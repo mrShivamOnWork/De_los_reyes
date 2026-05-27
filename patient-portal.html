@@ -1,0 +1,1206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Patient Portal — De Los Reyes Doctors</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&family=Open+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --crimson: #D31A22; --crimson-dark: #A8141B;
+      --green: #00A859; --green-dark: #007A42;
+      --dark: #11161B; --dark-2: #1B232C;
+      --gray: #7F8C8D;
+      --green-tint: #EAF7F0;
+      --light: #F4F6F7; --white: #FFFFFF;
+      --sidebar-w: 248px;
+      --radius: 12px;
+    }
+    html, body { height: 100%; }
+    body { font-family: 'Open Sans', sans-serif; color: var(--dark); background: var(--light); overflow-x: hidden; }
+
+    /* ── AUTH SCREENS ── */
+    .auth-screen {
+      min-height: 100vh; display: flex;
+      background: var(--dark);
+    }
+    .auth-brand {
+      width: 420px; flex-shrink: 0;
+      background: linear-gradient(160deg, var(--dark) 0%, #0a1920 100%);
+      border-right: 1px solid rgba(0,168,89,0.15);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 48px 36px; text-align: center;
+      position: relative; overflow: hidden;
+    }
+    .auth-brand::before {
+      content: '';
+      position: absolute; inset: 0;
+      background-image:
+        linear-gradient(rgba(0,168,89,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,168,89,0.04) 1px, transparent 1px);
+      background-size: 48px 48px;
+    }
+    .auth-brand-inner { position: relative; z-index: 1; }
+    .auth-brand img { width: 120px; height: 120px; object-fit: contain; margin-bottom: 24px; border-radius: 12px; }
+    .auth-brand h1 {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 800; font-size: 22px; color: #fff;
+      letter-spacing: -0.01em; margin-bottom: 10px;
+    }
+    .auth-brand p { font-size: 14px; color: rgba(255,255,255,0.4); line-height: 1.7; margin-bottom: 32px; }
+    .auth-tagline {
+      display: inline-block;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 12px; font-weight: 700;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--green); padding: 8px 20px;
+      border: 1px solid rgba(0,168,89,0.3); border-radius: 100px;
+    }
+    .auth-main {
+      flex: 1; display: flex; align-items: center; justify-content: center;
+      padding: 48px 32px; background: var(--light);
+    }
+    .auth-card {
+      background: #fff; border-radius: 16px;
+      padding: 44px 40px;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.1);
+      width: 100%; max-width: 420px;
+    }
+    .auth-title {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 800; font-size: 24px;
+      color: var(--dark); margin-bottom: 6px;
+    }
+    .auth-sub { font-size: 14px; color: var(--gray); margin-bottom: 32px; }
+
+    /* ── FORM ELEMENTS ── */
+    .fgroup { margin-bottom: 18px; }
+    .flabel {
+      display: block;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 11px; font-weight: 700;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--dark); margin-bottom: 7px;
+    }
+    .finput {
+      width: 100%; padding: 11px 14px;
+      border: 1.5px solid rgba(0,0,0,0.12);
+      border-radius: 8px;
+      font-family: 'Open Sans', sans-serif;
+      font-size: 14px; color: var(--dark);
+      background: #fff; outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .finput:focus { border-color: var(--green); box-shadow: 0 0 0 3px rgba(0,168,89,0.1); }
+    select.finput { appearance: none; cursor: pointer; }
+    textarea.finput { resize: vertical; min-height: 90px; }
+    .frow { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+    .btn {
+      display: inline-flex; align-items: center; gap: 7px;
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700; font-size: 12px;
+      letter-spacing: 0.08em; text-transform: uppercase;
+      padding: 11px 22px; border-radius: 8px;
+      border: 2px solid transparent; cursor: pointer;
+      text-decoration: none;
+      transition: transform 0.15s, box-shadow 0.2s, background 0.2s;
+      white-space: nowrap;
+    }
+    .btn:hover { transform: translateY(-1px); }
+    .btn:active { transform: translateY(0); }
+    .btn-green { background: var(--green); color: #fff; box-shadow: 0 4px 16px rgba(0,168,89,0.2); }
+    .btn-green:hover { background: var(--green-dark); }
+    .btn-crimson { background: var(--crimson); color: #fff; }
+    .btn-ghost { background: transparent; border-color: rgba(0,0,0,0.15); color: var(--gray); }
+    .btn-ghost:hover { border-color: var(--green); color: var(--green); }
+    .btn-sm { padding: 7px 14px; font-size: 11px; border-radius: 6px; }
+    .btn-full { width: 100%; justify-content: center; }
+    .auth-link {
+      font-size: 13px; color: var(--gray); text-align: center;
+      margin-top: 20px;
+    }
+    .auth-link a { color: var(--green); font-weight: 600; text-decoration: none; cursor: pointer; }
+
+    /* ── APP LAYOUT ── */
+    .app { display: none; min-height: 100vh; }
+    .app.active { display: flex; }
+
+    /* ── SIDEBAR ── */
+    .sidebar {
+      width: var(--sidebar-w); flex-shrink: 0;
+      background: var(--dark); min-height: 100vh;
+      display: flex; flex-direction: column;
+      position: sticky; top: 0; height: 100vh;
+      overflow-y: auto;
+    }
+    .sidebar-brand {
+      padding: 20px 20px 16px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      display: flex; align-items: center; gap: 10px;
+    }
+    .sidebar-brand img { width: 40px; height: 40px; object-fit: contain; border-radius: 6px; }
+    .sidebar-brand-text { line-height: 1.2; }
+    .sidebar-brand-name {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 800; font-size: 12px; color: #fff; display: block;
+    }
+    .sidebar-brand-sub { font-size: 10px; color: var(--green); letter-spacing: 0.1em; text-transform: uppercase; }
+    .sidebar-section-label {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 10px; font-weight: 700;
+      letter-spacing: 0.18em; text-transform: uppercase;
+      color: rgba(255,255,255,0.2);
+      padding: 20px 20px 8px;
+    }
+    .sidebar-nav { list-style: none; padding: 4px 12px; flex: 1; }
+    .sidebar-nav li { margin-bottom: 2px; }
+    .sidebar-nav a {
+      display: flex; align-items: center; gap: 11px;
+      padding: 10px 12px; border-radius: 8px;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 13px; font-weight: 600;
+      color: rgba(255,255,255,0.5);
+      text-decoration: none;
+      transition: background 0.2s, color 0.2s;
+      cursor: pointer;
+    }
+    .sidebar-nav a:hover { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.85); }
+    .sidebar-nav a.active { background: rgba(0,168,89,0.15); color: var(--green); }
+    .sidebar-nav a svg { width: 17px; height: 17px; flex-shrink: 0; }
+    .sidebar-bottom {
+      padding: 12px 12px 20px;
+      border-top: 1px solid rgba(255,255,255,0.06);
+    }
+    .sidebar-user {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 12px; border-radius: 8px;
+      margin-bottom: 6px;
+    }
+    .sidebar-avatar {
+      width: 34px; height: 34px; border-radius: 50%;
+      background: var(--green);
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700; font-size: 12px; color: #fff; flex-shrink: 0;
+    }
+    .sidebar-user-name { font-family: 'Montserrat', sans-serif; font-size: 12px; font-weight: 700; color: #fff; }
+    .sidebar-user-role { font-size: 11px; color: rgba(255,255,255,0.35); }
+
+    /* ── MAIN CONTENT ── */
+    .main-content { flex: 1; overflow-y: auto; }
+    .main-header {
+      background: #fff; padding: 18px 32px;
+      border-bottom: 1px solid rgba(0,0,0,0.06);
+      display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; z-index: 10;
+    }
+    .main-header-title {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 800; font-size: 18px; color: var(--dark);
+    }
+    .main-header-sub { font-size: 13px; color: var(--gray); margin-top: 2px; }
+    .header-actions { display: flex; gap: 10px; align-items: center; }
+    .notif-btn {
+      width: 38px; height: 38px; border-radius: 8px;
+      border: 1.5px solid rgba(0,0,0,0.1);
+      background: #fff; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      position: relative;
+      transition: border-color 0.2s;
+    }
+    .notif-btn:hover { border-color: var(--green); }
+    .notif-btn svg { width: 18px; height: 18px; stroke: var(--gray); fill: none; stroke-width: 1.8; stroke-linecap: round; }
+    .notif-badge {
+      position: absolute; top: 6px; right: 6px;
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--crimson);
+    }
+    .content-body { padding: 28px 32px; }
+
+    /* ── VIEWS ── */
+    .view { display: none; }
+    .view.active { display: block; }
+
+    /* ── DASHBOARD ── */
+    .welcome-banner {
+      background: linear-gradient(135deg, var(--dark) 0%, var(--dark-2) 100%);
+      border-radius: var(--radius); padding: 28px 32px;
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 24px; overflow: hidden; position: relative;
+    }
+    .welcome-banner::before {
+      content: '';
+      position: absolute; top: -40px; right: -40px;
+      width: 240px; height: 240px; border-radius: 50%;
+      background: rgba(0,168,89,0.08);
+    }
+    .welcome-title {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 800; font-size: 22px; color: #fff; margin-bottom: 6px;
+    }
+    .welcome-sub { font-size: 14px; color: rgba(255,255,255,0.5); }
+    .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px; }
+    .stat-card {
+      background: #fff; border-radius: var(--radius); padding: 22px 24px;
+      border: 1.5px solid rgba(0,0,0,0.05);
+      display: flex; align-items: center; gap: 16px;
+    }
+    .stat-icon {
+      width: 46px; height: 46px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .stat-icon svg { width: 22px; height: 22px; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+    .stat-val { font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 26px; color: var(--dark); }
+    .stat-lbl { font-size: 12px; color: var(--gray); margin-top: 2px; }
+
+    .section-title-sm {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700; font-size: 15px; color: var(--dark);
+      margin-bottom: 14px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .card {
+      background: #fff; border-radius: var(--radius);
+      padding: 24px; margin-bottom: 20px;
+      border: 1.5px solid rgba(0,0,0,0.05);
+    }
+    .table { width: 100%; border-collapse: collapse; }
+    .table th {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 11px; font-weight: 700;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--gray); text-align: left;
+      padding: 0 16px 12px; border-bottom: 1px solid var(--light);
+    }
+    .table td {
+      padding: 14px 16px; font-size: 14px; color: var(--dark);
+      border-bottom: 1px solid var(--light);
+    }
+    .table tr:last-child td { border-bottom: none; }
+    .table tr:hover td { background: rgba(0,168,89,0.02); }
+    .badge {
+      display: inline-flex; align-items: center; gap: 5px;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 10px; font-weight: 700;
+      letter-spacing: 0.08em; text-transform: uppercase;
+      padding: 4px 10px; border-radius: 100px;
+    }
+    .badge-green { background: var(--green-tint); color: var(--green-dark); }
+    .badge-crimson { background: rgba(211,26,34,0.1); color: var(--crimson); }
+    .badge-gray { background: rgba(0,0,0,0.06); color: var(--gray); }
+    .badge-yellow { background: rgba(255,193,7,0.12); color: #B8860B; }
+    .badge-blue { background: rgba(66,133,244,0.1); color: #2563EB; }
+
+    /* ── BOOKING ── */
+    .book-steps {
+      display: flex; gap: 0; margin-bottom: 32px;
+      background: #fff; border-radius: var(--radius);
+      border: 1.5px solid rgba(0,0,0,0.05);
+      overflow: hidden;
+    }
+    .book-step-item {
+      flex: 1; padding: 18px 20px; text-align: center;
+      border-right: 1px solid var(--light);
+      cursor: pointer;
+    }
+    .book-step-item:last-child { border-right: none; }
+    .book-step-item.active { background: var(--green-tint); }
+    .book-step-num {
+      width: 28px; height: 28px; border-radius: 50%;
+      background: var(--light); color: var(--gray);
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700; font-size: 12px;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 8px;
+    }
+    .book-step-item.active .book-step-num { background: var(--green); color: #fff; }
+    .book-step-item.done .book-step-num { background: var(--green); color: #fff; }
+    .book-step-label {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 12px; font-weight: 600; color: var(--gray);
+    }
+    .book-step-item.active .book-step-label { color: var(--green-dark); }
+    .book-panel { display: none; }
+    .book-panel.active { display: block; }
+    .doctor-select-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px; }
+    .doc-select-card {
+      background: #fff; border: 2px solid rgba(0,0,0,0.08);
+      border-radius: var(--radius); padding: 20px;
+      cursor: pointer; transition: border-color 0.2s, transform 0.2s;
+    }
+    .doc-select-card:hover { border-color: rgba(0,168,89,0.4); transform: translateY(-2px); }
+    .doc-select-card.selected { border-color: var(--green); background: var(--green-tint); }
+    .doc-select-name { font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: 14px; color: var(--dark); margin-bottom: 4px; }
+    .doc-select-spec { font-size: 12px; color: var(--green); font-weight: 600; margin-bottom: 8px; }
+    .doc-select-avail { font-size: 12px; color: var(--gray); }
+    .date-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; margin-bottom: 24px; }
+    .date-btn {
+      background: #fff; border: 1.5px solid rgba(0,0,0,0.08);
+      border-radius: 8px; padding: 10px 6px;
+      text-align: center; cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .date-btn:hover { border-color: var(--green); }
+    .date-btn.selected { border-color: var(--green); background: var(--green-tint); }
+    .date-btn.disabled { opacity: 0.35; cursor: not-allowed; }
+    .date-day { font-size: 10px; color: var(--gray); margin-bottom: 4px; }
+    .date-num { font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: 16px; color: var(--dark); }
+    .date-btn.selected .date-num { color: var(--green-dark); }
+    .time-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 24px; }
+    .time-btn {
+      background: #fff; border: 1.5px solid rgba(0,0,0,0.08);
+      border-radius: 8px; padding: 11px 8px;
+      text-align: center; cursor: pointer;
+      font-family: 'Montserrat', sans-serif; font-size: 13px; font-weight: 600;
+      color: var(--dark); transition: border-color 0.2s, background 0.2s;
+    }
+    .time-btn:hover { border-color: var(--green); }
+    .time-btn.selected { border-color: var(--green); background: var(--green-tint); color: var(--green-dark); }
+    .time-btn.booked { background: var(--light); color: var(--gray); cursor: not-allowed; opacity: 0.5; }
+    .confirm-summary {
+      background: var(--green-tint); border: 1px solid rgba(0,168,89,0.2);
+      border-radius: var(--radius); padding: 24px; margin-bottom: 24px;
+    }
+    .confirm-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(0,168,89,0.1); }
+    .confirm-row:last-child { border-bottom: none; }
+    .confirm-key { font-size: 13px; color: var(--gray); }
+    .confirm-val { font-family: 'Montserrat', sans-serif; font-weight: 600; font-size: 13px; color: var(--dark); }
+    .book-nav-btns { display: flex; justify-content: space-between; align-items: center; }
+
+    /* ── APPOINTMENTS LIST ── */
+    .appt-filters { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+    .filter-btn {
+      padding: 7px 18px; border-radius: 100px;
+      font-family: 'Montserrat', sans-serif; font-size: 12px; font-weight: 600;
+      border: 1.5px solid rgba(0,0,0,0.1); background: #fff; color: var(--gray);
+      cursor: pointer; transition: all 0.2s;
+    }
+    .filter-btn.active { background: var(--green); color: #fff; border-color: var(--green); }
+    .appt-card {
+      background: #fff; border-radius: var(--radius);
+      border: 1.5px solid rgba(0,0,0,0.05);
+      padding: 20px 24px; margin-bottom: 14px;
+      display: flex; align-items: center; gap: 20px;
+    }
+    .appt-date-block {
+      width: 56px; height: 64px; border-radius: 10px;
+      background: var(--dark); color: #fff;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .appt-date-month { font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--green); }
+    .appt-date-day { font-family: 'Montserrat', sans-serif; font-weight: 900; font-size: 22px; color: #fff; }
+    .appt-info { flex: 1; }
+    .appt-doctor { font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: 15px; color: var(--dark); }
+    .appt-detail { font-size: 13px; color: var(--gray); margin-top: 4px; }
+
+    /* ── HEALTH RECORDS ── */
+    .record-card {
+      background: #fff; border-radius: var(--radius);
+      border: 1.5px solid rgba(0,0,0,0.05); margin-bottom: 16px;
+      overflow: hidden;
+    }
+    .record-header {
+      padding: 18px 24px; background: var(--light);
+      display: flex; align-items: center; gap: 16px;
+      cursor: pointer; border-bottom: 1px solid rgba(0,0,0,0.05);
+    }
+    .record-date-pill {
+      font-family: 'Montserrat', sans-serif; font-size: 12px; font-weight: 700;
+      background: var(--dark); color: #fff;
+      padding: 5px 12px; border-radius: 100px;
+    }
+    .record-doctor { font-family: 'Montserrat', sans-serif; font-weight: 600; font-size: 14px; color: var(--dark); }
+    .record-reason { font-size: 13px; color: var(--gray); }
+    .record-body { padding: 20px 24px; }
+    .record-field-label { font-family: 'Montserrat', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--gray); margin-bottom: 5px; margin-top: 14px; }
+    .record-field-val { font-size: 14px; color: var(--dark); line-height: 1.6; }
+    .record-body.collapsed { display: none; }
+
+    /* ── PROFILE ── */
+    .profile-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .profile-header {
+      background: linear-gradient(135deg, var(--dark) 0%, var(--dark-2) 100%);
+      border-radius: var(--radius); padding: 28px 32px; margin-bottom: 24px;
+      display: flex; align-items: center; gap: 20px;
+    }
+    .profile-av-large {
+      width: 72px; height: 72px; border-radius: 50%;
+      background: var(--green); display: flex; align-items: center; justify-content: center;
+      font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 26px; color: #fff;
+    }
+    .profile-name { font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 20px; color: #fff; }
+    .profile-id { font-size: 13px; color: rgba(255,255,255,0.4); margin-top: 4px; }
+
+    /* ── EMPTY STATE ── */
+    .empty-state { text-align: center; padding: 56px 24px; }
+    .empty-icon { width: 64px; height: 64px; border-radius: 16px; background: var(--light); display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; }
+    .empty-icon svg { width: 30px; height: 30px; stroke: var(--gray); fill: none; stroke-width: 1.6; stroke-linecap: round; }
+    .empty-title { font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: 17px; color: var(--dark); margin-bottom: 8px; }
+    .empty-desc { font-size: 14px; color: var(--gray); line-height: 1.6; margin-bottom: 22px; }
+
+    /* ── TOAST ── */
+    .toast {
+      position: fixed; bottom: 24px; right: 24px;
+      background: var(--dark); color: #fff;
+      padding: 14px 20px; border-radius: 10px;
+      font-family: 'Montserrat', sans-serif; font-size: 13px; font-weight: 600;
+      display: flex; align-items: center; gap: 10px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.25);
+      transform: translateY(80px); opacity: 0;
+      transition: transform 0.35s, opacity 0.35s;
+      z-index: 9999; max-width: 340px;
+    }
+    .toast.show { transform: translateY(0); opacity: 1; }
+    .toast-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); flex-shrink: 0; }
+
+    @media (max-width: 900px) {
+      .auth-brand { display: none; }
+      .sidebar { display: none; }
+      .stats-row { grid-template-columns: 1fr 1fr; }
+      .doctor-select-grid { grid-template-columns: 1fr 1fr; }
+      .time-grid { grid-template-columns: repeat(3, 1fr); }
+      .profile-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 600px) {
+      .stats-row { grid-template-columns: 1fr; }
+      .doctor-select-grid { grid-template-columns: 1fr; }
+      .frow { grid-template-columns: 1fr; }
+      .date-grid { grid-template-columns: repeat(4, 1fr); }
+      .content-body { padding: 16px; }
+      .main-header { padding: 14px 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── LOGIN SCREEN ── -->
+<div class="auth-screen" id="loginScreen">
+  <div class="auth-brand">
+    <div class="auth-brand-inner">
+      <img src="brand_assets/brand_logo.jpg" alt="De Los Reyes Doctors Logo">
+      <h1>De Los Reyes Doctors</h1>
+      <p>Secure access to your patient portal. Manage appointments and health records in one place.</p>
+      <span class="auth-tagline">Professional Care You Can Trust</span>
+    </div>
+  </div>
+  <div class="auth-main">
+    <div class="auth-card">
+      <div class="auth-title">Patient Login</div>
+      <div class="auth-sub">Welcome back. Please sign in to your account.</div>
+      <div class="fgroup">
+        <label class="flabel" for="login-email">Email Address</label>
+        <input class="finput" id="login-email" type="email" placeholder="juan@example.com" value="patient@demo.com">
+      </div>
+      <div class="fgroup">
+        <label class="flabel" for="login-pass">Password</label>
+        <input class="finput" id="login-pass" type="password" placeholder="Your password" value="demo1234">
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;">
+        <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--gray);cursor:pointer;">
+          <input type="checkbox" checked> Remember me
+        </label>
+        <a style="font-size:13px;color:var(--green);font-weight:600;text-decoration:none;cursor:pointer;">Forgot password?</a>
+      </div>
+      <button class="btn btn-green btn-full" style="padding:13px;" onclick="doLogin()">Sign In</button>
+      <div class="auth-link">Don't have an account? <a onclick="showRegister()">Register here</a></div>
+      <div style="margin-top:20px;padding-top:20px;border-top:1px solid var(--light);text-align:center;">
+        <a href="index.html" style="font-size:12px;color:var(--gray);text-decoration:none;">← Back to main website</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── REGISTER SCREEN ── -->
+<div class="auth-screen" id="registerScreen" style="display:none;">
+  <div class="auth-brand">
+    <div class="auth-brand-inner">
+      <img src="brand_assets/brand_logo.jpg" alt="De Los Reyes Doctors Logo">
+      <h1>Create Your Account</h1>
+      <p>Register to book appointments, track your health records, and manage your care at De Los Reyes Doctors.</p>
+      <span class="auth-tagline">Professional Care You Can Trust</span>
+    </div>
+  </div>
+  <div class="auth-main" style="overflow-y:auto;">
+    <div class="auth-card" style="max-width:500px;">
+      <div class="auth-title">New Patient Registration</div>
+      <div class="auth-sub">Fill in your details to create an account.</div>
+      <div class="frow">
+        <div class="fgroup">
+          <label class="flabel" for="r-fname">First Name</label>
+          <input class="finput" id="r-fname" type="text" placeholder="Juan">
+        </div>
+        <div class="fgroup">
+          <label class="flabel" for="r-lname">Last Name</label>
+          <input class="finput" id="r-lname" type="text" placeholder="dela Cruz">
+        </div>
+      </div>
+      <div class="frow">
+        <div class="fgroup">
+          <label class="flabel" for="r-dob">Date of Birth</label>
+          <input class="finput" id="r-dob" type="date">
+        </div>
+        <div class="fgroup">
+          <label class="flabel" for="r-gender">Gender</label>
+          <select class="finput" id="r-gender">
+            <option value="">Select gender</option>
+            <option>Male</option><option>Female</option><option>Prefer not to say</option>
+          </select>
+        </div>
+      </div>
+      <div class="fgroup">
+        <label class="flabel" for="r-contact">Contact Number</label>
+        <input class="finput" id="r-contact" type="tel" placeholder="0917-123-4567">
+      </div>
+      <div class="fgroup">
+        <label class="flabel" for="r-address">Home Address</label>
+        <input class="finput" id="r-address" type="text" placeholder="123 Rizal St, Quezon City">
+      </div>
+      <div class="fgroup">
+        <label class="flabel" for="r-emergency">Emergency Contact</label>
+        <input class="finput" id="r-emergency" type="text" placeholder="Name & Number">
+      </div>
+      <div class="fgroup">
+        <label class="flabel" for="r-allergies">Known Allergies / Medical Notes</label>
+        <textarea class="finput" id="r-allergies" placeholder="e.g., Penicillin allergy, Asthma (optional)"></textarea>
+      </div>
+      <div class="fgroup">
+        <label class="flabel" for="r-email">Email Address</label>
+        <input class="finput" id="r-email" type="email" placeholder="juan@example.com">
+      </div>
+      <div class="frow">
+        <div class="fgroup">
+          <label class="flabel" for="r-pass">Password</label>
+          <input class="finput" id="r-pass" type="password" placeholder="Min. 8 characters">
+        </div>
+        <div class="fgroup">
+          <label class="flabel" for="r-pass2">Confirm Password</label>
+          <input class="finput" id="r-pass2" type="password" placeholder="Repeat password">
+        </div>
+      </div>
+      <button class="btn btn-green btn-full" style="padding:13px;" onclick="doRegister()">Create Account</button>
+      <div class="auth-link">Already have an account? <a onclick="showLogin()">Sign in</a></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── PATIENT APP ── -->
+<div class="app" id="patientApp">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <img src="brand_assets/brand_logo.jpg" alt="Logo">
+      <div class="sidebar-brand-text">
+        <span class="sidebar-brand-name">DRD Clinic</span>
+        <span class="sidebar-brand-sub">Patient Portal</span>
+      </div>
+    </div>
+    <div class="sidebar-section-label">Main Menu</div>
+    <ul class="sidebar-nav">
+      <li>
+        <a class="active" onclick="showView('dashboard')">
+          <svg fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+          Dashboard
+        </a>
+      </li>
+      <li>
+        <a onclick="showView('book')">
+          <svg fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          Book Appointment
+        </a>
+      </li>
+      <li>
+        <a onclick="showView('appointments')">
+          <svg fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+          My Appointments
+        </a>
+      </li>
+      <li>
+        <a onclick="showView('records')">
+          <svg fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="11" x2="12" y2="17"/><line x1="9" y1="14" x2="15" y2="14"/></svg>
+          Health Records
+        </a>
+      </li>
+      <li>
+        <a onclick="showView('profile')">
+          <svg fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          My Profile
+        </a>
+      </li>
+    </ul>
+    <div class="sidebar-bottom">
+      <div class="sidebar-user">
+        <div class="sidebar-avatar" id="sidebarAvatar">JP</div>
+        <div>
+          <div class="sidebar-user-name" id="sidebarName">Juan Patient</div>
+          <div class="sidebar-user-role">Patient Account</div>
+        </div>
+      </div>
+      <a class="sidebar-nav a" style="display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:8px;font-family:'Montserrat',sans-serif;font-size:13px;font-weight:600;color:rgba(255,100,100,0.7);cursor:pointer;text-decoration:none;" onclick="doLogout()">
+        <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Sign Out
+      </a>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <div class="main-content">
+    <header class="main-header">
+      <div>
+        <div class="main-header-title" id="viewTitle">Dashboard</div>
+        <div class="main-header-sub" id="viewSub">Welcome back, Juan</div>
+      </div>
+      <div class="header-actions">
+        <button class="notif-btn" title="Notifications">
+          <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          <div class="notif-badge"></div>
+        </button>
+        <a href="index.html" class="btn btn-ghost btn-sm">← Main Site</a>
+      </div>
+    </header>
+
+    <div class="content-body">
+
+      <!-- ── DASHBOARD VIEW ── -->
+      <div class="view active" id="view-dashboard">
+        <div class="welcome-banner">
+          <div>
+            <div class="welcome-title" id="welcomeTitle">Good morning, Juan! 👋</div>
+            <div class="welcome-sub">You have 1 upcoming appointment. Stay healthy!</div>
+          </div>
+          <button class="btn btn-green" onclick="showView('book')">+ Book Appointment</button>
+        </div>
+        <div class="stats-row">
+          <div class="stat-card">
+            <div class="stat-icon" style="background:var(--green-tint);">
+              <svg stroke="var(--green)" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            </div>
+            <div>
+              <div class="stat-val">1</div>
+              <div class="stat-lbl">Upcoming Appointments</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background:rgba(211,26,34,0.08);">
+              <svg stroke="var(--crimson)" viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+            </div>
+            <div>
+              <div class="stat-val">5</div>
+              <div class="stat-lbl">Completed Visits</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background:rgba(66,133,244,0.08);">
+              <svg stroke="#2563EB" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            </div>
+            <div>
+              <div class="stat-val">3</div>
+              <div class="stat-lbl">Health Records</div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="section-title-sm">
+            Upcoming Appointments
+            <a style="font-size:12px;font-weight:600;color:var(--green);cursor:pointer;" onclick="showView('appointments')">View all →</a>
+          </div>
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Date & Time</th>
+                <th>Doctor</th>
+                <th>Purpose</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Jun 3, 2026</strong><br><small style="color:var(--gray)">10:00 AM</small></td>
+                <td>Dr. Maria C. Santos<br><small style="color:var(--gray)">Internal Medicine</small></td>
+                <td>Follow-up: Hypertension</td>
+                <td><span class="badge badge-blue">Confirmed</span></td>
+                <td><button class="btn btn-ghost btn-sm" onclick="showToast('Appointment cancelled')">Cancel</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="card">
+          <div class="section-title-sm">Recent Visit History</div>
+          <table class="table">
+            <thead>
+              <tr><th>Date</th><th>Doctor</th><th>Diagnosis</th><th>Record</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>May 12, 2026</td>
+                <td>Dr. Maria C. Santos</td>
+                <td>Hypertension monitoring</td>
+                <td><button class="btn btn-ghost btn-sm" onclick="showView('records')">View EHR</button></td>
+              </tr>
+              <tr>
+                <td>Mar 5, 2026</td>
+                <td>Dr. Juan B. dela Cruz</td>
+                <td>Annual check-up</td>
+                <td><button class="btn btn-ghost btn-sm" onclick="showView('records')">View EHR</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ── BOOK APPOINTMENT VIEW ── -->
+      <div class="view" id="view-book">
+        <div class="book-steps" id="bookSteps">
+          <div class="book-step-item active" id="bsi-1"><div class="book-step-num">1</div><div class="book-step-label">Select Doctor</div></div>
+          <div class="book-step-item" id="bsi-2"><div class="book-step-num">2</div><div class="book-step-label">Choose Date</div></div>
+          <div class="book-step-item" id="bsi-3"><div class="book-step-num">3</div><div class="book-step-label">Select Time</div></div>
+          <div class="book-step-item" id="bsi-4"><div class="book-step-num">4</div><div class="book-step-label">Confirm</div></div>
+        </div>
+
+        <!-- Step 1: Select Doctor -->
+        <div class="book-panel active" id="bp-1">
+          <div class="card">
+            <h3 style="font-family:'Montserrat',sans-serif;font-weight:700;margin-bottom:20px;">Choose a Doctor</h3>
+            <div class="doctor-select-grid">
+              <div class="doc-select-card" onclick="selectDoctor(this, 'Dr. Maria C. Santos', 'Internal Medicine')">
+                <div class="doc-select-spec">Internal Medicine</div>
+                <div class="doc-select-name">Dr. Maria C. Santos</div>
+                <div class="doc-select-avail">Mon–Fri · 9AM–5PM</div>
+              </div>
+              <div class="doc-select-card" onclick="selectDoctor(this, 'Dr. Juan B. dela Cruz', 'Pediatrics')">
+                <div class="doc-select-spec">Pediatrics</div>
+                <div class="doc-select-name">Dr. Juan B. dela Cruz</div>
+                <div class="doc-select-avail">Mon, Wed, Fri · 8AM–4PM</div>
+              </div>
+              <div class="doc-select-card" onclick="selectDoctor(this, 'Dr. Ana P. Reyes', 'OB-Gynecology')">
+                <div class="doc-select-spec">OB-Gynecology</div>
+                <div class="doc-select-name">Dr. Ana P. Reyes</div>
+                <div class="doc-select-avail">Tue, Thu, Sat · 9AM–3PM</div>
+              </div>
+            </div>
+            <div class="fgroup">
+              <label class="flabel" for="book-reason">Reason for Visit / Symptoms</label>
+              <textarea class="finput" id="book-reason" placeholder="Briefly describe your symptoms or reason for your appointment…"></textarea>
+            </div>
+            <div style="text-align:right;">
+              <button class="btn btn-green" onclick="bookNext(1)">Next: Choose Date →</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 2: Select Date -->
+        <div class="book-panel" id="bp-2">
+          <div class="card">
+            <h3 style="font-family:'Montserrat',sans-serif;font-weight:700;margin-bottom:6px;">Select Appointment Date</h3>
+            <p style="font-size:13px;color:var(--gray);margin-bottom:24px;">Available dates for <strong id="dateDocName">the selected doctor</strong></p>
+            <div class="date-grid" id="dateGrid"></div>
+            <div class="book-nav-btns">
+              <button class="btn btn-ghost" onclick="bookPrev(2)">← Back</button>
+              <button class="btn btn-green" onclick="bookNext(2)">Next: Select Time →</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 3: Select Time -->
+        <div class="book-panel" id="bp-3">
+          <div class="card">
+            <h3 style="font-family:'Montserrat',sans-serif;font-weight:700;margin-bottom:6px;">Select Time Slot</h3>
+            <p style="font-size:13px;color:var(--gray);margin-bottom:24px;">Available slots on <strong id="timeDate">the selected date</strong></p>
+            <div class="time-grid">
+              <div class="time-btn" onclick="selectTime(this)">9:00 AM</div>
+              <div class="time-btn" onclick="selectTime(this)">9:30 AM</div>
+              <div class="time-btn booked">10:00 AM</div>
+              <div class="time-btn" onclick="selectTime(this)">10:30 AM</div>
+              <div class="time-btn" onclick="selectTime(this)">11:00 AM</div>
+              <div class="time-btn booked">11:30 AM</div>
+              <div class="time-btn" onclick="selectTime(this)">1:00 PM</div>
+              <div class="time-btn" onclick="selectTime(this)">1:30 PM</div>
+              <div class="time-btn" onclick="selectTime(this)">2:00 PM</div>
+              <div class="time-btn booked">2:30 PM</div>
+              <div class="time-btn" onclick="selectTime(this)">3:00 PM</div>
+              <div class="time-btn" onclick="selectTime(this)">3:30 PM</div>
+            </div>
+            <p style="font-size:12px;color:var(--gray);margin-bottom:20px;"><span style="background:var(--light);padding:2px 8px;border-radius:4px;margin-right:8px;">Grayed</span> slots are already booked</p>
+            <div class="book-nav-btns">
+              <button class="btn btn-ghost" onclick="bookPrev(3)">← Back</button>
+              <button class="btn btn-green" onclick="bookNext(3)">Next: Confirm →</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 4: Confirm -->
+        <div class="book-panel" id="bp-4">
+          <div class="card">
+            <h3 style="font-family:'Montserrat',sans-serif;font-weight:700;margin-bottom:20px;">Confirm Your Appointment</h3>
+            <div class="confirm-summary">
+              <div class="confirm-row"><span class="confirm-key">Doctor</span><span class="confirm-val" id="conf-doc">—</span></div>
+              <div class="confirm-row"><span class="confirm-key">Specialty</span><span class="confirm-val" id="conf-spec">—</span></div>
+              <div class="confirm-row"><span class="confirm-key">Date</span><span class="confirm-val" id="conf-date">—</span></div>
+              <div class="confirm-row"><span class="confirm-key">Time</span><span class="confirm-val" id="conf-time">—</span></div>
+              <div class="confirm-row"><span class="confirm-key">Reason for Visit</span><span class="confirm-val" id="conf-reason">—</span></div>
+              <div class="confirm-row"><span class="confirm-key">Patient</span><span class="confirm-val" id="conf-patient">Juan Patient</span></div>
+            </div>
+            <div style="background:rgba(255,193,7,0.1);border:1px solid rgba(255,193,7,0.3);border-radius:8px;padding:14px 18px;margin-bottom:24px;font-size:13px;color:#7A6200;">
+              ⚠ By confirming, your slot will be immediately reserved. Please arrive 10 minutes before your scheduled time.
+            </div>
+            <div class="book-nav-btns">
+              <button class="btn btn-ghost" onclick="bookPrev(4)">← Back</button>
+              <button class="btn btn-green" onclick="confirmBooking()">Confirm Appointment</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── APPOINTMENTS VIEW ── -->
+      <div class="view" id="view-appointments">
+        <div class="appt-filters">
+          <button class="filter-btn active" onclick="filterAppts(this,'all')">All</button>
+          <button class="filter-btn" onclick="filterAppts(this,'upcoming')">Upcoming</button>
+          <button class="filter-btn" onclick="filterAppts(this,'completed')">Completed</button>
+          <button class="filter-btn" onclick="filterAppts(this,'cancelled')">Cancelled</button>
+        </div>
+        <div id="apptList">
+          <div class="appt-card" data-status="upcoming">
+            <div class="appt-date-block"><div class="appt-date-month">Jun</div><div class="appt-date-day">3</div></div>
+            <div class="appt-info">
+              <div class="appt-doctor">Dr. Maria C. Santos</div>
+              <div class="appt-detail">10:00 AM · Internal Medicine · Follow-up: Hypertension</div>
+            </div>
+            <span class="badge badge-blue">Confirmed</span>
+          </div>
+          <div class="appt-card" data-status="completed">
+            <div class="appt-date-block" style="background:var(--gray);"><div class="appt-date-month">May</div><div class="appt-date-day">12</div></div>
+            <div class="appt-info">
+              <div class="appt-doctor">Dr. Maria C. Santos</div>
+              <div class="appt-detail">9:00 AM · Internal Medicine · Hypertension monitoring</div>
+            </div>
+            <span class="badge badge-green">Completed</span>
+          </div>
+          <div class="appt-card" data-status="completed">
+            <div class="appt-date-block" style="background:var(--gray);"><div class="appt-date-month">Mar</div><div class="appt-date-day">5</div></div>
+            <div class="appt-info">
+              <div class="appt-doctor">Dr. Juan B. dela Cruz</div>
+              <div class="appt-detail">8:30 AM · Pediatrics · Annual check-up</div>
+            </div>
+            <span class="badge badge-green">Completed</span>
+          </div>
+          <div class="appt-card" data-status="cancelled">
+            <div class="appt-date-block" style="background:#ccc;"><div class="appt-date-month">Feb</div><div class="appt-date-day">18</div></div>
+            <div class="appt-info">
+              <div class="appt-doctor">Dr. Ana P. Reyes</div>
+              <div class="appt-detail">2:00 PM · OB-Gynecology · Routine visit</div>
+            </div>
+            <span class="badge badge-crimson">Cancelled</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── HEALTH RECORDS VIEW ── -->
+      <div class="view" id="view-records">
+        <div class="card" style="margin-bottom:0;">
+          <div class="section-title-sm" style="margin-bottom:0;">Electronic Health Records</div>
+          <p style="font-size:13px;color:var(--gray);margin-top:4px;">Your complete medical history, securely stored and accessible anytime.</p>
+        </div>
+        <br>
+        <div class="record-card">
+          <div class="record-header" onclick="toggleRecord(this)">
+            <div class="record-date-pill">May 12, 2026</div>
+            <div>
+              <div class="record-doctor">Dr. Maria C. Santos — Internal Medicine</div>
+              <div class="record-reason">Hypertension monitoring, BP check</div>
+            </div>
+            <span class="badge badge-green" style="margin-left:auto;">Completed</span>
+          </div>
+          <div class="record-body">
+            <div class="record-field-label">Chief Complaint</div>
+            <div class="record-field-val">Mild headache, elevated blood pressure readings at home (140/90 mmHg average)</div>
+            <div class="record-field-label">Diagnosis</div>
+            <div class="record-field-val">Stage 1 Hypertension — under control with current medication regimen</div>
+            <div class="record-field-label">Prescription</div>
+            <div class="record-field-val">Amlodipine 5mg once daily (continue) · Losartan 50mg once daily (continue)</div>
+            <div class="record-field-label">Treatment Plan</div>
+            <div class="record-field-val">Low-sodium diet, regular aerobic exercise 30 min/day, home BP monitoring twice daily</div>
+            <div class="record-field-label">Follow-up Instructions</div>
+            <div class="record-field-val">Return in 3 weeks for BP recheck. If reading exceeds 160/100, visit immediately.</div>
+          </div>
+        </div>
+        <div class="record-card">
+          <div class="record-header" onclick="toggleRecord(this)">
+            <div class="record-date-pill">Mar 5, 2026</div>
+            <div>
+              <div class="record-doctor">Dr. Juan B. dela Cruz — Pediatrics</div>
+              <div class="record-reason">Annual check-up</div>
+            </div>
+            <span class="badge badge-green" style="margin-left:auto;">Completed</span>
+          </div>
+          <div class="record-body collapsed">
+            <div class="record-field-label">Chief Complaint</div>
+            <div class="record-field-val">Routine annual physical examination, no current complaints</div>
+            <div class="record-field-label">Diagnosis</div>
+            <div class="record-field-val">Generally healthy. Mild vitamin D deficiency noted on labs.</div>
+            <div class="record-field-label">Prescription</div>
+            <div class="record-field-val">Vitamin D3 1000 IU daily for 3 months</div>
+            <div class="record-field-label">Follow-up Instructions</div>
+            <div class="record-field-val">Recheck Vitamin D levels in 3 months. Continue regular check-ups annually.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── PROFILE VIEW ── -->
+      <div class="view" id="view-profile">
+        <div class="profile-header">
+          <div class="profile-av-large" id="profileAvLarge">JP</div>
+          <div>
+            <div class="profile-name" id="profileName">Juan Patient</div>
+            <div class="profile-id">Patient ID: DRD-2024-00142 · Member since January 2024</div>
+          </div>
+        </div>
+        <div class="profile-grid">
+          <div class="card">
+            <div class="section-title-sm">Personal Information</div>
+            <div class="fgroup"><label class="flabel">Full Name</label><input class="finput" value="Juan dela Cruz" id="p-name"></div>
+            <div class="frow">
+              <div class="fgroup"><label class="flabel">Date of Birth</label><input class="finput" type="date" value="1990-05-15" id="p-dob"></div>
+              <div class="fgroup"><label class="flabel">Gender</label><select class="finput" id="p-gender"><option selected>Male</option><option>Female</option><option>Prefer not to say</option></select></div>
+            </div>
+            <div class="fgroup"><label class="flabel">Contact Number</label><input class="finput" value="0917-123-4567" id="p-contact"></div>
+            <div class="fgroup"><label class="flabel">Email Address</label><input class="finput" type="email" value="patient@demo.com" id="p-email"></div>
+            <div class="fgroup"><label class="flabel">Home Address</label><textarea class="finput" id="p-address" style="min-height:70px;">456 Rizal Ave, Quezon City, Metro Manila</textarea></div>
+            <button class="btn btn-green btn-full" onclick="saveProfile()">Save Personal Info</button>
+          </div>
+          <div>
+            <div class="card" style="margin-bottom:16px;">
+              <div class="section-title-sm">Emergency Contact</div>
+              <div class="fgroup"><label class="flabel">Contact Name</label><input class="finput" value="Maria dela Cruz" id="p-emname"></div>
+              <div class="fgroup"><label class="flabel">Relationship</label><input class="finput" value="Spouse" id="p-emrel"></div>
+              <div class="fgroup"><label class="flabel">Contact Number</label><input class="finput" value="0918-987-6543" id="p-emnum"></div>
+              <button class="btn btn-ghost btn-full" onclick="showToast('Emergency contact saved')">Save Contact</button>
+            </div>
+            <div class="card">
+              <div class="section-title-sm">Medical Notes & Allergies</div>
+              <div class="fgroup"><label class="flabel">Known Allergies</label><textarea class="finput" style="min-height:80px;">No known drug allergies. Seasonal pollen allergy (mild).</textarea></div>
+              <div class="fgroup"><label class="flabel">Existing Conditions</label><textarea class="finput" style="min-height:80px;">Stage 1 Hypertension (managed)</textarea></div>
+              <button class="btn btn-ghost btn-full" onclick="showToast('Medical notes updated')">Update Notes</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /content-body -->
+  </div><!-- /main-content -->
+</div><!-- /app -->
+
+<div class="toast" id="toast">
+  <div class="toast-dot"></div>
+  <span id="toastMsg">Action completed</span>
+</div>
+
+<script>
+  // ── STATE ──
+  const booking = { doctor: null, specialty: null, date: null, time: null, reason: null };
+  let currentUser = null;
+
+  // ── AUTH ──
+  function doLogin() {
+    const email = document.getElementById('login-email').value.trim();
+    const pass = document.getElementById('login-pass').value;
+    if (!email || !pass) { showToast('Please fill in all fields'); return; }
+    currentUser = { name: 'Juan dela Cruz', email, initials: 'JD' };
+    document.getElementById('sidebarName').textContent = currentUser.name.split(' ')[0] + ' ' + currentUser.name.split(' ').slice(-1)[0];
+    document.getElementById('sidebarAvatar').textContent = 'JD';
+    document.getElementById('profileAvLarge').textContent = 'JD';
+    document.getElementById('profileName').textContent = currentUser.name;
+    document.getElementById('welcomeTitle').textContent = `Good morning, ${currentUser.name.split(' ')[0]}! 👋`;
+    document.getElementById('viewSub').textContent = `Welcome back, ${currentUser.name.split(' ')[0]}`;
+    document.getElementById('conf-patient').textContent = currentUser.name;
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('patientApp').classList.add('active');
+    showToast('Welcome back, ' + currentUser.name.split(' ')[0] + '!');
+  }
+
+  function doRegister() {
+    const fname = document.getElementById('r-fname').value.trim();
+    const lname = document.getElementById('r-lname').value.trim();
+    const email = document.getElementById('r-email').value.trim();
+    const pass = document.getElementById('r-pass').value;
+    const pass2 = document.getElementById('r-pass2').value;
+    if (!fname || !lname || !email || !pass) { showToast('Please fill in all required fields'); return; }
+    if (pass !== pass2) { showToast('Passwords do not match'); return; }
+    currentUser = { name: fname + ' ' + lname, email, initials: fname[0] + lname[0] };
+    document.getElementById('sidebarName').textContent = fname + ' ' + lname;
+    document.getElementById('sidebarAvatar').textContent = (fname[0] + lname[0]).toUpperCase();
+    document.getElementById('profileAvLarge').textContent = (fname[0] + lname[0]).toUpperCase();
+    document.getElementById('profileName').textContent = fname + ' ' + lname;
+    document.getElementById('welcomeTitle').textContent = `Welcome, ${fname}! 👋`;
+    document.getElementById('viewSub').textContent = 'Let\'s get your first appointment booked.';
+    document.getElementById('conf-patient').textContent = fname + ' ' + lname;
+    document.getElementById('registerScreen').style.display = 'none';
+    document.getElementById('patientApp').classList.add('active');
+    showToast('Account created! Welcome to DRD Clinic.');
+  }
+
+  function showRegister() {
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('registerScreen').style.display = 'flex';
+  }
+  function showLogin() {
+    document.getElementById('registerScreen').style.display = 'none';
+    document.getElementById('loginScreen').style.display = 'flex';
+  }
+  function doLogout() {
+    document.getElementById('patientApp').classList.remove('active');
+    document.getElementById('loginScreen').style.display = 'flex';
+  }
+
+  // ── VIEW SWITCHING ──
+  const viewTitles = {
+    'dashboard': ['Dashboard', 'Your health overview at a glance'],
+    'book': ['Book Appointment', 'Schedule a visit with one of our specialists'],
+    'appointments': ['My Appointments', 'Track and manage your appointments'],
+    'records': ['Health Records', 'Your electronic medical history'],
+    'profile': ['My Profile', 'Manage your personal information'],
+  };
+  function showView(id) {
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    document.getElementById('view-' + id).classList.add('active');
+    document.querySelectorAll('.sidebar-nav a').forEach(a => a.classList.remove('active'));
+    const link = [...document.querySelectorAll('.sidebar-nav a')].find(a => a.getAttribute('onclick') === `showView('${id}')`);
+    if (link) link.classList.add('active');
+    const [title, sub] = viewTitles[id] || [id, ''];
+    document.getElementById('viewTitle').textContent = title;
+    document.getElementById('viewSub').textContent = sub;
+    if (id === 'book') resetBooking();
+  }
+
+  // ── BOOKING FLOW ──
+  function selectDoctor(el, name, spec) {
+    document.querySelectorAll('.doc-select-card').forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+    booking.doctor = name; booking.specialty = spec;
+    document.getElementById('dateDocName').textContent = name;
+  }
+  function buildDateGrid() {
+    const grid = document.getElementById('dateGrid');
+    grid.innerHTML = '';
+    const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+    const today = new Date();
+    for (let i = 1; i <= 28; i++) {
+      const d = new Date(today);
+      d.setDate(today.getDate() + i);
+      const btn = document.createElement('div');
+      btn.className = 'date-btn' + (d.getDay() === 0 ? ' disabled' : '');
+      btn.innerHTML = `<div class="date-day">${days[d.getDay()]}</div><div class="date-num">${d.getDate()}</div>`;
+      if (d.getDay() !== 0) {
+        btn.onclick = () => selectDate(btn, d);
+      }
+      grid.appendChild(btn);
+    }
+  }
+  function selectDate(el, d) {
+    document.querySelectorAll('.date-btn').forEach(b => b.classList.remove('selected'));
+    el.classList.add('selected');
+    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    booking.date = `${months[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`;
+    document.getElementById('timeDate').textContent = booking.date;
+  }
+  function selectTime(el) {
+    if (el.classList.contains('booked')) return;
+    document.querySelectorAll('.time-btn').forEach(b => b.classList.remove('selected'));
+    el.classList.add('selected');
+    booking.time = el.textContent;
+  }
+  function bookNext(step) {
+    if (step === 1) {
+      if (!booking.doctor) { showToast('Please select a doctor'); return; }
+      booking.reason = document.getElementById('book-reason').value || 'General consultation';
+      buildDateGrid();
+    }
+    if (step === 2) {
+      if (!booking.date) { showToast('Please select a date'); return; }
+    }
+    if (step === 3) {
+      if (!booking.time) { showToast('Please select a time slot'); return; }
+      document.getElementById('conf-doc').textContent = booking.doctor;
+      document.getElementById('conf-spec').textContent = booking.specialty;
+      document.getElementById('conf-date').textContent = booking.date;
+      document.getElementById('conf-time').textContent = booking.time;
+      document.getElementById('conf-reason').textContent = booking.reason;
+    }
+    document.querySelector('#bp-' + step).classList.remove('active');
+    document.querySelector('#bp-' + (step + 1)).classList.add('active');
+    document.querySelector('#bsi-' + step).classList.add('done');
+    document.querySelector('#bsi-' + (step + 1)).classList.add('active');
+  }
+  function bookPrev(step) {
+    document.querySelector('#bp-' + step).classList.remove('active');
+    document.querySelector('#bp-' + (step - 1)).classList.add('active');
+    document.querySelector('#bsi-' + step).classList.remove('active');
+    document.querySelector('#bsi-' + (step - 1)).classList.remove('done');
+  }
+  function confirmBooking() {
+    showToast('✓ Appointment booked! See you on ' + booking.date);
+    setTimeout(() => showView('appointments'), 1000);
+    resetBooking();
+  }
+  function resetBooking() {
+    booking.doctor = null; booking.specialty = null; booking.date = null; booking.time = null;
+    [1,2,3,4].forEach(i => {
+      document.querySelector('#bp-' + i)?.classList.toggle('active', i === 1);
+      document.querySelector('#bsi-' + i)?.classList.toggle('active', i === 1);
+      document.querySelector('#bsi-' + i)?.classList.remove('done');
+    });
+    document.querySelectorAll('.doc-select-card, .date-btn, .time-btn').forEach(el => el.classList.remove('selected'));
+    document.getElementById('book-reason').value = '';
+  }
+
+  // ── APPOINTMENTS FILTER ──
+  function filterAppts(btn, filter) {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('.appt-card').forEach(c => {
+      c.style.display = (filter === 'all' || c.dataset.status === filter) ? 'flex' : 'none';
+    });
+  }
+
+  // ── RECORDS ──
+  function toggleRecord(header) {
+    const body = header.nextElementSibling;
+    body.classList.toggle('collapsed');
+  }
+
+  // ── PROFILE ──
+  function saveProfile() {
+    const name = document.getElementById('p-name').value;
+    if (name) {
+      const parts = name.split(' ');
+      const initials = parts.map(p => p[0]).join('').slice(0, 2).toUpperCase();
+      document.getElementById('sidebarAvatar').textContent = initials;
+      document.getElementById('profileAvLarge').textContent = initials;
+      document.getElementById('profileName').textContent = name;
+    }
+    showToast('Profile updated successfully');
+  }
+
+  // ── TOAST ──
+  let toastTimer;
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    document.getElementById('toastMsg').textContent = msg;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove('show'), 3200);
+  }
+
+  // ── INIT ──
+  if (location.hash === '#book') {
+    document.getElementById('loginScreen').style.display = 'flex';
+  }
+</script>
+</body>
+</html>

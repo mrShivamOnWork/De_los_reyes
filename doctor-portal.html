@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Doctor Portal — De Los Reyes Doctors</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&family=Open+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --crimson: #D31A22; --crimson-dark: #A8141B;
+      --green: #00A859; --green-dark: #007A42;
+      --dark: #11161B; --dark-2: #1B232C;
+      --gray: #7F8C8D;
+      --green-tint: #EAF7F0;
+      --light: #F4F6F7; --white: #FFFFFF;
+      --sidebar-w: 252px; --radius: 12px;
+    }
+    html, body { height: 100%; }
+    body { font-family: 'Open Sans', sans-serif; color: var(--dark); background: var(--light); overflow-x: hidden; }
+
+    /* ── AUTH ── */
+    .auth-screen { min-height: 100vh; display: flex; background: var(--dark); }
+    .auth-brand {
+      width: 400px; flex-shrink: 0;
+      background: linear-gradient(160deg, var(--dark) 0%, #091520 100%);
+      border-right: 1px solid rgba(211,26,34,0.15);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      padding: 48px 36px; text-align: center; position: relative; overflow: hidden;
+    }
+    .auth-brand::before {
+      content: ''; position: absolute; inset: 0;
+      background-image:
+        linear-gradient(rgba(211,26,34,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(211,26,34,0.04) 1px, transparent 1px);
+      background-size: 48px 48px;
+    }
+    .auth-brand-inner { position: relative; z-index: 1; }
+    .auth-brand img { width: 110px; height: 110px; object-fit: contain; margin-bottom: 22px; border-radius: 12px; }
+    .auth-brand h1 { font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 20px; color: #fff; margin-bottom: 10px; }
+    .auth-brand p { font-size: 14px; color: rgba(255,255,255,0.4); line-height: 1.7; margin-bottom: 28px; }
+    .auth-role-badge {
+      display: inline-block; font-family: 'Montserrat', sans-serif;
+      font-size: 11px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase;
+      color: var(--crimson); padding: 7px 18px;
+      border: 1px solid rgba(211,26,34,0.35); border-radius: 100px;
+    }
+    .auth-main {
+      flex: 1; display: flex; align-items: center; justify-content: center;
+      padding: 48px 32px; background: var(--light);
+    }
+    .auth-card {
+      background: #fff; border-radius: 16px; padding: 44px 40px;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.1); width: 100%; max-width: 400px;
+    }
+    .auth-title { font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 24px; color: var(--dark); margin-bottom: 6px; }
+    .auth-sub { font-size: 14px; color: var(--gray); margin-bottom: 32px; }
+
+    /* ── FORMS ── */
+    .fgroup { margin-bottom: 18px; }
+    .flabel { display: block; font-family: 'Montserrat', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--dark); margin-bottom: 7px; }
+    .finput {
+      width: 100%; padding: 11px 14px; border: 1.5px solid rgba(0,0,0,0.12);
+      border-radius: 8px; font-family: 'Open Sans', sans-serif; font-size: 14px;
+      color: var(--dark); background: #fff; outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .finput:focus { border-color: var(--crimson); box-shadow: 0 0 0 3px rgba(211,26,34,0.1); }
+    select.finput { appearance: none; cursor: pointer; }
+    textarea.finput { resize: vertical; min-height: 90px; }
+
+    /* ── BUTTONS ── */
+    .btn {
+      display: inline-flex; align-items: center; gap: 7px;
+      font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: 12px;
+      letter-spacing: 0.08em; text-transform: uppercase;
+      padding: 11px 22px; border-radius: 8px; border: 2px solid transparent;
+      cursor: pointer; text-decoration: none;
+      transition: transform 0.15s, box-shadow 0.2s, background 0.2s;
+      white-space: nowrap;
+    }
+    .btn:hover { transform: translateY(-1px); }
+    .btn:active { transform: translateY(0); }
+    .btn-crimson { background: var(--crimson); color: #fff; box-shadow: 0 4px 16px rgba(211,26,34,0.2); }
+    .btn-crimson:hover { background: var(--crimson-dark); }
+    .btn-green { background: var(--green); color: #fff; box-shadow: 0 4px 16px rgba(0,168,89,0.2); }
+    .btn-green:hover { background: var(--green-dark); }
+    .btn-ghost { background: transparent; border-color: rgba(0,0,0,0.15); color: var(--gray); }
+    .btn-ghost:hover { border-color: var(--crimson); color: var(--crimson); }
+    .btn-dark { background: var(--dark); color: #fff; }
+    .btn-sm { padding: 7px 14px; font-size: 11px; border-radius: 6px; }
+    .btn-full { width: 100%; justify-content: center; }
+
+    /* ── APP ── */
+    .app { display: none; min-height: 100vh; }
+    .app.active { display: flex; }
+
+    /* ── SIDEBAR ── */
+    .sidebar {
+      width: var(--sidebar-w); flex-shrink: 0;
+      background: var(--dark-2); min-height: 100vh;
+      display: flex; flex-direction: column;
+      position: sticky; top: 0; height: 100vh; overflow-y: auto;
+      border-right: 1px solid rgba(211,26,34,0.1);
+    }
+    .sidebar-brand {
+      padding: 18px; border-bottom: 1px solid rgba(255,255,255,0.06);
+      display: flex; align-items: center; gap: 10px;
+    }
+    .sidebar-brand img { width: 40px; height: 40px; object-fit: contain; border-radius: 6px; }
+    .sb-name { font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 12px; color: #fff; display: block; }
+    .sb-sub { font-size: 10px; color: var(--crimson); letter-spacing: 0.12em; text-transform: uppercase; }
+    .sidebar-nav { list-style: none; padding: 12px 10px; flex: 1; }
+    .sidebar-nav li { margin-bottom: 2px; }
+    .sidebar-nav a {
+      display: flex; align-items: center; gap: 11px;
+      padding: 10px 12px; border-radius: 8px;
+      font-family: 'Montserrat', sans-serif; font-size: 13px; font-weight: 600;
+      color: rgba(255,255,255,0.45); text-decoration: none; cursor: pointer;
+      transition: background 0.2s, color 0.2s;
+    }
+    .sidebar-nav a:hover { background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.8); }
+    .sidebar-nav a.active { background: rgba(211,26,34,0.15); color: #ff6b6b; }
+    .sidebar-nav a svg { width: 17px; height: 17px; flex-shrink: 0; }
+    .sidebar-queue-badge {
+      margin-left: auto;
+      background: var(--crimson); color: #fff;
+      font-size: 10px; font-weight: 800;
+      padding: 2px 7px; border-radius: 100px;
+      font-family: 'Montserrat', sans-serif;
+    }
+    .sidebar-bottom { padding: 10px 10px 18px; border-top: 1px solid rgba(255,255,255,0.06); }
+    .sidebar-doc-card {
+      display: flex; align-items: center; gap: 10px;
+      padding: 12px; background: rgba(255,255,255,0.04);
+      border-radius: 8px; margin-bottom: 8px;
+    }
+    .doc-av {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: var(--crimson);
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: 12px; color: #fff;
+      flex-shrink: 0;
+    }
+    .doc-sidebar-name { font-family: 'Montserrat', sans-serif; font-size: 12px; font-weight: 700; color: #fff; }
+    .doc-sidebar-spec { font-size: 11px; color: rgba(255,255,255,0.35); }
+
+    /* ── MAIN ── */
+    .main-content { flex: 1; overflow-y: auto; }
+    .main-header {
+      background: #fff; padding: 18px 32px;
+      border-bottom: 1px solid rgba(0,0,0,0.06);
+      display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; z-index: 10;
+    }
+    .main-header-title { font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 18px; color: var(--dark); }
+    .main-header-sub { font-size: 13px; color: var(--gray); margin-top: 2px; }
+    .content-body { padding: 28px 32px; }
+    .view { display: none; }
+    .view.active { display: block; }
+
+    /* ── QUEUE DASHBOARD ── */
+    .queue-layout {
+      display: grid; grid-template-columns: 340px 1fr;
+      gap: 20px; align-items: start;
+    }
+
+    /* Queue Panel */
+    .queue-panel {
+      background: #fff; border-radius: var(--radius);
+      border: 1.5px solid rgba(0,0,0,0.05);
+      overflow: hidden; position: sticky; top: 88px;
+    }
+    .queue-panel-header {
+      padding: 18px 20px; background: var(--dark);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .queue-panel-title { font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: 14px; color: #fff; }
+    .queue-count {
+      background: var(--crimson); color: #fff;
+      font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: 12px;
+      padding: 3px 10px; border-radius: 100px;
+    }
+    .queue-list { max-height: 520px; overflow-y: auto; }
+    .queue-item {
+      display: flex; align-items: center; gap: 14px;
+      padding: 14px 20px; border-bottom: 1px solid var(--light);
+      cursor: pointer; transition: background 0.2s;
+    }
+    .queue-item:hover { background: var(--light); }
+    .queue-item.active { background: var(--green-tint); border-left: 3px solid var(--green); }
+    .queue-item.done { opacity: 0.4; }
+    .q-num {
+      width: 32px; height: 32px; border-radius: 8px;
+      background: var(--light); flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 13px; color: var(--dark);
+    }
+    .queue-item.active .q-num { background: var(--green); color: #fff; }
+    .q-name { font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: 13px; color: var(--dark); }
+    .q-time { font-size: 11px; color: var(--gray); }
+    .q-status { margin-left: auto; }
+    .queue-call-btn {
+      width: 100%; padding: 16px; background: var(--green);
+      color: #fff; border: none; cursor: pointer;
+      font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: 13px;
+      letter-spacing: 0.08em; text-transform: uppercase;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      transition: background 0.2s;
+    }
+    .queue-call-btn:hover { background: var(--green-dark); }
+    .queue-call-btn svg { width: 16px; height: 16px; }
+
+    /* Patient Panel */
+    .patient-panel { display: flex; flex-direction: column; gap: 20px; }
+    .patient-header-card {
+      background: linear-gradient(135deg, var(--dark) 0%, var(--dark-2) 100%);
+      border-radius: var(--radius); padding: 24px 28px;
+      display: flex; align-items: center; gap: 20px;
+    }
+    .patient-av {
+      width: 60px; height: 60px; border-radius: 50%;
+      background: var(--crimson);
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 20px; color: #fff; flex-shrink: 0;
+    }
+    .patient-hd-name { font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 20px; color: #fff; }
+    .patient-hd-meta { font-size: 13px; color: rgba(255,255,255,0.45); margin-top: 4px; }
+    .patient-info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .pinfo-card {
+      background: rgba(255,255,255,0.08); border-radius: 8px; padding: 14px 18px;
+    }
+    .pinfo-label { font-size: 10px; color: rgba(255,255,255,0.35); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 4px; }
+    .pinfo-val { font-family: 'Montserrat', sans-serif; font-weight: 600; font-size: 13px; color: #fff; }
+    .reason-box {
+      background: rgba(255,193,7,0.1); border: 1px solid rgba(255,193,7,0.25);
+      border-radius: 8px; padding: 14px 18px; margin-top: 16px;
+    }
+    .reason-label { font-family: 'Montserrat', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #B8860B; margin-bottom: 6px; }
+    .reason-text { font-size: 14px; color: var(--dark); line-height: 1.6; }
+
+    /* EHR Form */
+    .card {
+      background: #fff; border-radius: var(--radius);
+      border: 1.5px solid rgba(0,0,0,0.05); padding: 24px;
+      margin-bottom: 0;
+    }
+    .card-title {
+      font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: 15px;
+      color: var(--dark); margin-bottom: 18px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .frow { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .ehr-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 6px; }
+
+    /* Stats row */
+    .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+    .stat-card {
+      background: #fff; border-radius: var(--radius); padding: 20px 22px;
+      border: 1.5px solid rgba(0,0,0,0.05);
+    }
+    .stat-val { font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 28px; color: var(--dark); }
+    .stat-lbl { font-size: 12px; color: var(--gray); margin-top: 3px; }
+    .stat-delta { font-size: 11px; color: var(--green); font-weight: 600; margin-top: 4px; }
+
+    /* Schedule */
+    .schedule-grid {
+      display: grid; grid-template-columns: repeat(6, 1fr);
+      gap: 12px; margin-bottom: 20px;
+    }
+    .day-col { background: #fff; border-radius: var(--radius); overflow: hidden; border: 1.5px solid rgba(0,0,0,0.05); }
+    .day-header {
+      padding: 10px; text-align: center; background: var(--dark);
+      font-family: 'Montserrat', sans-serif; font-size: 11px; font-weight: 700;
+      color: rgba(255,255,255,0.6); letter-spacing: 0.1em; text-transform: uppercase;
+    }
+    .day-header.today { background: var(--green); color: #fff; }
+    .day-slot {
+      padding: 8px 10px; border-bottom: 1px solid var(--light);
+      font-size: 12px; color: var(--gray); cursor: default;
+    }
+    .day-slot.booked { background: rgba(211,26,34,0.07); color: var(--crimson); font-weight: 600; }
+    .day-slot.available { color: var(--green); font-weight: 600; cursor: pointer; }
+    .day-slot.available:hover { background: var(--green-tint); }
+
+    /* Patient History */
+    .hist-search {
+      display: flex; gap: 10px; margin-bottom: 20px;
+    }
+    .hist-search .finput { flex: 1; }
+    .hist-item {
+      background: #fff; border-radius: var(--radius); border: 1.5px solid rgba(0,0,0,0.05);
+      padding: 18px 22px; margin-bottom: 12px;
+      display: flex; align-items: center; gap: 16px; cursor: pointer;
+      transition: border-color 0.2s;
+    }
+    .hist-item:hover { border-color: rgba(211,26,34,0.2); }
+    .hist-av { width: 44px; height: 44px; border-radius: 50%; background: var(--gray); color: #fff; display: flex; align-items: center; justify-content: center; font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: 14px; flex-shrink: 0; }
+    .hist-name { font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: 14px; color: var(--dark); }
+    .hist-meta { font-size: 12px; color: var(--gray); margin-top: 3px; }
+    .hist-badge { margin-left: auto; }
+
+    /* Badges */
+    .badge { display: inline-flex; align-items: center; gap: 5px; font-family: 'Montserrat', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; padding: 4px 10px; border-radius: 100px; }
+    .badge-green { background: var(--green-tint); color: var(--green-dark); }
+    .badge-crimson { background: rgba(211,26,34,0.1); color: var(--crimson); }
+    .badge-gray { background: rgba(0,0,0,0.06); color: var(--gray); }
+    .badge-blue { background: rgba(66,133,244,0.1); color: #2563EB; }
+    .badge-yellow { background: rgba(255,193,7,0.12); color: #B8860B; }
+
+    /* Toast */
+    .toast {
+      position: fixed; bottom: 24px; right: 24px;
+      background: var(--dark); color: #fff;
+      padding: 14px 20px; border-radius: 10px;
+      font-family: 'Montserrat', sans-serif; font-size: 13px; font-weight: 600;
+      display: flex; align-items: center; gap: 10px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.25);
+      transform: translateY(80px); opacity: 0;
+      transition: transform 0.35s, opacity 0.35s;
+      z-index: 9999;
+    }
+    .toast.show { transform: translateY(0); opacity: 1; }
+    .toast-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--crimson); flex-shrink: 0; }
+
+    @media (max-width: 1000px) {
+      .queue-layout { grid-template-columns: 1fr; }
+      .queue-panel { position: static; }
+      .stats-row { grid-template-columns: repeat(2, 1fr); }
+      .schedule-grid { grid-template-columns: repeat(3, 1fr); }
+      .patient-info-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 768px) {
+      .auth-brand { display: none; }
+      .sidebar { display: none; }
+      .stats-row { grid-template-columns: 1fr 1fr; }
+      .frow { grid-template-columns: 1fr; }
+      .content-body { padding: 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── LOGIN ── -->
+<div class="auth-screen" id="loginScreen">
+  <div class="auth-brand">
+    <div class="auth-brand-inner">
+      <img src="brand_assets/brand_logo.jpg" alt="De Los Reyes Doctors Logo">
+      <h1>Doctor Portal</h1>
+      <p>Access your patient queue, manage consultations, and update health records securely.</p>
+      <span class="auth-role-badge">Physician Access Only</span>
+    </div>
+  </div>
+  <div class="auth-main">
+    <div class="auth-card">
+      <div class="auth-title">Doctor Sign In</div>
+      <div class="auth-sub">Enter your physician credentials to continue.</div>
+      <div class="fgroup">
+        <label class="flabel" for="d-email">Email Address</label>
+        <input class="finput" id="d-email" type="email" placeholder="doctor@delosreyes.com" value="santos@delosreyes.com">
+      </div>
+      <div class="fgroup">
+        <label class="flabel" for="d-pass">Password</label>
+        <input class="finput" id="d-pass" type="password" placeholder="Your password" value="doctor1234">
+      </div>
+      <div class="fgroup" style="margin-bottom:28px;">
+        <label class="flabel" for="d-role">Login As</label>
+        <select class="finput" id="d-role">
+          <option value="Dr. Maria C. Santos — Internal Medicine">Dr. Maria C. Santos — Internal Medicine</option>
+          <option value="Dr. Juan B. dela Cruz — Pediatrics">Dr. Juan B. dela Cruz — Pediatrics</option>
+          <option value="Dr. Ana P. Reyes — OB-Gynecology">Dr. Ana P. Reyes — OB-Gynecology</option>
+        </select>
+      </div>
+      <button class="btn btn-crimson btn-full" style="padding:13px;" onclick="doDocLogin()">Sign In to Doctor Portal</button>
+      <div style="margin-top:20px;text-align:center;">
+        <a href="index.html" style="font-size:12px;color:var(--gray);text-decoration:none;">← Back to main website</a>
+        &nbsp;|&nbsp;
+        <a href="patient-portal.html" style="font-size:12px;color:var(--gray);text-decoration:none;">Patient Portal</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── DOCTOR APP ── -->
+<div class="app" id="doctorApp">
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <img src="brand_assets/brand_logo.jpg" alt="Logo">
+      <div><span class="sb-name">DRD Clinic</span><span class="sb-sub">Doctor Portal</span></div>
+    </div>
+    <ul class="sidebar-nav" style="margin-top:8px;">
+      <li>
+        <a class="active" onclick="showView('queue')">
+          <svg fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          Today's Queue
+          <span class="sidebar-queue-badge" id="queueBadge">4</span>
+        </a>
+      </li>
+      <li>
+        <a onclick="showView('schedule')">
+          <svg fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          My Schedule
+        </a>
+      </li>
+      <li>
+        <a onclick="showView('history')">
+          <svg fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          Patient History
+        </a>
+      </li>
+    </ul>
+    <div class="sidebar-bottom">
+      <div class="sidebar-doc-card">
+        <div class="doc-av" id="docAvatar">MS</div>
+        <div>
+          <div class="doc-sidebar-name" id="docSidebarName">Dr. M. Santos</div>
+          <div class="doc-sidebar-spec" id="docSidebarSpec">Internal Medicine</div>
+        </div>
+      </div>
+      <a style="display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:8px;font-family:'Montserrat',sans-serif;font-size:13px;font-weight:600;color:rgba(255,100,100,0.7);cursor:pointer;text-decoration:none;" onclick="doLogout()">
+        <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Sign Out
+      </a>
+    </div>
+  </aside>
+
+  <div class="main-content">
+    <header class="main-header">
+      <div>
+        <div class="main-header-title" id="viewTitle">Today's Queue</div>
+        <div class="main-header-sub" id="viewSub">Tuesday, May 27, 2026 · Internal Medicine</div>
+      </div>
+      <div style="display:flex;gap:10px;align-items:center;">
+        <div style="font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;color:var(--green);background:var(--green-tint);padding:6px 14px;border-radius:100px;">● Available</div>
+        <a href="index.html" class="btn btn-ghost btn-sm">← Main Site</a>
+      </div>
+    </header>
+
+    <div class="content-body">
+
+      <!-- ── QUEUE VIEW ── -->
+      <div class="view active" id="view-queue">
+        <div class="stats-row" style="margin-bottom:20px;">
+          <div class="stat-card">
+            <div class="stat-val">4</div>
+            <div class="stat-lbl">Patients in Queue</div>
+            <div class="stat-delta">Remaining today</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-val" id="seenCount">2</div>
+            <div class="stat-lbl">Patients Seen</div>
+            <div class="stat-delta" style="color:var(--green);">Completed today</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-val">6</div>
+            <div class="stat-lbl">Total Today</div>
+            <div class="stat-delta">Scheduled</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-val">~25m</div>
+            <div class="stat-lbl">Avg. Consult Time</div>
+            <div class="stat-delta">Per patient</div>
+          </div>
+        </div>
+
+        <div class="queue-layout">
+          <!-- Queue List -->
+          <div>
+            <div class="queue-panel">
+              <div class="queue-panel-header">
+                <div class="queue-panel-title">Patient Queue</div>
+                <div class="queue-count" id="qCount">4 waiting</div>
+              </div>
+              <div class="queue-list" id="queueList">
+                <div class="queue-item active" data-idx="0" onclick="selectPatient(0)">
+                  <div class="q-num">Q3</div>
+                  <div>
+                    <div class="q-name">Ana Rivera</div>
+                    <div class="q-time">10:30 AM · Hypertension follow-up</div>
+                  </div>
+                  <span class="badge badge-crimson q-status">Now</span>
+                </div>
+                <div class="queue-item" data-idx="1" onclick="selectPatient(1)">
+                  <div class="q-num">Q4</div>
+                  <div>
+                    <div class="q-name">Ben Marcos</div>
+                    <div class="q-time">11:00 AM · Chest pain evaluation</div>
+                  </div>
+                  <span class="badge badge-yellow q-status">Next</span>
+                </div>
+                <div class="queue-item" data-idx="2" onclick="selectPatient(2)">
+                  <div class="q-num">Q5</div>
+                  <div>
+                    <div class="q-name">Clara Tan</div>
+                    <div class="q-time">11:30 AM · Diabetes management</div>
+                  </div>
+                  <span class="badge badge-gray q-status">Waiting</span>
+                </div>
+                <div class="queue-item" data-idx="3" onclick="selectPatient(3)">
+                  <div class="q-num">Q6</div>
+                  <div>
+                    <div class="q-name">David Reyes</div>
+                    <div class="q-time">12:00 PM · Annual check-up</div>
+                  </div>
+                  <span class="badge badge-gray q-status">Waiting</span>
+                </div>
+                <div class="queue-item done" data-idx="4">
+                  <div class="q-num">Q1</div>
+                  <div>
+                    <div class="q-name">Maria Cruz</div>
+                    <div class="q-time">9:00 AM · Completed</div>
+                  </div>
+                  <span class="badge badge-green q-status">Done</span>
+                </div>
+                <div class="queue-item done" data-idx="5">
+                  <div class="q-num">Q2</div>
+                  <div>
+                    <div class="q-name">Jose Santos</div>
+                    <div class="q-time">9:30 AM · Completed</div>
+                  </div>
+                  <span class="badge badge-green q-status">Done</span>
+                </div>
+              </div>
+              <button class="queue-call-btn" onclick="callNext()">
+                <svg fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+                Call Next Patient
+              </button>
+            </div>
+          </div>
+
+          <!-- Patient Detail -->
+          <div class="patient-panel">
+            <!-- Current Patient Header -->
+            <div class="patient-header-card">
+              <div class="patient-av" id="patientAv">AR</div>
+              <div style="flex:1;">
+                <div class="patient-hd-name" id="patientName">Ana Rivera</div>
+                <div class="patient-hd-meta" id="patientMeta">F · 45 yrs · Appt #DRD-2026-1034</div>
+                <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;">
+                  <div class="pinfo-card" style="padding:6px 12px;"><div class="pinfo-val" style="font-size:11px;">🩸 A+</div><div class="pinfo-label">Blood Type</div></div>
+                  <div class="pinfo-card" style="padding:6px 12px;"><div class="pinfo-val" style="font-size:11px;">No known allergies</div><div class="pinfo-label">Allergies</div></div>
+                  <div class="pinfo-card" style="padding:6px 12px;"><div class="pinfo-val" style="font-size:11px;">Hypertension</div><div class="pinfo-label">Existing Conditions</div></div>
+                </div>
+              </div>
+              <div>
+                <div style="font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.3);margin-bottom:6px;">Queue</div>
+                <div style="font-family:'Montserrat',sans-serif;font-weight:900;font-size:36px;color:var(--crimson);">Q3</div>
+                <div style="font-size:11px;color:rgba(255,255,255,0.35);" id="patientTime">10:30 AM</div>
+              </div>
+            </div>
+
+            <!-- Reason for Visit -->
+            <div class="card">
+              <div class="card-title">
+                <svg width="17" height="17" fill="none" stroke="var(--crimson)" stroke-width="2" stroke-linecap="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                Chief Complaint / Reason for Visit
+              </div>
+              <div class="reason-box" id="patientReason">
+                <div class="reason-label">Patient's Description</div>
+                <div class="reason-text">Patient reports persistent headache and morning blood pressure readings consistently above 150/95 mmHg. On Amlodipine 5mg — concerned about efficacy. Requesting medication review.</div>
+              </div>
+              <div style="margin-top:16px;">
+                <div style="font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--gray);margin-bottom:10px;">Previous Visits</div>
+                <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                  <span class="badge badge-blue">May 12, 2026</span>
+                  <span class="badge badge-gray">Mar 5, 2026</span>
+                  <span class="badge badge-gray">Jan 20, 2026</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- EHR Form -->
+            <div class="card">
+              <div class="card-title">
+                <svg width="17" height="17" fill="none" stroke="var(--green)" stroke-width="2" stroke-linecap="round" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="11" x2="12" y2="17"/><line x1="9" y1="14" x2="15" y2="14"/></svg>
+                Create / Update EHR
+              </div>
+              <div class="fgroup">
+                <label class="flabel">Diagnosis</label>
+                <textarea class="finput" id="ehr-diagnosis" placeholder="Enter primary diagnosis…">Hypertension Stage 1 — inadequate control on current dose</textarea>
+              </div>
+              <div class="fgroup">
+                <label class="flabel">Clinical Notes</label>
+                <textarea class="finput" id="ehr-notes" style="min-height:100px;" placeholder="Clinical observations, vitals, examination findings…">BP: 154/96 mmHg. HR: 82 bpm. Patient alert and oriented. No signs of end-organ damage. Compliance confirmed — takes medication daily.</textarea>
+              </div>
+              <div class="frow">
+                <div class="fgroup">
+                  <label class="flabel">Prescription</label>
+                  <textarea class="finput" id="ehr-rx" placeholder="Medications prescribed…">Amlodipine 10mg OD (dose increased)
+Losartan 50mg OD (continue)</textarea>
+                </div>
+                <div class="fgroup">
+                  <label class="flabel">Treatment Plan</label>
+                  <textarea class="finput" id="ehr-treatment" placeholder="Treatment plan…">Low-sodium diet strict compliance. Daily aerobic exercise. Home BP monitoring BID.</textarea>
+                </div>
+              </div>
+              <div class="fgroup">
+                <label class="flabel">Follow-Up Instructions</label>
+                <textarea class="finput" id="ehr-followup" placeholder="Instructions for next visit…">Return in 2 weeks for BP recheck. Go to ER if BP exceeds 170/110 or develops severe headache, vision changes.</textarea>
+              </div>
+              <div class="ehr-actions">
+                <button class="btn btn-ghost btn-sm" onclick="showToast('Draft saved')">Save Draft</button>
+                <button class="btn btn-dark btn-sm" onclick="saveAndComplete()">Save EHR &amp; Mark Complete</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── SCHEDULE VIEW ── -->
+      <div class="view" id="view-schedule">
+        <div class="card" style="margin-bottom:20px;">
+          <div class="card-title">Week of May 27, 2026 — <span id="scheduleDocName" style="color:var(--crimson);">Dr. Maria C. Santos</span></div>
+          <div class="schedule-grid">
+            <div class="day-col">
+              <div class="day-header today">Mon</div>
+              <div class="day-slot booked">9:00 AM – Maria Cruz</div>
+              <div class="day-slot booked">9:30 AM – Jose Santos</div>
+              <div class="day-slot booked">10:30 AM – Ana Rivera</div>
+              <div class="day-slot available">11:00 AM – Available</div>
+              <div class="day-slot booked">1:00 PM – Ben Marcos</div>
+              <div class="day-slot available">2:00 PM – Available</div>
+            </div>
+            <div class="day-col">
+              <div class="day-header">Tue</div>
+              <div class="day-slot booked">9:00 AM – Carlos Lim</div>
+              <div class="day-slot available">10:00 AM – Available</div>
+              <div class="day-slot available">11:00 AM – Available</div>
+              <div class="day-slot booked">2:00 PM – Rosa Tan</div>
+            </div>
+            <div class="day-col">
+              <div class="day-header">Wed</div>
+              <div class="day-slot booked">9:00 AM – Elena Ramos</div>
+              <div class="day-slot available">10:00 AM – Available</div>
+              <div class="day-slot booked">3:00 PM – Diego Reyes</div>
+            </div>
+            <div class="day-col">
+              <div class="day-header">Thu</div>
+              <div class="day-slot available">9:00 AM – Available</div>
+              <div class="day-slot available">10:00 AM – Available</div>
+              <div class="day-slot booked">1:00 PM – Felix Cruz</div>
+            </div>
+            <div class="day-col">
+              <div class="day-header">Fri</div>
+              <div class="day-slot booked">9:00 AM – Gloria Uy</div>
+              <div class="day-slot available">10:00 AM – Available</div>
+              <div class="day-slot available">3:00 PM – Available</div>
+            </div>
+            <div class="day-col">
+              <div class="day-header">Sat</div>
+              <div class="day-slot" style="color:var(--gray);font-style:italic;">Off Day</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── PATIENT HISTORY VIEW ── -->
+      <div class="view" id="view-history">
+        <div class="hist-search">
+          <input class="finput" id="histSearch" placeholder="Search patient by name or ID…" oninput="filterHistory()">
+          <button class="btn btn-ghost btn-sm">Filter</button>
+        </div>
+        <div id="histList">
+          <div class="hist-item" data-name="ana rivera">
+            <div class="hist-av" style="background:var(--crimson);">AR</div>
+            <div>
+              <div class="hist-name">Ana Rivera</div>
+              <div class="hist-meta">Last visit: May 27, 2026 · 5 visits total · Hypertension</div>
+            </div>
+            <div class="hist-badge"><span class="badge badge-blue">Active Patient</span></div>
+          </div>
+          <div class="hist-item" data-name="ben marcos">
+            <div class="hist-av" style="background:#4A5568;">BM</div>
+            <div>
+              <div class="hist-name">Ben Marcos</div>
+              <div class="hist-meta">Last visit: Apr 15, 2026 · 2 visits total · Chest Pain Evaluation</div>
+            </div>
+            <div class="hist-badge"><span class="badge badge-yellow">Pending Follow-up</span></div>
+          </div>
+          <div class="hist-item" data-name="clara tan">
+            <div class="hist-av" style="background:var(--green);">CT</div>
+            <div>
+              <div class="hist-name">Clara Tan</div>
+              <div class="hist-meta">Last visit: Mar 22, 2026 · 8 visits total · Type 2 Diabetes</div>
+            </div>
+            <div class="hist-badge"><span class="badge badge-blue">Active Patient</span></div>
+          </div>
+          <div class="hist-item" data-name="david reyes">
+            <div class="hist-av" style="background:#805AD5;">DR</div>
+            <div>
+              <div class="hist-name">David Reyes</div>
+              <div class="hist-meta">Last visit: Jan 10, 2026 · 1 visit total · Annual Check-up</div>
+            </div>
+            <div class="hist-badge"><span class="badge badge-gray">New Patient</span></div>
+          </div>
+          <div class="hist-item" data-name="maria cruz">
+            <div class="hist-av" style="background:var(--crimson);">MC</div>
+            <div>
+              <div class="hist-name">Maria Cruz</div>
+              <div class="hist-meta">Last visit: May 27, 2026 · 12 visits total · Hypertension, GERD</div>
+            </div>
+            <div class="hist-badge"><span class="badge badge-green">Completed Today</span></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"><div class="toast-dot"></div><span id="toastMsg">Done</span></div>
+
+<script>
+  const patients = [
+    { initials:'AR', name:'Ana Rivera', meta:'F · 45 yrs · Appt #DRD-2026-1034', time:'10:30 AM', reason:'Patient reports persistent headache and morning blood pressure readings consistently above 150/95 mmHg. Requesting medication review.' },
+    { initials:'BM', name:'Ben Marcos', meta:'M · 58 yrs · Appt #DRD-2026-1035', time:'11:00 AM', reason:'Intermittent chest tightness on exertion for the past 2 weeks. No prior cardiac history. Non-smoker.' },
+    { initials:'CT', name:'Clara Tan', meta:'F · 62 yrs · Appt #DRD-2026-1036', time:'11:30 AM', reason:'Regular diabetes management visit. Home glucose readings averaging 180 mg/dL fasting — above target range.' },
+    { initials:'DR', name:'David Reyes', meta:'M · 34 yrs · Appt #DRD-2026-1037', time:'12:00 PM', reason:'Annual physical examination. No current complaints. Patient wants full blood workup.' },
+  ];
+  let currentPatientIdx = 0;
+  let seenCount = 2;
+
+  function doDocLogin() {
+    const roleEl = document.getElementById('d-role');
+    const role = roleEl.value;
+    const parts = role.split(' — ');
+    const name = parts[0];
+    const spec = parts[1];
+    const initials = name.replace('Dr. ', '').split(' ').map(p => p[0]).join('').slice(0,2);
+    document.getElementById('docAvatar').textContent = initials;
+    document.getElementById('docSidebarName').textContent = name.split(' ').slice(0,3).join(' ');
+    document.getElementById('docSidebarSpec').textContent = spec;
+    document.getElementById('viewSub').textContent = 'Tuesday, May 27, 2026 · ' + spec;
+    document.getElementById('scheduleDocName').textContent = name;
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('doctorApp').classList.add('active');
+    showToast('Welcome back, ' + name.split(' ').slice(0,2).join(' ') + '!');
+  }
+
+  function doLogout() {
+    document.getElementById('doctorApp').classList.remove('active');
+    document.getElementById('loginScreen').style.display = 'flex';
+  }
+
+  const viewTitles = {
+    'queue': ["Today's Queue", "Active consultation session"],
+    'schedule': ["My Schedule", "Weekly appointment overview"],
+    'history': ["Patient History", "Search and review patient records"],
+  };
+  function showView(id) {
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    document.getElementById('view-' + id).classList.add('active');
+    document.querySelectorAll('.sidebar-nav a').forEach(a => a.classList.remove('active'));
+    const link = [...document.querySelectorAll('.sidebar-nav a')].find(a => a.getAttribute('onclick') === `showView('${id}')`);
+    if (link) link.classList.add('active');
+    const [t, s] = viewTitles[id] || [id, ''];
+    document.getElementById('viewTitle').textContent = t;
+  }
+
+  function selectPatient(idx) {
+    if (idx >= patients.length) return;
+    currentPatientIdx = idx;
+    const p = patients[idx];
+    document.querySelectorAll('.queue-item').forEach((el, i) => {
+      el.classList.toggle('active', parseInt(el.dataset.idx) === idx);
+    });
+    document.getElementById('patientAv').textContent = p.initials;
+    document.getElementById('patientName').textContent = p.name;
+    document.getElementById('patientMeta').textContent = p.meta;
+    document.getElementById('patientTime').textContent = p.time;
+    document.getElementById('patientReason').querySelector('.reason-text').textContent = p.reason;
+    document.getElementById('ehr-diagnosis').value = '';
+    document.getElementById('ehr-notes').value = '';
+    document.getElementById('ehr-rx').value = '';
+    document.getElementById('ehr-treatment').value = '';
+    document.getElementById('ehr-followup').value = '';
+    showToast('Viewing patient: ' + p.name);
+  }
+
+  function callNext() {
+    const waiting = document.querySelectorAll('.queue-item:not(.done)');
+    let nextIdx = -1;
+    waiting.forEach(el => {
+      const idx = parseInt(el.dataset.idx);
+      if (idx > currentPatientIdx && nextIdx === -1) nextIdx = idx;
+    });
+    if (nextIdx === -1) { showToast('No more patients in queue'); return; }
+    selectPatient(nextIdx);
+    showToast('Called Q' + (nextIdx + 3) + ': ' + patients[nextIdx]?.name);
+  }
+
+  function saveAndComplete() {
+    const diag = document.getElementById('ehr-diagnosis').value.trim();
+    if (!diag) { showToast('Please enter a diagnosis before saving'); return; }
+    const activeItem = document.querySelector('.queue-item.active');
+    if (activeItem) {
+      activeItem.classList.remove('active');
+      activeItem.classList.add('done');
+      activeItem.querySelector('.q-status').textContent = 'Done';
+      activeItem.querySelector('.q-status').className = 'badge badge-green q-status';
+    }
+    seenCount++;
+    document.getElementById('seenCount').textContent = seenCount;
+    const remaining = document.querySelectorAll('.queue-item:not(.done)').length;
+    document.getElementById('qCount').textContent = remaining + ' waiting';
+    document.getElementById('queueBadge').textContent = remaining;
+    showToast('✓ EHR saved. Patient marked as completed.');
+    if (remaining > 0) setTimeout(() => callNext(), 800);
+  }
+
+  function filterHistory() {
+    const q = document.getElementById('histSearch').value.toLowerCase();
+    document.querySelectorAll('.hist-item').forEach(el => {
+      el.style.display = el.dataset.name.includes(q) ? 'flex' : 'none';
+    });
+  }
+
+  let toastTimer;
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    document.getElementById('toastMsg').textContent = msg;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove('show'), 3200);
+  }
+</script>
+</body>
+</html>

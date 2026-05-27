@@ -1,0 +1,387 @@
+Clinic Management Web App System
+
+Build a modern full-stack clinic management web application for “De Los Reyes Doctors Clinic”.
+
+The system should function as a complete digital clinic workflow platform for:
+
+patients
+doctors
+clinic staff/admin
+
+The application must be professional, scalable, secure, mobile responsive, and optimized for real-world clinic operations.
+
+The overall design should feel:
+
+modern healthcare
+clean
+trustworthy
+efficient
+simple for non-technical users
+
+Use a modern architecture and structure the project cleanly for future expansion.
+
+SYSTEM OVERVIEW
+
+The platform should support:
+
+Patient Accounts
+Appointment Booking System
+Doctor Dashboard
+Queue Management
+Electronic Health Records (EHR)
+Patient Visit History
+Real-Time Appointment Availability
+Admin/Clinic Management Features
+USER ROLES
+1. Patient
+
+Patients should be able to:
+
+create an account
+log in securely
+manage their profile
+book appointments
+select doctors
+view appointment history
+view visit records
+update personal information
+2. Doctor
+
+Doctors should be able to:
+
+view today’s patient queue
+open patient records
+view symptoms/reason for visit
+manage appointments
+create/update EHR notes
+view patient visit history
+mark consultation as completed
+call next patient in queue
+3. Admin / Clinic Staff
+
+Admins should be able to:
+
+manage doctors
+manage schedules
+manage patient records
+monitor appointments
+manually create/edit appointments
+manage queues
+view clinic statistics
+PATIENT FEATURES
+Authentication
+Patient registration
+Login/logout
+Password reset
+Secure authentication system
+Patient Profile
+
+Store:
+
+Full name
+Date of birth
+Gender
+Contact number
+Address
+Emergency contact
+Medical notes/allergies
+Account creation date
+Appointment Booking System
+
+Patients must be able to:
+
+select a doctor
+select available date
+select available time slot
+describe symptoms/reason for visit
+
+The system must:
+
+prevent double booking
+prevent overlapping appointments
+update slot availability in real-time
+lock booked time slots instantly
+
+Appointment status should include:
+
+Pending
+Confirmed
+Completed
+Cancelled
+No-show
+Patient Dashboard
+
+Patients should see:
+
+upcoming appointments
+appointment status
+previous visits
+doctor assigned
+prescriptions/notes (optional later)
+notifications/reminders
+DOCTOR FEATURES
+Doctor Dashboard
+
+Doctors should see:
+
+today’s appointment list
+current queue
+patient information
+appointment times
+patient symptoms/reasons for visit
+Queue System
+
+Doctor should be able to:
+
+press “Call Next Patient”
+automatically move queue forward
+view queue number
+see current patient information
+
+Queue should display:
+
+patient name
+queue number
+appointment time
+symptoms/reason for visit
+Electronic Health Record (EHR)
+
+Doctors should be able to:
+
+create consultation notes
+update patient records
+save diagnosis
+save treatment plan
+save prescriptions
+save follow-up instructions
+
+Each patient should maintain a permanent medical history.
+
+Patient History Access
+
+Doctor must be able to see:
+
+previous visits
+consultation history
+previous diagnoses
+previous treatments
+previous prescriptions
+visit dates
+
+Doctor should instantly know:
+
+when patient last visited
+what condition they had
+what treatment was provided
+Consultation Workflow
+
+Typical workflow:
+
+Doctor opens patient
+Views symptoms/history
+Conducts consultation
+Saves EHR
+Marks consultation complete
+Calls next patient
+ADMIN FEATURES
+Doctor Management
+
+Admin can:
+
+add/edit/remove doctors
+assign schedules
+assign specialties
+enable/disable doctor availability
+Appointment Management
+
+Admin can:
+
+monitor all appointments
+manually create bookings
+reschedule appointments
+cancel appointments
+override schedules if needed
+Queue Monitoring
+
+Admin dashboard should display:
+
+active queues
+waiting patients
+completed consultations
+currently active doctor
+SYSTEM REQUIREMENTS
+Real-Time Functionality
+
+The system should support:
+
+real-time appointment availability
+real-time queue updates
+instant slot locking
+live patient queue movement
+
+Recommended technologies:
+
+WebSockets
+OR
+Firebase realtime listeners
+Security
+
+Must include:
+
+secure authentication
+encrypted passwords
+role-based access control
+protected patient records
+secure database structure
+
+Patient medical records must only be accessible to authorized users.
+
+DATABASE REQUIREMENTS
+
+Core entities:
+
+Patients
+personal information
+medical profile
+account data
+Doctors
+schedules
+specialties
+availability
+Appointments
+patient
+doctor
+time slot
+status
+symptoms
+EHR Records
+diagnosis
+notes
+prescriptions
+treatment
+timestamps
+Queue System
+queue order
+active patient
+waiting status
+UI/UX REQUIREMENTS
+
+The interface should feel:
+
+clean
+professional
+medical-grade
+easy for elderly/non-technical users
+
+Avoid:
+
+clutter
+overly flashy animations
+gaming-style UI
+
+Prioritize:
+
+readability
+accessibility
+speed
+clarity
+DESIGN STYLE
+
+Recommended aesthetic:
+
+modern clinic dashboard
+white + navy + teal palette
+soft shadows
+rounded cards
+professional typography
+MOBILE RESPONSIVENESS
+
+The entire system must work properly on:
+
+desktop
+tablet
+mobile devices
+
+Especially important for:
+
+patients booking appointments from phones
+NOTIFICATIONS (Optional Initial Support)
+
+Future-ready support for:
+
+SMS reminders
+email reminders
+appointment confirmations
+queue notifications
+SCALABILITY
+
+The architecture should allow future expansion for:
+
+laboratory modules
+pharmacy modules
+billing/payment
+online prescriptions
+telemedicine
+multi-branch clinics
+HMO support
+SUGGESTED TECH STACK
+
+Frontend:
+
+Next.js
+React
+Tailwind CSS
+
+Backend:
+
+Node.js / Express
+OR
+Firebase
+
+Database:
+
+PostgreSQL
+OR
+Firebase Firestore
+
+Authentication:
+
+Firebase Auth
+OR
+JWT authentication
+
+Realtime Features:
+
+Firebase Realtime
+OR
+Socket.io
+PRIORITY FEATURES FOR VERSION 1
+
+Highest Priority:
+
+Authentication
+Appointment booking
+Double-booking prevention
+Doctor dashboard
+Queue management
+EHR system
+Patient history
+Admin scheduling
+
+Lower Priority:
+
+billing
+payments
+analytics
+telemedicine
+FINAL GOAL
+
+The system should digitize the clinic workflow while making operations:
+
+faster
+organized
+secure
+scalable
+easy for staff and patients
+
+The experience should feel like a professional modern healthcare management platform rather than just a basic clinic website.
