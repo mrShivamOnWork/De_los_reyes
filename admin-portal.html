@@ -7,8 +7,11 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&family=Open+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    * { user-select: none; }
+    input, textarea, select { user-select: text; }
     :root {
       --crimson: #D31A22; --crimson-dark: #A8141B;
       --green: #00A859; --green-dark: #007A42;
@@ -169,7 +172,7 @@
     .queue-monitor-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
     .queue-doc-card { background: #fff; border-radius: var(--radius); border: 1.5px solid rgba(0,0,0,0.05); overflow: hidden; }
     .qdoc-header { padding: 16px 20px; background: var(--dark-2); display: flex; align-items: center; gap: 12px; }
-    .qdoc-av { width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: 13px; color: #fff; flex-shrink: 0; }
+    .qdoc-av { width: 42px; height: 42px; border-radius: 50%; object-fit: cover; object-position: center top; flex-shrink: 0; border: 2px solid rgba(255,255,255,0.12); }
     .qdoc-name { font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: 13px; color: #fff; }
     .qdoc-spec { font-size: 11px; color: rgba(255,255,255,0.4); }
     .qdoc-stat { margin-left: auto; }
@@ -184,9 +187,12 @@
     /* ── DOCTORS MANAGEMENT ── */
     .doctor-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
     .doc-manage-card { background: #fff; border-radius: var(--radius); border: 1.5px solid rgba(0,0,0,0.05); overflow: hidden; }
-    .doc-manage-header { height: 100px; background: linear-gradient(135deg, var(--dark) 0%, var(--dark-2) 100%); display: flex; align-items: center; justify-content: center; position: relative; }
-    .doc-manage-header::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 3px; background: var(--green); }
-    .doc-manage-av { width: 64px; height: 64px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 22px; color: #fff; }
+    .doc-manage-header { height: 120px; background: linear-gradient(135deg, var(--dark) 0%, var(--dark-2) 100%); position: relative; overflow: hidden; }
+    .doc-manage-header::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 3px; background: var(--green); z-index: 2; }
+    .doc-manage-photo { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 12%; transition: transform 0.35s; }
+    .doc-manage-card:hover .doc-manage-photo { transform: scale(1.05); }
+    .doc-manage-photo-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(17,22,27,0.65) 0%, rgba(17,22,27,0.1) 60%, transparent 100%); z-index: 1; }
+    .doc-manage-av { display: none; }
     .doc-manage-body { padding: 18px 20px; }
     .doc-manage-spec { font-family: 'Montserrat', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: var(--green); margin-bottom: 4px; }
     .doc-manage-name { font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: 15px; color: var(--dark); margin-bottom: 6px; }
@@ -202,6 +208,51 @@
     .modal-close { position: absolute; top: 20px; right: 20px; background: none; border: none; cursor: pointer; font-size: 22px; color: var(--gray); line-height: 1; }
     .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 8px; }
 
+    /* ── AVAILABILITY CALENDAR ── */
+    .avail-modal { max-width: 600px; }
+    .avail-doctor-label { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid var(--light); }
+    .avail-doc-av { width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 14px; color: #fff; flex-shrink: 0; }
+    .avail-doc-name { font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: 15px; color: var(--dark); }
+    .avail-doc-spec { font-size: 12px; color: var(--gray); }
+    .avail-cal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+    .avail-cal-title { font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: 15px; color: var(--dark); }
+    .avail-cal-nav { background: none; border: 1.5px solid rgba(0,0,0,0.1); border-radius: 6px; width: 30px; height: 30px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: border-color 0.2s; }
+    .avail-cal-nav:hover { border-color: var(--crimson); }
+    .avail-cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-bottom: 16px; }
+    .avail-cal-day-label { text-align: center; font-family: 'Montserrat', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.08em; color: var(--gray); padding: 4px 0; }
+    .avail-cal-day {
+      aspect-ratio: 1; display: flex; align-items: center; justify-content: center;
+      border-radius: 7px; font-family: 'Montserrat', sans-serif; font-weight: 600; font-size: 13px;
+      cursor: pointer; transition: background 0.15s, color 0.15s; position: relative;
+    }
+    .avail-cal-day:hover:not(.empty):not(.past) { background: rgba(0,0,0,0.06); }
+    .avail-cal-day.empty { cursor: default; }
+    .avail-cal-day.past { opacity: 0.35; cursor: not-allowed; }
+    .avail-cal-day.today { background: rgba(0,168,89,0.1); color: var(--green); }
+    .avail-cal-day.blocked { background: rgba(211,26,34,0.12); color: var(--crimson); }
+    .avail-cal-day.blocked::after { content: ''; position: absolute; bottom: 3px; left: 50%; transform: translateX(-50%); width: 4px; height: 4px; border-radius: 50%; background: var(--crimson); }
+    .avail-cal-day.in-range { background: rgba(211,26,34,0.06); }
+    .avail-legend { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 20px; }
+    .avail-legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--gray); }
+    .avail-legend-dot { width: 12px; height: 12px; border-radius: 3px; }
+    .avail-range-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+    .avail-reason { margin-bottom: 16px; }
+    .avail-blocked-list { background: var(--light); border-radius: 8px; padding: 12px 16px; margin-bottom: 16px; max-height: 120px; overflow-y: auto; }
+    .avail-blocked-item { display: flex; justify-content: space-between; align-items: center; padding: 5px 0; border-bottom: 1px solid rgba(0,0,0,0.05); font-size: 13px; }
+    .avail-blocked-item:last-child { border-bottom: none; }
+    .avail-unblock-btn { background: none; border: none; color: var(--crimson); cursor: pointer; font-size: 12px; font-family: 'Montserrat', sans-serif; font-weight: 700; }
+    .avail-no-blocks { font-size: 13px; color: var(--gray); padding: 4px 0; }
+
+    /* ── RESERVED SLOTS ── */
+    .reserved-row { display: flex; gap: 12px; margin-bottom: 16px; }
+    .reserved-slot {
+      flex: 1; background: rgba(255,193,7,0.08); border: 1.5px solid rgba(255,193,7,0.25);
+      border-radius: 10px; padding: 14px 16px;
+    }
+    .reserved-slot-label { font-family: 'Montserrat', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #B8860B; margin-bottom: 6px; }
+    .reserved-slot-val { font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: 14px; color: var(--dark); }
+    .reserved-slot-desc { font-size: 11px; color: var(--gray); margin-top: 2px; }
+
     /* ── CHART PLACEHOLDER ── */
     .chart-bar-wrap { display: flex; gap: 6px; align-items: flex-end; height: 120px; padding-top: 10px; }
     .chart-bar { flex: 1; border-radius: 4px 4px 0 0; background: var(--green-tint); position: relative; min-width: 0; transition: background 0.2s; cursor: default; }
@@ -215,6 +266,7 @@
     .toast { position: fixed; bottom: 24px; right: 24px; background: var(--dark); color: #fff; padding: 14px 20px; border-radius: 10px; font-family: 'Montserrat', sans-serif; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 10px; box-shadow: 0 8px 30px rgba(0,0,0,0.25); transform: translateY(80px); opacity: 0; transition: transform 0.35s, opacity 0.35s; z-index: 9999; }
     .toast.show { transform: translateY(0); opacity: 1; }
     .toast-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); flex-shrink: 0; }
+    @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
     @media (max-width: 1100px) {
       .queue-monitor-grid { grid-template-columns: 1fr 1fr; }
@@ -229,6 +281,32 @@
       .frow { grid-template-columns: 1fr; }
       .content-body { padding: 16px; }
     }
+
+    /* ── HAMBURGER + DRAWER ── */
+    .hamburger-btn { display: none; width: 38px; height: 38px; border-radius: 8px; border: 1.5px solid rgba(0,0,0,0.1); background: #fff; cursor: pointer; align-items: center; justify-content: center; flex-direction: column; gap: 4px; }
+    @media (max-width: 768px) { .hamburger-btn { display: flex; } }
+    .hamburger-btn span { display: block; width: 16px; height: 2px; background: var(--gray); border-radius: 2px; }
+    .drawer-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 800; display: none; }
+    .drawer-overlay.open { display: block; }
+    .sidebar-drawer { position: fixed; top: 0; left: 0; bottom: 0; width: 260px; background: var(--dark); z-index: 900; transform: translateX(-100%); transition: transform 0.3s; display: flex; flex-direction: column; overflow-y: auto; }
+    .sidebar-drawer.open { transform: translateX(0); }
+
+    /* ── NOTIFICATION BELL ── */
+    .notif-wrap { position: relative; }
+    .notif-count { position: absolute; top: -5px; right: -5px; min-width: 18px; height: 18px; border-radius: 9px; background: var(--crimson); padding: 0 4px; display: flex; align-items: center; justify-content: center; font-family: 'Montserrat', sans-serif; font-size: 10px; font-weight: 800; color: #fff; }
+    .notif-btn { width: 38px; height: 38px; border-radius: 8px; border: 1.5px solid rgba(0,0,0,0.1); background: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; position: relative; }
+    .notif-btn svg { width: 18px; height: 18px; stroke: var(--gray); fill: none; stroke-width: 1.8; stroke-linecap: round; }
+
+    /* ── APPT DETAIL MODAL EXTRAS ── */
+    .detail-row { display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--light); }
+    .detail-row:last-child { border-bottom: none; }
+    .detail-key { font-family: 'Montserrat', sans-serif; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--gray); min-width: 100px; }
+    .detail-val { font-size: 13px; color: var(--dark); }
+
+    /* ── ACTIVITY LOG ── */
+    .activity-item { display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--light); font-size: 13px; color: var(--dark); }
+    .activity-item:last-child { border-bottom: none; }
+    .activity-time { font-size: 11px; color: var(--gray); flex-shrink: 0; }
   </style>
 </head>
 <body>
@@ -249,13 +327,13 @@
       <div class="auth-sub">Enter your clinic staff credentials to continue.</div>
       <div class="fgroup">
         <label class="flabel" for="a-email">Email Address</label>
-        <input class="finput" id="a-email" type="email" value="admin@delosreyes.com" placeholder="admin@delosreyes.com">
+        <input class="finput" id="a-email" type="email" placeholder="admin@delosreyes.com">
       </div>
-      <div class="fgroup" style="margin-bottom:28px;">
+      <div class="fgroup" style="margin-bottom:16px;">
         <label class="flabel" for="a-pass">Password</label>
-        <input class="finput" id="a-pass" type="password" value="admin1234" placeholder="Admin password">
+        <input class="finput" id="a-pass" type="password" placeholder="Admin password">
       </div>
-      <button class="btn btn-green btn-full" style="padding:13px;" onclick="doAdminLogin()">Sign In to Admin Panel</button>
+      <button class="btn btn-green btn-full" id="adminLoginBtn" style="padding:13px;" disabled onclick="doAdminLogin()">Connecting…</button>
       <div style="margin-top:20px;text-align:center;">
         <a href="index.html" style="font-size:12px;color:var(--gray);text-decoration:none;">← Back to main website</a>
         &nbsp;|&nbsp;
@@ -285,6 +363,11 @@
     </ul>
     <div class="sidebar-section">Management</div>
     <ul class="sidebar-nav">
+      <li><a onclick="showView('checkin')">
+        <svg fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><polyline points="16 11 18 13 22 9"/></svg>
+        Check-In
+        <span id="checkinBadge" style="margin-left:auto;background:var(--green);color:#fff;font-size:10px;font-weight:800;padding:2px 7px;border-radius:100px;font-family:'Montserrat',sans-serif;display:none;"></span>
+      </a></li>
       <li><a onclick="showView('appointments')">
         <svg fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
         Appointments
@@ -298,6 +381,12 @@
         Patients
       </a></li>
     </ul>
+    <div style="padding:10px 10px 0;border-top:1px solid rgba(255,255,255,0.06);margin-top:auto;">
+      <div style="font-family:'Montserrat',sans-serif;font-size:10px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:rgba(255,255,255,0.2);padding:10px 2px 6px;">Activity</div>
+      <div id="activityLogList" style="font-size:11px;color:rgba(255,255,255,0.35);">
+        <div style="padding:6px 2px;color:rgba(255,255,255,0.2);">No activity yet.</div>
+      </div>
+    </div>
     <div class="sidebar-bottom">
       <div class="admin-card-sidebar">
         <div class="admin-av">AD</div>
@@ -319,9 +408,27 @@
         <div class="main-header-title" id="viewTitle">Dashboard Overview</div>
         <div class="main-header-sub" id="viewSub">Tuesday, May 27, 2026 · De Los Reyes Doctors Clinic</div>
       </div>
-      <div style="display:flex;gap:10px;">
+      <div style="display:flex;gap:10px;align-items:center;">
+        <div class="notif-wrap" style="position:relative;">
+          <button class="notif-btn" id="adminNotifBtn" onclick="toggleNotifPanel()">
+            <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+            <div class="notif-count" id="notifCount" style="display:none;">0</div>
+          </button>
+          <div id="notifPanel" style="display:none;position:absolute;top:46px;right:0;width:320px;background:#fff;border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,0.14);z-index:200;border:1px solid rgba(0,0,0,0.08);overflow:hidden;">
+            <div style="padding:14px 16px;border-bottom:1px solid rgba(0,0,0,0.07);display:flex;justify-content:space-between;align-items:center;">
+              <span style="font-family:'Montserrat',sans-serif;font-weight:700;font-size:13px;">Notifications</span>
+              <button onclick="clearNotifs()" style="font-size:11px;color:var(--gray);background:none;border:none;cursor:pointer;">Clear all</button>
+            </div>
+            <div id="notifList" style="max-height:320px;overflow-y:auto;padding:8px 0;">
+              <div style="padding:20px;text-align:center;color:var(--gray);font-size:13px;">Loading…</div>
+            </div>
+          </div>
+        </div>
         <button class="btn btn-green btn-sm" onclick="openModal('appt')">+ New Appointment</button>
         <a href="index.html" class="btn btn-ghost btn-sm">← Main Site</a>
+        <button class="hamburger-btn" onclick="openDrawer()">
+          <span></span><span></span><span></span>
+        </button>
       </div>
     </header>
 
@@ -332,27 +439,27 @@
         <div class="stats-row">
           <div class="stat-card">
             <div class="stat-icon" style="background:var(--green-tint);"><svg stroke="var(--green)" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
-            <div class="stat-val">18</div>
+            <div class="stat-val" id="stat-appts-today">—</div>
             <div class="stat-lbl">Appointments Today</div>
-            <div class="stat-delta delta-up">↑ +3 from yesterday</div>
+            <div class="stat-delta delta-up" id="stat-appts-delta"></div>
           </div>
           <div class="stat-card">
             <div class="stat-icon" style="background:rgba(211,26,34,0.08);"><svg stroke="var(--crimson)" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/></svg></div>
-            <div class="stat-val">10</div>
+            <div class="stat-val" id="stat-queue-now">—</div>
             <div class="stat-lbl">In Queue Now</div>
-            <div class="stat-delta" style="color:var(--crimson);">Across 3 doctors</div>
+            <div class="stat-delta" id="stat-queue-delta" style="color:var(--crimson);"></div>
           </div>
           <div class="stat-card">
             <div class="stat-icon" style="background:rgba(66,133,244,0.08);"><svg stroke="#2563EB" viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></div>
-            <div class="stat-val">8</div>
+            <div class="stat-val" id="stat-completed-today">—</div>
             <div class="stat-lbl">Completed Today</div>
-            <div class="stat-delta delta-up">↑ 44% completion</div>
+            <div class="stat-delta delta-up" id="stat-completed-delta"></div>
           </div>
           <div class="stat-card">
             <div class="stat-icon" style="background:rgba(255,193,7,0.1);"><svg stroke="#B8860B" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
-            <div class="stat-val">3</div>
+            <div class="stat-val" id="stat-active-docs">—</div>
             <div class="stat-lbl">Active Doctors</div>
-            <div class="stat-delta delta-up">All on schedule</div>
+            <div class="stat-delta delta-up" id="stat-docs-delta"></div>
           </div>
         </div>
 
@@ -360,16 +467,16 @@
           <!-- Weekly chart -->
           <div class="card">
             <div class="card-title">Weekly Appointments</div>
-            <div class="chart-bar-wrap">
-              <div class="chart-bar" style="height:55%;" data-val="10"></div>
-              <div class="chart-bar" style="height:70%;" data-val="13"></div>
-              <div class="chart-bar peak" style="height:100%;" data-val="18"></div>
-              <div class="chart-bar" style="height:65%;" data-val="12"></div>
-              <div class="chart-bar" style="height:80%;" data-val="15"></div>
-              <div class="chart-bar" style="height:40%;" data-val="7"></div>
-              <div class="chart-bar" style="height:0;" data-val="–"></div>
+            <div class="chart-bar-wrap" id="weeklyChartBars">
+              <div class="chart-bar" style="height:0;" data-val="—"></div>
+              <div class="chart-bar" style="height:0;" data-val="—"></div>
+              <div class="chart-bar" style="height:0;" data-val="—"></div>
+              <div class="chart-bar" style="height:0;" data-val="—"></div>
+              <div class="chart-bar" style="height:0;" data-val="—"></div>
+              <div class="chart-bar" style="height:0;" data-val="—"></div>
+              <div class="chart-bar" style="height:0;" data-val="—"></div>
             </div>
-            <div class="chart-labels">
+            <div class="chart-labels" id="weeklyChartLabels">
               <div class="chart-label">Mon</div><div class="chart-label">Tue</div><div class="chart-label">Wed</div>
               <div class="chart-label">Thu</div><div class="chart-label">Fri</div><div class="chart-label">Sat</div><div class="chart-label">Sun</div>
             </div>
@@ -380,19 +487,19 @@
             <div class="card-title">Today's Appointment Status</div>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
               <div style="background:var(--green-tint);border-radius:8px;padding:14px;text-align:center;">
-                <div style="font-family:'Montserrat',sans-serif;font-weight:800;font-size:28px;color:var(--green);">8</div>
+                <div id="mini-completed" style="font-family:'Montserrat',sans-serif;font-weight:800;font-size:28px;color:var(--green);">—</div>
                 <div style="font-size:12px;color:var(--gray);">Completed</div>
               </div>
               <div style="background:rgba(66,133,244,0.07);border-radius:8px;padding:14px;text-align:center;">
-                <div style="font-family:'Montserrat',sans-serif;font-weight:800;font-size:28px;color:#2563EB;">6</div>
+                <div id="mini-confirmed" style="font-family:'Montserrat',sans-serif;font-weight:800;font-size:28px;color:#2563EB;">—</div>
                 <div style="font-size:12px;color:var(--gray);">Confirmed</div>
               </div>
               <div style="background:rgba(255,193,7,0.08);border-radius:8px;padding:14px;text-align:center;">
-                <div style="font-family:'Montserrat',sans-serif;font-weight:800;font-size:28px;color:#B8860B;">3</div>
+                <div id="mini-pending" style="font-family:'Montserrat',sans-serif;font-weight:800;font-size:28px;color:#B8860B;">—</div>
                 <div style="font-size:12px;color:var(--gray);">Pending</div>
               </div>
               <div style="background:rgba(211,26,34,0.07);border-radius:8px;padding:14px;text-align:center;">
-                <div style="font-family:'Montserrat',sans-serif;font-weight:800;font-size:28px;color:var(--crimson);">1</div>
+                <div id="mini-noshow" style="font-family:'Montserrat',sans-serif;font-weight:800;font-size:28px;color:var(--crimson);">—</div>
                 <div style="font-size:12px;color:var(--gray);">No-show</div>
               </div>
             </div>
@@ -411,47 +518,8 @@
                 <th>Patient</th><th>Doctor</th><th>Time</th><th>Purpose</th><th>Status</th><th>Action</th>
               </tr>
             </thead>
-            <tbody>
-              <tr>
-                <td><div class="td-name">Ana Rivera</div><div class="td-sub">Patient #DRD-00042</div></td>
-                <td>Dr. Maria Santos</td>
-                <td>10:30 AM</td>
-                <td>Hypertension follow-up</td>
-                <td><span class="badge badge-crimson">In Session</span></td>
-                <td><button class="btn btn-ghost btn-sm" onclick="showToast('Record opened')">View</button></td>
-              </tr>
-              <tr>
-                <td><div class="td-name">Ben Marcos</div><div class="td-sub">Patient #DRD-00078</div></td>
-                <td>Dr. Maria Santos</td>
-                <td>11:00 AM</td>
-                <td>Chest pain evaluation</td>
-                <td><span class="badge badge-yellow">Next</span></td>
-                <td><button class="btn btn-ghost btn-sm" onclick="showToast('Record opened')">View</button></td>
-              </tr>
-              <tr>
-                <td><div class="td-name">Eva Gomez</div><div class="td-sub">Patient #DRD-00021</div></td>
-                <td>Dr. Ana Reyes</td>
-                <td>10:00 AM</td>
-                <td>Prenatal check-up (28 weeks)</td>
-                <td><span class="badge badge-green">Completed</span></td>
-                <td><button class="btn btn-ghost btn-sm" onclick="showToast('Record opened')">View</button></td>
-              </tr>
-              <tr>
-                <td><div class="td-name">Felix Uy</div><div class="td-sub">Patient #DRD-00055</div></td>
-                <td>Dr. Juan dela Cruz</td>
-                <td>9:30 AM</td>
-                <td>Pediatric vaccination</td>
-                <td><span class="badge badge-green">Completed</span></td>
-                <td><button class="btn btn-ghost btn-sm" onclick="showToast('Record opened')">View</button></td>
-              </tr>
-              <tr>
-                <td><div class="td-name">Grace Reyes</div><div class="td-sub">Patient #DRD-00109</div></td>
-                <td>Dr. Maria Santos</td>
-                <td>2:00 PM</td>
-                <td>Diabetes management</td>
-                <td><span class="badge badge-blue">Confirmed</span></td>
-                <td><button class="btn btn-ghost btn-sm" onclick="showToast('Record opened')">View</button></td>
-              </tr>
+            <tbody id="recentApptBody">
+              <tr><td colspan="6" style="text-align:center;color:var(--gray);padding:20px;">Loading…</td></tr>
             </tbody>
           </table>
         </div>
@@ -459,56 +527,46 @@
 
       <!-- ── QUEUE MONITOR ── -->
       <div class="view" id="view-queue">
-        <div class="queue-monitor-grid" style="margin-bottom:20px;">
-          <!-- Dr. Santos -->
-          <div class="queue-doc-card">
-            <div class="qdoc-header">
-              <div class="qdoc-av" style="background:var(--crimson);">MS</div>
-              <div><div class="qdoc-name">Dr. Maria Santos</div><div class="qdoc-spec">Internal Medicine</div></div>
-              <span class="badge badge-crimson qdoc-stat" style="margin-left:auto;">4 waiting</span>
-            </div>
-            <div class="qdoc-list">
-              <div class="qdoc-item"><div class="qdoc-num active">Q3</div><div><div class="qdoc-pname">Ana Rivera</div><div class="qdoc-ptime">10:30 AM · In session</div></div><span class="badge badge-crimson" style="margin-left:auto;font-size:9px;">NOW</span></div>
-              <div class="qdoc-item"><div class="qdoc-num">Q4</div><div><div class="qdoc-pname">Ben Marcos</div><div class="qdoc-ptime">11:00 AM · Next</div></div></div>
-              <div class="qdoc-item"><div class="qdoc-num">Q5</div><div><div class="qdoc-pname">Clara Tan</div><div class="qdoc-ptime">11:30 AM · Waiting</div></div></div>
-              <div class="qdoc-item"><div class="qdoc-num">Q6</div><div><div class="qdoc-pname">David Reyes</div><div class="qdoc-ptime">12:00 PM · Waiting</div></div></div>
-            </div>
-          </div>
-          <!-- Dr. dela Cruz -->
-          <div class="queue-doc-card">
-            <div class="qdoc-header">
-              <div class="qdoc-av" style="background:var(--green);">JC</div>
-              <div><div class="qdoc-name">Dr. Juan dela Cruz</div><div class="qdoc-spec">Pediatrics</div></div>
-              <span class="badge badge-yellow qdoc-stat" style="margin-left:auto;">3 waiting</span>
-            </div>
-            <div class="qdoc-list">
-              <div class="qdoc-item"><div class="qdoc-num active">Q2</div><div><div class="qdoc-pname">Fatima Lim</div><div class="qdoc-ptime">10:00 AM · In session</div></div><span class="badge badge-crimson" style="margin-left:auto;font-size:9px;">NOW</span></div>
-              <div class="qdoc-item"><div class="qdoc-num">Q3</div><div><div class="qdoc-pname">Gab Santos</div><div class="qdoc-ptime">10:30 AM · Next</div></div></div>
-              <div class="qdoc-item"><div class="qdoc-num">Q4</div><div><div class="qdoc-pname">Hana Cruz</div><div class="qdoc-ptime">11:00 AM · Waiting</div></div></div>
-            </div>
-          </div>
-          <!-- Dr. Reyes -->
-          <div class="queue-doc-card">
-            <div class="qdoc-header">
-              <div class="qdoc-av" style="background:#805AD5;">AR</div>
-              <div><div class="qdoc-name">Dr. Ana Reyes</div><div class="qdoc-spec">OB-Gynecology</div></div>
-              <span class="badge badge-yellow qdoc-stat" style="margin-left:auto;">3 waiting</span>
-            </div>
-            <div class="qdoc-list">
-              <div class="qdoc-item"><div class="qdoc-num active">Q1</div><div><div class="qdoc-pname">Isabel Torres</div><div class="qdoc-ptime">9:00 AM · In session</div></div><span class="badge badge-crimson" style="margin-left:auto;font-size:9px;">NOW</span></div>
-              <div class="qdoc-item"><div class="qdoc-num">Q2</div><div><div class="qdoc-pname">Julie Mendez</div><div class="qdoc-ptime">9:30 AM · Next</div></div></div>
-              <div class="qdoc-item"><div class="qdoc-num">Q3</div><div><div class="qdoc-pname">Karen Aquino</div><div class="qdoc-ptime">10:00 AM · Waiting</div></div></div>
-            </div>
-          </div>
+        <div class="queue-monitor-grid" id="queueMonitorGrid" style="margin-bottom:20px;">
+          <div style="color:var(--gray);font-size:14px;padding:20px;grid-column:1/-1;">Loading queue…</div>
         </div>
         <div class="card">
           <div class="card-title">Queue Actions</div>
           <p style="font-size:14px;color:var(--gray);margin-bottom:16px;">Manually adjust queue order or add walk-in patients to an active queue.</p>
           <div style="display:flex;gap:10px;flex-wrap:wrap;">
-            <button class="btn btn-dark btn-sm" onclick="openModal('walkin')">+ Add Walk-In Patient</button>
-            <button class="btn btn-ghost btn-sm" onclick="showToast('Queue report exported')">Export Queue Report</button>
-            <button class="btn btn-ghost btn-sm" onclick="showToast('Queue refreshed')">Refresh All Queues</button>
+            <button class="btn btn-dark btn-sm" onclick="openWalkinModal()">+ Add Walk-In Patient</button>
+            <button class="btn btn-ghost btn-sm" onclick="loadQueueMonitor()">⟳ Refresh All Queues</button>
           </div>
+        </div>
+      </div>
+
+      <!-- ── CHECK-IN ── -->
+      <div class="view" id="view-checkin">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
+          <div>
+            <div style="font-family:'Montserrat',sans-serif;font-weight:800;font-size:18px;">Today's Check-In</div>
+            <div id="checkinDateLabel" style="font-size:13px;color:var(--gray);margin-top:3px;">Loading…</div>
+          </div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <button class="btn btn-ghost btn-sm" onclick="loadCheckinView()">⟳ Refresh</button>
+            <button class="btn btn-dark btn-sm" onclick="openWalkinModal()">+ Add Walk-In</button>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;" id="checkinFilters">
+          <button class="btn btn-dark btn-sm" onclick="filterCheckin(this,'all')">All</button>
+          <button class="btn btn-ghost btn-sm" onclick="filterCheckin(this,'Confirmed')">Confirmed</button>
+          <button class="btn btn-ghost btn-sm" onclick="filterCheckin(this,'Pending')">Pending</button>
+          <button class="btn btn-ghost btn-sm" onclick="filterCheckin(this,'Checked In')">Checked In</button>
+        </div>
+        <div class="card" style="overflow-x:auto;">
+          <table class="table" id="checkinTable">
+            <thead>
+              <tr><th>Patient</th><th>Type</th><th>Doctor</th><th>Time</th><th>Purpose</th><th>Status</th><th>Action</th></tr>
+            </thead>
+            <tbody id="checkinBody">
+              <tr><td colspan="7" style="text-align:center;color:var(--gray);padding:32px;">Loading…</td></tr>
+            </tbody>
+          </table>
         </div>
       </div>
 
@@ -519,6 +577,7 @@
             All Appointments
             <div style="display:flex;gap:8px;">
               <input class="finput" style="width:200px;padding:8px 12px;font-size:13px;" placeholder="Search by patient…" oninput="searchAppts(this.value)">
+              <button class="btn btn-ghost btn-sm" onclick="generateCSV()">Export CSV</button>
               <button class="btn btn-green btn-sm" onclick="openModal('appt')">+ New</button>
             </div>
           </div>
@@ -528,18 +587,19 @@
             <button class="btn btn-ghost btn-sm" onclick="filterAdminAppts(this,'Completed')">Completed</button>
             <button class="btn btn-ghost btn-sm" onclick="filterAdminAppts(this,'Pending')">Pending</button>
             <button class="btn btn-ghost btn-sm" onclick="filterAdminAppts(this,'Cancelled')">Cancelled</button>
+            <button class="btn btn-ghost btn-sm" onclick="filterAdminAppts(this,'In Session')">In Session</button>
           </div>
           <table class="table" id="adminApptTable">
             <thead>
               <tr><th>Patient</th><th>Doctor</th><th>Date &amp; Time</th><th>Purpose</th><th>Status</th><th>Actions</th></tr>
             </thead>
             <tbody id="adminApptBody">
-              <tr data-status="In Session"><td><div class="td-name">Ana Rivera</div><div class="td-sub">#DRD-00042</div></td><td>Dr. M. Santos</td><td>May 27 · 10:30 AM</td><td>Hypertension follow-up</td><td><span class="badge badge-crimson">In Session</span></td><td><button class="btn btn-ghost btn-sm" onclick="showToast('Record opened')">Edit</button></td></tr>
-              <tr data-status="Confirmed"><td><div class="td-name">Ben Marcos</div><div class="td-sub">#DRD-00078</div></td><td>Dr. M. Santos</td><td>May 27 · 11:00 AM</td><td>Chest pain</td><td><span class="badge badge-yellow">Confirmed</span></td><td><button class="btn btn-ghost btn-sm" onclick="showToast('Record opened')">Edit</button></td></tr>
-              <tr data-status="Completed"><td><div class="td-name">Eva Gomez</div><div class="td-sub">#DRD-00021</div></td><td>Dr. A. Reyes</td><td>May 27 · 10:00 AM</td><td>Prenatal 28wk</td><td><span class="badge badge-green">Completed</span></td><td><button class="btn btn-ghost btn-sm" onclick="showToast('Record opened')">View</button></td></tr>
-              <tr data-status="Completed"><td><div class="td-name">Felix Uy</div><div class="td-sub">#DRD-00055</div></td><td>Dr. J. dela Cruz</td><td>May 27 · 9:30 AM</td><td>Vaccination</td><td><span class="badge badge-green">Completed</span></td><td><button class="btn btn-ghost btn-sm" onclick="showToast('Record opened')">View</button></td></tr>
-              <tr data-status="Pending"><td><div class="td-name">Grace Reyes</div><div class="td-sub">#DRD-00109</div></td><td>Dr. M. Santos</td><td>May 27 · 2:00 PM</td><td>Diabetes management</td><td><span class="badge badge-blue">Pending</span></td><td><button class="btn btn-ghost btn-sm" onclick="showToast('Status updated')">Edit</button></td></tr>
-              <tr data-status="Cancelled"><td><div class="td-name">Hector Ramos</div><div class="td-sub">#DRD-00091</div></td><td>Dr. A. Reyes</td><td>May 27 · 1:00 PM</td><td>Annual check</td><td><span class="badge badge-crimson">Cancelled</span></td><td><button class="btn btn-ghost btn-sm" onclick="showToast('Reschedule dialog opened')">Reschedule</button></td></tr>
+              <tr data-status="In Session"><td><div class="td-name">Ana Rivera</div><div class="td-sub">#DRD-00042</div></td><td>Dr. M. Santos</td><td>May 27 · 10:30 AM</td><td>Hypertension follow-up</td><td><span class="badge badge-crimson">In Session</span></td><td><button class="btn btn-ghost btn-sm" onclick="openApptDetail(this)">View</button></td></tr>
+              <tr data-status="Confirmed"><td><div class="td-name">Ben Marcos</div><div class="td-sub">#DRD-00078</div></td><td>Dr. M. Santos</td><td>May 27 · 11:00 AM</td><td>Chest pain</td><td><span class="badge badge-yellow">Confirmed</span></td><td><button class="btn btn-ghost btn-sm" onclick="openApptDetail(this)">Edit</button></td></tr>
+              <tr data-status="Completed"><td><div class="td-name">Eva Gomez</div><div class="td-sub">#DRD-00021</div></td><td>Dr. A. Reyes</td><td>May 27 · 10:00 AM</td><td>Prenatal 28wk</td><td><span class="badge badge-green">Completed</span></td><td><button class="btn btn-ghost btn-sm" onclick="openApptDetail(this)">View</button></td></tr>
+              <tr data-status="Completed"><td><div class="td-name">Felix Uy</div><div class="td-sub">#DRD-00055</div></td><td>Dr. J. dela Cruz</td><td>May 27 · 9:30 AM</td><td>Vaccination</td><td><span class="badge badge-green">Completed</span></td><td><button class="btn btn-ghost btn-sm" onclick="openApptDetail(this)">View</button></td></tr>
+              <tr data-status="Pending"><td><div class="td-name">Grace Reyes</div><div class="td-sub">#DRD-00109</div></td><td>Dr. M. Santos</td><td>May 27 · 2:00 PM</td><td>Diabetes management</td><td><span class="badge badge-blue">Pending</span></td><td><button class="btn btn-ghost btn-sm" onclick="openApptDetail(this)">Edit</button></td></tr>
+              <tr data-status="Cancelled"><td><div class="td-name">Hector Ramos</div><div class="td-sub">#DRD-00091</div></td><td>Dr. A. Reyes</td><td>May 27 · 1:00 PM</td><td>Annual check</td><td><span class="badge badge-crimson">Cancelled</span></td><td><button class="btn btn-ghost btn-sm" onclick="openApptDetail(this)">Reschedule</button></td></tr>
             </tbody>
           </table>
         </div>
@@ -550,53 +610,12 @@
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
           <div>
             <div style="font-family:'Montserrat',sans-serif;font-weight:800;font-size:18px;">Doctor Management</div>
-            <div style="font-size:13px;color:var(--gray);margin-top:3px;">3 active physicians</div>
+            <div id="docCountText" style="font-size:13px;color:var(--gray);margin-top:3px;">Loading…</div>
           </div>
-          <button class="btn btn-green" onclick="openModal('doctor')">+ Add Doctor</button>
+          <button class="btn btn-green" onclick="openAddDoctorModal()">+ Add Doctor</button>
         </div>
-        <div class="doctor-grid">
-          <div class="doc-manage-card">
-            <div class="doc-manage-header"><div class="doc-manage-av" style="background:var(--crimson);">MS</div></div>
-            <div class="doc-manage-body">
-              <div class="doc-manage-spec">Internal Medicine</div>
-              <div class="doc-manage-name">Dr. Maria C. Santos</div>
-              <div class="doc-manage-sched">Mon–Fri · 9AM–5PM<br>PRC License: PH-MD-00482</div>
-              <div style="margin-bottom:12px;"><span class="badge badge-green">Active</span></div>
-              <div class="doc-manage-actions">
-                <button class="btn btn-ghost btn-sm" onclick="openModal('doctor')">Edit</button>
-                <button class="btn btn-ghost btn-sm" onclick="showToast('Schedule updated')">Schedule</button>
-                <button class="btn btn-sm" style="background:rgba(211,26,34,0.1);color:var(--crimson);border:none;padding:7px 12px;border-radius:6px;cursor:pointer;font-family:'Montserrat',sans-serif;font-weight:700;font-size:11px;" onclick="showToast('Doctor set to unavailable')">Disable</button>
-              </div>
-            </div>
-          </div>
-          <div class="doc-manage-card">
-            <div class="doc-manage-header"><div class="doc-manage-av" style="background:var(--green);">JC</div></div>
-            <div class="doc-manage-body">
-              <div class="doc-manage-spec">Pediatrics</div>
-              <div class="doc-manage-name">Dr. Juan B. dela Cruz</div>
-              <div class="doc-manage-sched">Mon, Wed, Fri · 8AM–4PM<br>PRC License: PH-MD-00291</div>
-              <div style="margin-bottom:12px;"><span class="badge badge-green">Active</span></div>
-              <div class="doc-manage-actions">
-                <button class="btn btn-ghost btn-sm" onclick="openModal('doctor')">Edit</button>
-                <button class="btn btn-ghost btn-sm" onclick="showToast('Schedule updated')">Schedule</button>
-                <button class="btn btn-sm" style="background:rgba(211,26,34,0.1);color:var(--crimson);border:none;padding:7px 12px;border-radius:6px;cursor:pointer;font-family:'Montserrat',sans-serif;font-weight:700;font-size:11px;" onclick="showToast('Doctor set to unavailable')">Disable</button>
-              </div>
-            </div>
-          </div>
-          <div class="doc-manage-card">
-            <div class="doc-manage-header"><div class="doc-manage-av" style="background:#805AD5;">AR</div></div>
-            <div class="doc-manage-body">
-              <div class="doc-manage-spec">OB-Gynecology</div>
-              <div class="doc-manage-name">Dr. Ana P. Reyes</div>
-              <div class="doc-manage-sched">Tue, Thu, Sat · 9AM–3PM<br>PRC License: PH-MD-00378</div>
-              <div style="margin-bottom:12px;"><span class="badge badge-green">Active</span></div>
-              <div class="doc-manage-actions">
-                <button class="btn btn-ghost btn-sm" onclick="openModal('doctor')">Edit</button>
-                <button class="btn btn-ghost btn-sm" onclick="showToast('Schedule updated')">Schedule</button>
-                <button class="btn btn-sm" style="background:rgba(211,26,34,0.1);color:var(--crimson);border:none;padding:7px 12px;border-radius:6px;cursor:pointer;font-family:'Montserrat',sans-serif;font-weight:700;font-size:11px;" onclick="showToast('Doctor set to unavailable')">Disable</button>
-              </div>
-            </div>
-          </div>
+        <div class="doctor-grid" id="doctorGrid">
+          <div style="color:var(--gray);font-size:14px;padding:20px;">Loading doctors…</div>
         </div>
       </div>
 
@@ -605,7 +624,7 @@
         <div class="card">
           <div class="card-title">
             Patient Registry
-            <input class="finput" style="width:220px;padding:8px 12px;font-size:13px;" placeholder="Search patients…">
+            <input class="finput" style="width:220px;padding:8px 12px;font-size:13px;" placeholder="Search patients…" oninput="searchPatients(this.value)">
           </div>
           <table class="table">
             <thead><tr><th>Patient</th><th>Contact</th><th>Last Visit</th><th>Total Visits</th><th>Status</th><th></th></tr></thead>
@@ -630,8 +649,13 @@
     <button class="modal-close" onclick="closeModal('appt')">×</button>
     <div class="modal-title">New Appointment</div>
     <div class="modal-sub">Manually create an appointment for a patient.</div>
+    <datalist id="patientDatalist">
+      <option value="Ana Rivera"><option value="Ben Marcos"><option value="Clara Tan">
+      <option value="David Reyes"><option value="Eva Gomez"><option value="Felix Uy">
+      <option value="Grace Reyes"><option value="Hector Ramos"><option value="Isabel Torres">
+    </datalist>
     <div class="frow">
-      <div class="fgroup"><label class="flabel">Patient Name</label><input class="finput" placeholder="Search patient…"></div>
+      <div class="fgroup"><label class="flabel">Patient Name</label><input class="finput" id="newApptPatient" list="patientDatalist" placeholder="Search patient…"></div>
       <div class="fgroup"><label class="flabel">Doctor</label>
         <select class="finput"><option>Dr. Maria Santos — Internal Med</option><option>Dr. Juan dela Cruz — Pediatrics</option><option>Dr. Ana Reyes — OB-GYN</option></select>
       </div>
@@ -656,28 +680,46 @@
 <div class="modal-overlay" id="modal-doctor">
   <div class="modal">
     <button class="modal-close" onclick="closeModal('doctor')">×</button>
-    <div class="modal-title">Doctor Profile</div>
-    <div class="modal-sub">Add or update a physician's information.</div>
+    <div class="modal-title" id="docModalTitle">Add Doctor</div>
+    <div class="modal-sub">Fill in the physician's information to add them to the system.</div>
+    <input type="hidden" id="doc-id">
+    <div class="fgroup" style="display:flex;align-items:center;gap:16px;margin-bottom:20px;">
+      <div id="docPhotoPreview" onclick="document.getElementById('docPhotoInput').click()" style="width:72px;height:72px;border-radius:50%;background:var(--light);display:flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;border:2px dashed rgba(0,0,0,0.15);flex-shrink:0;background-size:cover;background-position:center;" title="Click to upload photo">
+        <svg width="22" height="22" fill="none" stroke="var(--gray)" stroke-width="1.8" stroke-linecap="round" viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+      </div>
+      <input type="file" id="docPhotoInput" accept="image/jpeg,image/png,image/webp" style="display:none" onchange="previewDocPhoto(this.files[0])">
+      <div>
+        <div style="font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;color:var(--dark);margin-bottom:3px;">Doctor Photo</div>
+        <div style="font-size:12px;color:var(--gray);">Click circle to upload. JPG/PNG, max 5 MB.</div>
+      </div>
+    </div>
     <div class="frow">
-      <div class="fgroup"><label class="flabel">First Name</label><input class="finput" value="Maria" placeholder="First name"></div>
-      <div class="fgroup"><label class="flabel">Last Name</label><input class="finput" value="Santos" placeholder="Last name"></div>
+      <div class="fgroup"><label class="flabel">First Name</label><input class="finput" id="doc-fname" placeholder="First name"></div>
+      <div class="fgroup"><label class="flabel">Last Name</label><input class="finput" id="doc-lname" placeholder="Last name"></div>
     </div>
     <div class="fgroup"><label class="flabel">Specialty</label>
-      <select class="finput"><option selected>Internal Medicine</option><option>Pediatrics</option><option>OB-Gynecology</option><option>General Practice</option><option>Surgery</option></select>
+      <select class="finput" id="doc-specialty">
+        <option value="">Select specialty</option>
+        <option>Internal Medicine</option><option>Pediatrics</option><option>OB-Gynecology</option>
+        <option>General Practice</option><option>Surgery</option><option>Cardiology</option>
+        <option>Dermatology</option><option>ENT</option><option>Neurology</option><option>Orthopedics</option>
+      </select>
     </div>
-    <div class="fgroup"><label class="flabel">PRC License Number</label><input class="finput" value="PH-MD-00482" placeholder="PH-MD-XXXXX"></div>
-    <div class="fgroup"><label class="flabel">Email Address</label><input class="finput" type="email" value="santos@delosreyes.com"></div>
-    <div class="fgroup"><label class="flabel">Contact Number</label><input class="finput" value="0917-123-0001"></div>
+    <div class="fgroup"><label class="flabel">PRC License Number</label><input class="finput" id="doc-prc" placeholder="PH-MD-XXXXX"></div>
     <div class="frow">
-      <div class="fgroup"><label class="flabel">Work Days</label><input class="finput" value="Mon, Tue, Wed, Thu, Fri" placeholder="e.g. Mon, Wed, Fri"></div>
-      <div class="fgroup"><label class="flabel">Work Hours</label><input class="finput" value="9:00 AM – 5:00 PM"></div>
+      <div class="fgroup"><label class="flabel">Work Days</label><input class="finput" id="doc-workdays" placeholder="e.g. Mon, Wed, Fri"></div>
+      <div class="fgroup"><label class="flabel">Work Hours</label><input class="finput" id="doc-workhours" placeholder="e.g. 9:00 AM – 5:00 PM"></div>
     </div>
     <div class="fgroup"><label class="flabel">Status</label>
-      <select class="finput"><option>Active</option><option>Unavailable</option><option>On Leave</option></select>
+      <select class="finput" id="doc-status">
+        <option value="active">Active</option>
+        <option value="unavailable">Unavailable</option>
+        <option value="on_leave">On Leave</option>
+      </select>
     </div>
     <div class="modal-actions">
       <button class="btn btn-ghost btn-sm" onclick="closeModal('doctor')">Cancel</button>
-      <button class="btn btn-green btn-sm" onclick="saveDoctor()">Save Doctor</button>
+      <button class="btn btn-green btn-sm" id="docSaveBtn" onclick="saveDoctor()">Save Doctor</button>
     </div>
   </div>
 </div>
@@ -686,51 +728,330 @@
   <div class="modal">
     <button class="modal-close" onclick="closeModal('walkin')">×</button>
     <div class="modal-title">Add Walk-In Patient</div>
-    <div class="modal-sub">Add an unscheduled patient to an active doctor's queue.</div>
-    <div class="fgroup"><label class="flabel">Patient Name</label><input class="finput" placeholder="Full name…"></div>
-    <div class="fgroup"><label class="flabel">Contact Number</label><input class="finput" placeholder="0917-…"></div>
-    <div class="fgroup"><label class="flabel">Assign to Doctor</label>
-      <select class="finput"><option>Dr. Maria Santos (4 in queue)</option><option>Dr. Juan dela Cruz (3 in queue)</option><option>Dr. Ana Reyes (3 in queue)</option></select>
+    <div class="modal-sub">Creates an appointment and immediately places the patient in the doctor's live queue.</div>
+    <div class="fgroup"><label class="flabel">Patient</label>
+      <select class="finput" id="wi-patient"><option value="">Loading patients…</option></select>
     </div>
-    <div class="fgroup"><label class="flabel">Reason for Visit</label><textarea class="finput" placeholder="Chief complaint…"></textarea></div>
+    <div class="fgroup"><label class="flabel">Assign to Doctor</label>
+      <select class="finput" id="wi-doctor"><option value="">Loading doctors…</option></select>
+    </div>
+    <div class="fgroup"><label class="flabel">Reason for Visit</label>
+      <textarea class="finput" id="wi-purpose" placeholder="Chief complaint…" style="min-height:80px;"></textarea>
+    </div>
     <div class="modal-actions">
       <button class="btn btn-ghost btn-sm" onclick="closeModal('walkin')">Cancel</button>
-      <button class="btn btn-crimson btn-sm" onclick="addWalkin()">Add to Queue</button>
+      <button class="btn btn-crimson btn-sm" id="walkinSubmitBtn" onclick="addWalkin()">Add to Queue</button>
     </div>
+  </div>
+</div>
+
+<!-- ── AVAILABILITY CALENDAR MODAL ── -->
+<div class="modal-overlay" id="modal-avail">
+  <div class="modal avail-modal">
+    <button class="modal-close" onclick="closeModal('avail')">×</button>
+    <div class="modal-title">Manage Availability</div>
+    <div class="modal-sub">Block individual dates or date ranges. Blocked dates will be greyed out in patient booking.</div>
+    <div class="avail-doctor-label">
+      <div class="avail-doc-av" id="availDocAv" style="background:var(--crimson);">MS</div>
+      <div>
+        <div class="avail-doc-name" id="availDocName">Dr. Maria C. Santos</div>
+        <div class="avail-doc-spec" id="availDocSpec">Internal Medicine</div>
+      </div>
+    </div>
+
+    <!-- Calendar -->
+    <div class="avail-cal-header">
+      <button class="avail-cal-nav" onclick="changeAvailMonth(-1)">‹</button>
+      <div class="avail-cal-title" id="availCalTitle">June 2026</div>
+      <button class="avail-cal-nav" onclick="changeAvailMonth(1)">›</button>
+    </div>
+    <div class="avail-cal-grid" id="availCalDayLabels">
+      <div class="avail-cal-day-label">Sun</div>
+      <div class="avail-cal-day-label">Mon</div>
+      <div class="avail-cal-day-label">Tue</div>
+      <div class="avail-cal-day-label">Wed</div>
+      <div class="avail-cal-day-label">Thu</div>
+      <div class="avail-cal-day-label">Fri</div>
+      <div class="avail-cal-day-label">Sat</div>
+    </div>
+    <div class="avail-cal-grid" id="availCalGrid"></div>
+
+    <div class="avail-legend">
+      <div class="avail-legend-item"><div class="avail-legend-dot" style="background:var(--light);border:1px solid rgba(0,0,0,0.1);"></div> Available</div>
+      <div class="avail-legend-item"><div class="avail-legend-dot" style="background:rgba(211,26,34,0.15);"></div> Blocked</div>
+      <div class="avail-legend-item"><div class="avail-legend-dot" style="background:rgba(0,168,89,0.12);"></div> Today</div>
+    </div>
+
+    <!-- Range block -->
+    <div style="font-family:'Montserrat',sans-serif;font-weight:700;font-size:12px;letter-spacing:0.08em;text-transform:uppercase;color:var(--gray);margin-bottom:10px;">Block a Date Range</div>
+    <div class="avail-range-row">
+      <div class="fgroup" style="margin-bottom:0;"><label class="flabel">From</label><input class="finput" type="date" id="availRangeStart"></div>
+      <div class="fgroup" style="margin-bottom:0;"><label class="flabel">To</label><input class="finput" type="date" id="availRangeEnd"></div>
+    </div>
+    <div class="fgroup avail-reason" style="margin-top:12px;">
+      <label class="flabel">Reason (Optional)</label>
+      <input class="finput" id="availReason" placeholder="e.g. Annual Leave, Conference…">
+    </div>
+    <button class="btn btn-crimson btn-sm" style="margin-bottom:20px;" onclick="blockRange()">Block This Range</button>
+
+    <!-- Current blocks list -->
+    <div style="font-family:'Montserrat',sans-serif;font-weight:700;font-size:12px;letter-spacing:0.08em;text-transform:uppercase;color:var(--gray);margin-bottom:8px;">Currently Blocked Dates</div>
+    <div class="avail-blocked-list" id="availBlockedList">
+      <div class="avail-no-blocks" id="availNoBlocks">No dates blocked.</div>
+    </div>
+
+    <!-- Reserved slots info -->
+    <div style="font-family:'Montserrat',sans-serif;font-weight:700;font-size:12px;letter-spacing:0.08em;text-transform:uppercase;color:var(--gray);margin-bottom:10px;">Reserved Slots (Per Day)</div>
+    <div class="reserved-row">
+      <div class="reserved-slot">
+        <div class="reserved-slot-label">Slot 1</div>
+        <div class="reserved-slot-val">Emergency / Walk-in</div>
+        <div class="reserved-slot-desc">For urgent same-day cases</div>
+      </div>
+      <div class="reserved-slot">
+        <div class="reserved-slot-label">Slot 2</div>
+        <div class="reserved-slot-val">Admin Override</div>
+        <div class="reserved-slot-desc">For rescheduled patients &amp; exceptions</div>
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn btn-ghost btn-sm" onclick="closeModal('avail')">Close</button>
+      <button class="btn btn-green btn-sm" onclick="saveAvailability()">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── APPOINTMENT DETAIL MODAL ── -->
+<div class="modal-overlay" id="modal-apptDetail">
+  <div class="modal" style="max-width:480px;">
+    <button class="modal-close" onclick="closeModal('apptDetail')">×</button>
+    <div class="modal-title" id="detailModalTitle">Appointment Detail</div>
+    <div class="modal-sub" id="detailModalSub"></div>
+    <div id="detailRows" style="margin-bottom:20px;"></div>
+    <div class="modal-actions" id="detailActions"></div>
+  </div>
+</div>
+
+<!-- ── RESCHEDULE MODAL ── -->
+<div class="modal-overlay" id="modal-reschedule">
+  <div class="modal" style="max-width:440px;">
+    <button class="modal-close" onclick="closeModal('reschedule')">×</button>
+    <div class="modal-title">Reschedule Appointment</div>
+    <div class="modal-sub" id="reschedModalSub">For: Patient</div>
+    <div class="frow">
+      <div class="fgroup"><label class="flabel">New Date</label><input class="finput" type="date" id="reschedDate"></div>
+      <div class="fgroup"><label class="flabel">New Time</label>
+        <select class="finput" id="reschedTime">
+          <option>9:00 AM</option><option>9:30 AM</option><option>10:00 AM</option>
+          <option>10:30 AM</option><option>11:00 AM</option><option>2:00 PM</option><option>3:00 PM</option>
+        </select>
+      </div>
+    </div>
+    <div class="fgroup"><label class="flabel">Reason for Reschedule</label><textarea class="finput" id="reschedReason" placeholder="Reason…"></textarea></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost btn-sm" onclick="closeModal('reschedule')">Cancel</button>
+      <button class="btn btn-green btn-sm" onclick="confirmReschedule()">Confirm Reschedule</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── MOBILE DRAWER ── -->
+<div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()"></div>
+<div class="sidebar-drawer" id="sidebarDrawer">
+  <div class="sidebar-brand" style="padding:16px 18px;">
+    <img src="brand_assets/brand_logo.jpg" alt="Logo">
+    <div><span class="sb-name">DRD Clinic</span><span class="sb-sub">Admin Panel</span></div>
+    <button onclick="closeDrawer()" style="margin-left:auto;background:none;border:none;cursor:pointer;color:rgba(255,255,255,0.4);font-size:22px;line-height:1;padding:0 4px;">×</button>
+  </div>
+  <div class="sidebar-section">Overview</div>
+  <ul class="sidebar-nav">
+    <li><a onclick="showView('overview');closeDrawer()">
+      <svg fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      Dashboard
+    </a></li>
+    <li><a onclick="showView('queue');closeDrawer()">
+      <svg fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      Queue Monitor
+    </a></li>
+  </ul>
+  <div class="sidebar-section">Management</div>
+  <ul class="sidebar-nav">
+    <li><a onclick="showView('checkin');closeDrawer()">
+      <svg fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><polyline points="16 11 18 13 22 9"/></svg>
+      Check-In
+    </a></li>
+    <li><a onclick="showView('appointments');closeDrawer()">
+      <svg fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      Appointments
+    </a></li>
+    <li><a onclick="showView('doctors');closeDrawer()">
+      <svg fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      Doctors
+    </a></li>
+    <li><a onclick="showView('patients');closeDrawer()">
+      <svg fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="23" y1="11" x2="17" y2="11"/><line x1="20" y1="8" x2="20" y2="14"/></svg>
+      Patients
+    </a></li>
+  </ul>
+  <div style="padding:10px 10px;margin-top:auto;border-top:1px solid rgba(255,255,255,0.06);">
+    <a style="display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:8px;font-family:'Montserrat',sans-serif;font-size:13px;font-weight:600;color:rgba(255,100,100,0.7);cursor:pointer;text-decoration:none;" onclick="doLogout()">
+      <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      Sign Out
+    </a>
   </div>
 </div>
 
 <div class="toast" id="toast"><div class="toast-dot"></div><span id="toastMsg">Done</span></div>
 
 <script>
-  function doAdminLogin() {
+  // ── AUTH ────────────────────────────────────────────────────────────────
+  document.addEventListener('keydown', e => {
+    if (e.key !== 'Enter') return;
+    if (document.getElementById('loginScreen')?.style.display !== 'none') { doAdminLogin(); return; }
+    if (document.getElementById('modal-walkin')?.classList.contains('open')) { addWalkin(); return; }
+    if (document.getElementById('modal-reschedule')?.classList.contains('open')) { confirmReschedule(); return; }
+  });
+
+  let _adminLoggingIn = false;
+  async function doAdminLogin() {
+    if (_adminLoggingIn) return;
     const email = document.getElementById('a-email').value.trim();
-    if (!email) { showToast('Please enter credentials'); return; }
+    const pass  = document.getElementById('a-pass').value;
+    if (!email || !pass) { showToast('Please enter your credentials'); return; }
+    const btn = document.getElementById('adminLoginBtn');
+    _adminLoggingIn = true;
+    btn.disabled = true;
+    btn.innerHTML = '<span style="display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,0.35);border-top-color:#fff;border-radius:50%;animation:spin 0.7s linear infinite;vertical-align:middle;"></span>&nbsp;Signing in…';
+    try {
+      const { data, error } = await db.auth.signInWithPassword({ email, password: pass });
+      if (error) throw error;
+      const { data: profile } = await db.from('profiles').select('*').eq('id', data.user.id).single();
+      if (profile?.role !== 'admin') {
+        await db.auth.signOut();
+        showToast('This portal is for admins only.');
+        btn.disabled = false; btn.textContent = 'Sign In to Admin Panel';
+        _adminLoggingIn = false; return;
+      }
+      localStorage.setItem('drd-role', 'admin');
+      localStorage.setItem('drd-uid',  data.user.id);
+      initAdminSession(profile);
+    } catch(e) {
+      showToast(e.message || 'Invalid credentials');
+      btn.disabled = false; btn.textContent = 'Sign In to Admin Panel';
+    } finally {
+      _adminLoggingIn = false;
+    }
+  }
+
+  function initAdminSession(profile) {
+    const name = ((profile?.first_name||'') + ' ' + (profile?.last_name||'')).trim() || 'Admin';
+    document.querySelector('.admin-sb-name').textContent = name;
     document.getElementById('loginScreen').style.display = 'none';
     document.getElementById('adminApp').classList.add('active');
-    showToast('Welcome, Admin! Clinic dashboard loaded.');
+    showToast('Welcome, ' + name + '! Clinic dashboard loaded.');
+    buildDynamicStats();
+    loadNotifications();
+    startQueueAutoRefresh();
+    loadAdminData();
   }
-  function doLogout() {
+
+  async function loadAdminData() {
+    try {
+      const [appts, patients, doctors] = await Promise.all([
+        sbGetAllAppointments(),
+        sbGetPatients(),
+        sbGetAllDoctors(),
+      ]);
+      renderAdminAppointments(appts);
+      renderAdminPatients(patients);
+      _adminDoctors = doctors || [];
+      renderAdminDoctors(_adminDoctors);
+    } catch(e) { console.error('Admin data load error:', e); }
+  }
+
+  function renderAdminAppointments(appts) {
+    const tbody = document.getElementById('adminApptBody');
+    if (!tbody || !appts?.length) return;
+    tbody.innerHTML = appts.map(a => {
+      const p    = a.patients;
+      const d    = a.doctors;
+      const pname = p ? p.first_name + ' ' + p.last_name : '—';
+      const dname = d ? 'Dr. ' + d.first_name[0] + '. ' + d.last_name : '—';
+      const bc   = a.status==='Completed'?'badge-green':a.status==='Cancelled'||a.status==='No-Show'?'badge-crimson':a.status==='In Session'?'badge-crimson':a.status==='Pending'?'badge-blue':'badge-yellow';
+      return `<tr data-status="${a.status}" data-id="${a.id}">
+        <td><div class="td-name">${pname}</div><div class="td-sub">#${a.id.slice(0,8).toUpperCase()}</div></td>
+        <td>${dname}</td>
+        <td>${a.date} · ${a.time}</td>
+        <td>${a.purpose||'—'}</td>
+        <td><span class="badge ${bc}">${a.status}</span></td>
+        <td><button class="btn btn-ghost btn-sm" onclick="openApptDetail(this)">View</button></td>
+      </tr>`;
+    }).join('');
+  }
+
+  function renderAdminPatients(patients) {
+    const tbody = document.querySelector('#view-patients .table tbody');
+    if (!tbody || !patients?.length) return;
+    tbody.innerHTML = patients.map(p => `<tr>
+      <td><div style="display:flex;align-items:center;gap:10px;">
+        ${p.photo_url ? `<img src="${p.photo_url}" style="width:32px;height:32px;border-radius:50%;object-fit:cover;flex-shrink:0;">` : `<div style="width:32px;height:32px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;font-family:'Montserrat',sans-serif;font-weight:700;font-size:12px;color:#fff;flex-shrink:0;">${(p.first_name[0]||'') + (p.last_name[0]||'')}</div>`}
+        <div><div class="td-name">${p.first_name} ${p.last_name}</div><div class="td-sub">DOB: ${p.dob||'—'} · ${p.sex||'—'}</div></div>
+      </div></td>
+      <td>${p.contact||'—'}</td>
+      <td>—</td><td>—</td>
+      <td><span class="badge badge-green">Active</span></td>
+      <td><button class="btn btn-ghost btn-sm" onclick="showToast('Patient record opened')">View</button></td>
+    </tr>`).join('');
+  }
+
+  async function doLogout() {
+    localStorage.removeItem('drd-role');
+    localStorage.removeItem('drd-uid');
+    await db.auth.signOut();
     document.getElementById('adminApp').classList.remove('active');
     document.getElementById('loginScreen').style.display = 'flex';
   }
 
+  // ── NAVIGATION ──────────────────────────────────────────────────────────
   const viewTitles = {
-    'overview': 'Dashboard Overview',
-    'queue': 'Live Queue Monitor',
-    'appointments': 'Appointment Management',
-    'doctors': 'Doctor Management',
-    'patients': 'Patient Registry',
+    overview: 'Dashboard Overview',
+    queue: 'Live Queue Monitor',
+    checkin: 'Today\'s Check-In',
+    appointments: 'Appointment Management',
+    doctors: 'Doctor Management',
+    patients: 'Patient Registry',
   };
+
   function showView(id) {
     document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
     document.getElementById('view-' + id).classList.add('active');
-    document.querySelectorAll('.sidebar-nav a').forEach(a => a.classList.remove('active'));
-    const link = [...document.querySelectorAll('.sidebar-nav a')].find(a => a.getAttribute('onclick') === `showView('${id}')`);
-    if (link) link.classList.add('active');
+    document.querySelectorAll('.sidebar-nav a').forEach(a => {
+      a.classList.toggle('active', !!a.getAttribute('onclick')?.includes(`showView('${id}')`));
+    });
     document.getElementById('viewTitle').textContent = viewTitles[id] || id;
+    if (location.hash !== '#' + id) history.pushState(null, '', '#' + id);
+    if (id === 'overview') buildDynamicStats();
+    if (id === 'queue')    loadQueueMonitor();
+    if (id === 'checkin')  loadCheckinView();
   }
 
+  window.addEventListener('hashchange', () => {
+    const id = location.hash.slice(1);
+    if (id && viewTitles[id]) showView(id);
+  });
+
+  // ── DRAWER ──────────────────────────────────────────────────────────────
+  function openDrawer() {
+    document.getElementById('sidebarDrawer').classList.add('open');
+    document.getElementById('drawerOverlay').classList.add('open');
+  }
+  function closeDrawer() {
+    document.getElementById('sidebarDrawer').classList.remove('open');
+    document.getElementById('drawerOverlay').classList.remove('open');
+  }
+
+  // ── MODALS ──────────────────────────────────────────────────────────────
   function openModal(type) {
     document.getElementById('modal-' + type).classList.add('open');
   }
@@ -741,14 +1062,269 @@
     m.addEventListener('click', e => { if (e.target === m) m.classList.remove('open'); });
   });
 
-  function saveAppt() { closeModal('appt'); showToast('Appointment created successfully'); }
-  function saveDoctor() { closeModal('doctor'); showToast('Doctor profile saved'); }
-  function addWalkin() { closeModal('walkin'); showToast('Walk-in patient added to queue'); }
+  // ── APPOINTMENT DETAIL ──────────────────────────────────────────────────
+  let reschedTarget = null;
+
+  function openApptDetail(btn) {
+    const row = btn.closest('tr');
+    const cells = row.querySelectorAll('td');
+    const apptId  = row.dataset.id || '';
+    const patient  = cells[0].querySelector('.td-name')?.textContent || '';
+    const patientId = cells[0].querySelector('.td-sub')?.textContent || '';
+    const doctor   = cells[1].textContent.trim();
+    const datetime = cells[2].textContent.trim();
+    const purpose  = cells[3].textContent.trim();
+    const status   = cells[4].querySelector('.badge')?.textContent.trim() || '';
+
+    document.getElementById('detailModalTitle').textContent = patient;
+    document.getElementById('detailModalSub').textContent = patientId;
+
+    const pairs = [['Doctor', doctor], ['Date & Time', datetime], ['Purpose', purpose], ['Status', status]];
+    document.getElementById('detailRows').innerHTML = pairs.map(([k,v]) =>
+      `<div class="detail-row"><div class="detail-key">${k}</div><div class="detail-val">${v}</div></div>`
+    ).join('');
+
+    const safePatient = patient.replace(/'/g,"\\'");
+    const actions = document.getElementById('detailActions');
+    if (status === 'Cancelled') {
+      actions.innerHTML = `
+        <button class="btn btn-ghost btn-sm" onclick="closeModal('apptDetail')">Close</button>
+        <button class="btn btn-green btn-sm" onclick="closeModal('apptDetail');openRescheduleModal('${apptId}','${safePatient}')">Reschedule</button>`;
+    } else if (status === 'Completed' || status === 'No-Show') {
+      actions.innerHTML = `<button class="btn btn-green btn-sm" onclick="closeModal('apptDetail')">Close</button>`;
+    } else {
+      actions.innerHTML = `
+        <button class="btn btn-ghost btn-sm" onclick="closeModal('apptDetail')">Close</button>
+        <button class="btn btn-green btn-sm" style="margin-left:auto;" onclick="closeModal('apptDetail');openRescheduleModal('${apptId}','${safePatient}')">Reschedule</button>
+        <button class="btn btn-crimson btn-sm" onclick="cancelApptFromDetail('${apptId}','${safePatient}')">Cancel</button>`;
+    }
+
+    openModal('apptDetail');
+    logActivity('Viewed appointment: ' + patient);
+  }
+
+  async function cancelApptFromDetail(apptId, name) {
+    closeModal('apptDetail');
+    try {
+      const { error } = await db.from('appointments').update({ status: 'Cancelled' }).eq('id', apptId);
+      if (error) throw error;
+      showToast('Appointment for ' + name + ' cancelled');
+      logActivity('Cancelled appointment: ' + name);
+      loadNotifications();
+      await loadAdminData();
+      buildDynamicStats();
+    } catch(e) {
+      showToast('Cancel failed: ' + e.message);
+    }
+  }
+
+  function openRescheduleModal(apptId, name) {
+    reschedTarget = { id: apptId, name };
+    document.getElementById('reschedModalSub').textContent = 'For: ' + name;
+    document.getElementById('reschedDate').value = '';
+    document.getElementById('reschedReason').value = '';
+    const timeEl = document.getElementById('reschedTime');
+    if (timeEl) timeEl.value = '';
+    openModal('reschedule');
+  }
+
+  async function confirmReschedule() {
+    const date   = document.getElementById('reschedDate').value;
+    const time   = document.getElementById('reschedTime')?.value || '';
+    const reason = document.getElementById('reschedReason').value.trim();
+    if (!date) { showToast('Please select a new date'); return; }
+    if (!time) { showToast('Please select a new time'); return; }
+    const btn = document.querySelector('#modal-reschedule .btn-green');
+    if (btn) { btn.disabled = true; btn.textContent = 'Saving…'; }
+    try {
+      const updates = { date, time, status: 'Confirmed' };
+      if (reason) updates.notes = reason;
+      const { error } = await db.from('appointments').update(updates).eq('id', reschedTarget.id);
+      if (error) throw error;
+      closeModal('reschedule');
+      showToast('Rescheduled ' + reschedTarget.name + ' → ' + date + ' at ' + time);
+      logActivity('Rescheduled ' + reschedTarget.name + ' to ' + date);
+      await loadAdminData();
+      buildDynamicStats();
+    } catch(e) {
+      showToast('Reschedule failed: ' + e.message);
+      if (btn) { btn.disabled = false; btn.textContent = 'Confirm Reschedule'; }
+    }
+  }
+
+  // ── APPOINTMENTS ────────────────────────────────────────────────────────
+  function saveAppt() {
+    const patient = document.getElementById('newApptPatient').value.trim();
+    closeModal('appt');
+    showToast('Appointment created' + (patient ? ' for ' + patient : '') + ' successfully');
+    logActivity('Created appointment' + (patient ? ' for ' + patient : ''));
+  }
+
+  const AV_COLORS = ['#D31A22','#00A859','#805AD5','#E07B00','#0078C8','#B45309','#059669'];
+
+  function renderAdminDoctors(doctors) {
+    const grid = document.getElementById('doctorGrid');
+    const countEl = document.getElementById('docCountText');
+    if (!grid) return;
+    if (!doctors || !doctors.length) {
+      grid.innerHTML = '<div style="color:var(--gray);font-size:14px;padding:20px;">No doctors yet. Click <strong>+ Add Doctor</strong> to get started.</div>';
+      if (countEl) countEl.textContent = '0 active physicians';
+      return;
+    }
+    const active = doctors.filter(d => d.status === 'active').length;
+    if (countEl) countEl.textContent = active + ' active physician' + (active !== 1 ? 's' : '');
+    grid.innerHTML = doctors.map((d, i) => {
+      const name = 'Dr. ' + d.first_name + ' ' + d.last_name;
+      const initials = (d.first_name[0] || '') + (d.last_name[0] || '');
+      const color = AV_COLORS[i % AV_COLORS.length];
+      const bc = d.status === 'active' ? 'badge-green' : d.status === 'on_leave' ? 'badge-blue' : 'badge-gray';
+      const label = d.status === 'active' ? 'Active' : d.status === 'on_leave' ? 'On Leave' : 'Unavailable';
+      const photo = d.photo_url ? `<img class="doc-manage-photo" src="${d.photo_url}" alt="${name}">` : '';
+      return `<div class="doc-manage-card">
+        <div class="doc-manage-header">
+          ${photo}
+          <div class="doc-manage-photo-overlay"></div>
+          <div class="doc-manage-av" style="background:${color};display:flex;position:absolute;bottom:12px;left:16px;z-index:3;width:44px;height:44px;border-radius:50%;align-items:center;justify-content:center;font-family:'Montserrat',sans-serif;font-weight:800;font-size:15px;color:#fff;border:2px solid rgba(255,255,255,0.2);">${initials.toUpperCase()}</div>
+        </div>
+        <div class="doc-manage-body">
+          <div class="doc-manage-spec">${d.specialty || '—'}</div>
+          <div class="doc-manage-name">${name}</div>
+          <div class="doc-manage-sched">${d.work_days || '—'} · ${d.work_hours || '—'}<br>PRC License: ${d.prc_license || '—'}</div>
+          <div style="margin-bottom:12px;"><span class="badge ${bc}">${label}</span></div>
+          <div class="doc-manage-actions">
+            <button class="btn btn-ghost btn-sm" onclick="openEditDoctorModal('${d.id}')">Edit</button>
+            <button class="btn btn-ghost btn-sm" onclick="openAvailModal(this)">Availability</button>
+            <button class="btn btn-sm" style="background:rgba(211,26,34,0.1);color:var(--crimson);border:none;padding:7px 12px;border-radius:6px;cursor:pointer;font-family:'Montserrat',sans-serif;font-weight:700;font-size:11px;" onclick="deleteDoctor('${d.id}','${name.replace(/'/g, "\\'")}')">Delete</button>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  let _adminDoctors = [];
+
+  function resetDocPhotoPreview(url) {
+    const prev = document.getElementById('docPhotoPreview');
+    const inp  = document.getElementById('docPhotoInput');
+    if (inp) inp.value = '';
+    if (!prev) return;
+    if (url) {
+      prev.style.backgroundImage = `url(${url})`;
+      prev.innerHTML = '';
+    } else {
+      prev.style.backgroundImage = '';
+      prev.innerHTML = '<svg width="22" height="22" fill="none" stroke="var(--gray)" stroke-width="1.8" stroke-linecap="round" viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>';
+    }
+  }
+
+  function previewDocPhoto(file) {
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) { showToast('Photo must be under 5 MB'); return; }
+    const reader = new FileReader();
+    reader.onload = e => resetDocPhotoPreview(e.target.result);
+    reader.readAsDataURL(file);
+  }
+
+  function openAddDoctorModal() {
+    document.getElementById('doc-id').value = '';
+    document.getElementById('docModalTitle').textContent = 'Add Doctor';
+    document.getElementById('doc-fname').value = '';
+    document.getElementById('doc-lname').value = '';
+    document.getElementById('doc-specialty').value = '';
+    document.getElementById('doc-prc').value = '';
+    document.getElementById('doc-workdays').value = '';
+    document.getElementById('doc-workhours').value = '';
+    document.getElementById('doc-status').value = 'active';
+    resetDocPhotoPreview(null);
+    const btn = document.getElementById('docSaveBtn');
+    if (btn) { btn.disabled = false; btn.textContent = 'Save Doctor'; }
+    openModal('doctor');
+  }
+
+  function openEditDoctorModal(docId) {
+    const doc = _adminDoctors.find(d => d.id === docId);
+    if (!doc) { showToast('Doctor not found'); return; }
+    document.getElementById('doc-id').value = docId;
+    document.getElementById('docModalTitle').textContent = 'Edit Doctor';
+    document.getElementById('doc-fname').value = doc.first_name || '';
+    document.getElementById('doc-lname').value = doc.last_name || '';
+    document.getElementById('doc-specialty').value = doc.specialty || '';
+    document.getElementById('doc-prc').value = doc.prc_license || '';
+    document.getElementById('doc-workdays').value = doc.work_days || '';
+    document.getElementById('doc-workhours').value = doc.work_hours || '';
+    document.getElementById('doc-status').value = doc.status || 'active';
+    resetDocPhotoPreview(doc.photo_url || null);
+    const btn = document.getElementById('docSaveBtn');
+    if (btn) { btn.disabled = false; btn.textContent = 'Save Changes'; }
+    openModal('doctor');
+  }
+
+  async function saveDoctor() {
+    const fname = document.getElementById('doc-fname').value.trim();
+    const lname = document.getElementById('doc-lname').value.trim();
+    if (!fname || !lname) { showToast('First and last name are required'); return; }
+    const btn = document.getElementById('docSaveBtn');
+    if (btn) { btn.disabled = true; btn.textContent = 'Saving…'; }
+    const docId    = document.getElementById('doc-id').value;
+    const photoFile = document.getElementById('docPhotoInput').files[0];
+    const payload = {
+      first_name:  fname,
+      last_name:   lname,
+      specialty:   document.getElementById('doc-specialty').value || null,
+      prc_license: document.getElementById('doc-prc').value.trim() || null,
+      work_days:   document.getElementById('doc-workdays').value.trim() || null,
+      work_hours:  document.getElementById('doc-workhours').value.trim() || null,
+      status:      document.getElementById('doc-status').value || 'active',
+    };
+    try {
+      let savedDoc;
+      if (docId) {
+        if (photoFile) {
+          if (btn) btn.textContent = 'Uploading photo…';
+          const ext = photoFile.name.split('.').pop();
+          payload.photo_url = await sbUploadPhoto('doctor-photos', docId + '/avatar.' + ext, photoFile);
+        }
+        await sbUpdateDoctor(docId, payload);
+        const idx = _adminDoctors.findIndex(d => d.id === docId);
+        if (idx !== -1) _adminDoctors[idx] = { ..._adminDoctors[idx], ...payload };
+        showToast('Doctor updated successfully');
+        logActivity('Updated doctor: Dr. ' + fname + ' ' + lname);
+      } else {
+        savedDoc = await sbCreateDoctor({ firstName: fname, lastName: lname, specialty: payload.specialty, prcLicense: payload.prc_license, workDays: payload.work_days, workHours: payload.work_hours, status: payload.status });
+        if (photoFile) {
+          if (btn) btn.textContent = 'Uploading photo…';
+          const ext = photoFile.name.split('.').pop();
+          const photoUrl = await sbUploadPhoto('doctor-photos', savedDoc.id + '/avatar.' + ext, photoFile);
+          await sbUpdateDoctor(savedDoc.id, { photo_url: photoUrl });
+          savedDoc.photo_url = photoUrl;
+        }
+        _adminDoctors.push(savedDoc);
+        showToast('Doctor added successfully');
+        logActivity('Added doctor: Dr. ' + fname + ' ' + lname);
+      }
+      renderAdminDoctors(_adminDoctors);
+      closeModal('doctor');
+    } catch(e) {
+      showToast('Save failed: ' + e.message);
+      if (btn) { btn.disabled = false; btn.textContent = docId ? 'Save Changes' : 'Save Doctor'; }
+    }
+  }
+
+  async function deleteDoctor(id, name) {
+    if (!confirm('Delete ' + name + '? This cannot be undone.')) return;
+    try {
+      await sbDeleteDoctor(id);
+      _adminDoctors = _adminDoctors.filter(d => d.id !== id);
+      renderAdminDoctors(_adminDoctors);
+      showToast(name + ' removed');
+      logActivity('Deleted doctor: ' + name);
+    } catch(e) {
+      showToast('Cannot delete — this doctor has existing appointments. Set status to Unavailable instead.');
+    }
+  }
 
   function filterAdminAppts(btn, status) {
-    document.querySelectorAll('#apptFilters .btn').forEach(b => {
-      b.className = 'btn btn-ghost btn-sm';
-    });
+    document.querySelectorAll('#apptFilters .btn').forEach(b => { b.className = 'btn btn-ghost btn-sm'; });
     btn.className = 'btn btn-dark btn-sm';
     document.querySelectorAll('#adminApptBody tr').forEach(row => {
       row.style.display = (status === 'all' || row.dataset.status === status) ? '' : 'none';
@@ -762,6 +1338,401 @@
     });
   }
 
+  // ── PATIENT REGISTRY SEARCH ─────────────────────────────────────────────
+  function searchPatients(q) {
+    q = q.toLowerCase();
+    document.querySelectorAll('#view-patients .table tbody tr').forEach(row => {
+      row.style.display = row.textContent.toLowerCase().includes(q) ? '' : 'none';
+    });
+  }
+
+  // ── CSV EXPORT ──────────────────────────────────────────────────────────
+  function generateCSV() {
+    const headers = ['Patient', 'ID', 'Doctor', 'Date & Time', 'Purpose', 'Status'];
+    const rows = [];
+    document.querySelectorAll('#adminApptBody tr').forEach(row => {
+      if (row.style.display === 'none') return;
+      const cells = row.querySelectorAll('td');
+      rows.push([
+        cells[0].querySelector('.td-name')?.textContent || '',
+        cells[0].querySelector('.td-sub')?.textContent || '',
+        cells[1].textContent.trim(),
+        cells[2].textContent.trim(),
+        cells[3].textContent.trim(),
+        cells[4].querySelector('.badge')?.textContent.trim() || '',
+      ]);
+    });
+    const csv = [headers, ...rows].map(r => r.map(c => `"${c.replace(/"/g,'""')}"`).join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'appointments-' + new Date().toISOString().slice(0,10) + '.csv';
+    a.click();
+    showToast('CSV exported successfully');
+    logActivity('Exported appointments CSV');
+  }
+
+  // ── DYNAMIC STATS ───────────────────────────────────────────────────────
+  async function buildDynamicStats() {
+    try {
+      const today = new Date().toISOString().slice(0, 10);
+      const { data: todayAppts } = await db.from('appointments').select('status, doctors(first_name,last_name,photo_url), patients(first_name,last_name), time, purpose, id').eq('date', today);
+      // Exclude cancelled — they should not count toward today's stats
+      const appts = (todayAppts || []).filter(a => a.status !== 'Cancelled');
+      const completed  = appts.filter(a => a.status === 'Completed').length;
+      const confirmed  = appts.filter(a => a.status === 'Confirmed').length;
+      const pending    = appts.filter(a => a.status === 'Pending').length;
+      const noShow     = appts.filter(a => a.status === 'No-Show').length;
+      const inSession  = appts.filter(a => a.status === 'In Session').length;
+      const checkedIn  = appts.filter(a => a.status === 'Checked In').length;
+      const total      = appts.length;
+
+      const { data: queueNow } = await db.from('queue_entries').select('status,doctor_id').eq('queue_date', today).in('status', ['waiting','in_session']);
+      const queueCount  = (queueNow || []).length;
+      const activeDocs  = (_adminDoctors || []).filter(d => d.status === 'active');
+      const doctorsInQ  = new Set((queueNow || []).map(q => q.doctor_id)).size;
+
+      document.getElementById('stat-appts-today').textContent    = total;
+      document.getElementById('stat-appts-delta').textContent     = total > 0 ? confirmed + ' confirmed, ' + checkedIn + ' checked in' : 'No appointments today';
+      document.getElementById('stat-queue-now').textContent       = queueCount;
+      document.getElementById('stat-queue-delta').textContent     = doctorsInQ > 0 ? 'Across ' + doctorsInQ + ' doctor' + (doctorsInQ > 1 ? 's' : '') : 'Queue empty';
+      document.getElementById('stat-completed-today').textContent = completed;
+      document.getElementById('stat-completed-delta').textContent = total > 0 ? Math.round(completed/total*100) + '% completion rate' : '';
+      document.getElementById('stat-active-docs').textContent     = activeDocs.length;
+      document.getElementById('stat-docs-delta').textContent      = activeDocs.length > 0 ? activeDocs.length + ' on schedule today' : 'No active doctors';
+      document.getElementById('mini-completed').textContent  = completed;
+      document.getElementById('mini-confirmed').textContent  = confirmed + checkedIn;
+      document.getElementById('mini-pending').textContent    = pending;
+      document.getElementById('mini-noshow').textContent     = noShow;
+
+      // Recent appointments (today's, newest first by time desc)
+      const sorted = [...appts].sort((a,b) => (b.time||'') > (a.time||'') ? 1 : -1).slice(0, 8);
+      const tbody = document.getElementById('recentApptBody');
+      if (!sorted.length) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--gray);padding:20px;">No appointments today</td></tr>';
+      } else {
+        const statusBadge = s => {
+          const map = { 'Completed':'badge-green','Confirmed':'badge-blue','Checked In':'badge-yellow','In Session':'badge-crimson','Pending':'badge-gray','Cancelled':'badge-gray','No-Show':'badge-gray' };
+          return `<span class="badge ${map[s]||'badge-gray'}">${s}</span>`;
+        };
+        tbody.innerHTML = sorted.map(a => {
+          const pt = a.patients ? a.patients.first_name+' '+a.patients.last_name : '—';
+          const dr = a.doctors  ? 'Dr. '+a.doctors.first_name+' '+a.doctors.last_name : '—';
+          const photo = a.doctors?.photo_url ? `<img src="${a.doctors.photo_url}" style="width:28px;height:28px;border-radius:50%;object-fit:cover;flex-shrink:0;">` : '';
+          const fmtTime = t => { if (!t) return '—'; const [h,m]=t.split(':'); const hr=parseInt(h); return (hr%12||12)+':'+m+(hr<12?'AM':'PM'); };
+          return `<tr>
+            <td><div class="td-name">${pt}</div></td>
+            <td><div style="display:flex;align-items:center;gap:8px;">${photo}${dr}</div></td>
+            <td>${fmtTime(a.time)}</td>
+            <td>${a.purpose||'—'}</td>
+            <td>${statusBadge(a.status)}</td>
+            <td></td>
+          </tr>`;
+        }).join('');
+      }
+      // Weekly appointments chart
+      const dow = new Date().getDay();
+      const daysFromMon = dow === 0 ? 6 : dow - 1;
+      const mon = new Date(); mon.setDate(mon.getDate() - daysFromMon);
+      const sun = new Date(mon); sun.setDate(mon.getDate() + 6);
+      const monStr = mon.toISOString().slice(0, 10);
+      const sunStr = sun.toISOString().slice(0, 10);
+      const { data: weekData } = await db.from('appointments').select('date').gte('date', monStr).lte('date', sunStr);
+      const weekCounts = [0, 0, 0, 0, 0, 0, 0];
+      (weekData || []).forEach(a => {
+        const d = new Date(a.date + 'T00:00:00');
+        const idx = d.getDay() === 0 ? 6 : d.getDay() - 1;
+        weekCounts[idx]++;
+      });
+      const maxCount = Math.max(...weekCounts, 1);
+      const barsEl = document.getElementById('weeklyChartBars');
+      if (barsEl) {
+        [...barsEl.children].forEach((bar, i) => {
+          const pct = Math.round(weekCounts[i] / maxCount * 100);
+          bar.style.height = Math.max(pct, 2) + '%';
+          bar.setAttribute('data-val', weekCounts[i]);
+          bar.classList.toggle('peak', weekCounts[i] === Math.max(...weekCounts));
+        });
+      }
+    } catch(e) { console.error('Stats error:', e); }
+  }
+
+  // ── NOTIFICATIONS ───────────────────────────────────────────────────────
+  let _notifDismissed = JSON.parse(localStorage.getItem('notif-dismissed') || '[]');
+
+  async function loadNotifications() {
+    try {
+      const { data } = await db.from('appointments')
+        .select('id, status, updated_at, patients(first_name, last_name), doctors(first_name, last_name)')
+        .in('status', ['Cancelled', 'No-Show'])
+        .order('updated_at', { ascending: false })
+        .limit(20);
+      const items = (data || []).filter(n => !_notifDismissed.includes(n.id));
+      const count = document.getElementById('notifCount');
+      if (items.length > 0) {
+        count.textContent = items.length;
+        count.style.display = 'flex';
+      } else {
+        count.style.display = 'none';
+      }
+      const list = document.getElementById('notifList');
+      if (!items.length) {
+        list.innerHTML = '<div style="padding:20px;text-align:center;color:var(--gray);font-size:13px;">No new notifications</div>';
+        return;
+      }
+      const timeAgo = d => {
+        const diff = Date.now() - new Date(d).getTime();
+        const m = Math.floor(diff/60000);
+        if (m < 60) return m + 'm ago';
+        const h = Math.floor(m/60);
+        if (h < 24) return h + 'h ago';
+        return Math.floor(h/24) + 'd ago';
+      };
+      list.innerHTML = items.map(n => {
+        const pt = n.patients ? n.patients.first_name+' '+n.patients.last_name : '—';
+        const dr = n.doctors  ? 'Dr. '+n.doctors.first_name+' '+n.doctors.last_name : '—';
+        const icon = n.status === 'Cancelled' ? '✕' : '!';
+        const color = n.status === 'Cancelled' ? 'var(--crimson)' : '#B8860B';
+        return `<div style="display:flex;align-items:flex-start;gap:10px;padding:10px 16px;border-bottom:1px solid rgba(0,0,0,0.05);">
+          <div style="width:28px;height:28px;border-radius:50%;background:${color}22;display:flex;align-items:center;justify-content:center;font-weight:800;color:${color};font-size:12px;flex-shrink:0;">${icon}</div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:12px;font-weight:600;color:var(--dark);">${pt} — ${n.status}</div>
+            <div style="font-size:11px;color:var(--gray);">${dr} · ${timeAgo(n.updated_at)}</div>
+          </div>
+        </div>`;
+      }).join('');
+    } catch(_) {}
+  }
+
+  function toggleNotifPanel() {
+    const panel = document.getElementById('notifPanel');
+    const isOpen = panel.style.display !== 'none';
+    panel.style.display = isOpen ? 'none' : 'block';
+    if (!isOpen) loadNotifications();
+  }
+
+  function clearNotifs() {
+    const list = document.getElementById('notifList');
+    const items = list.querySelectorAll('[data-id]');
+    document.getElementById('notifCount').style.display = 'none';
+    list.innerHTML = '<div style="padding:20px;text-align:center;color:var(--gray);font-size:13px;">No new notifications</div>';
+  }
+
+  document.addEventListener('click', e => {
+    if (!e.target.closest('.notif-wrap')) {
+      const panel = document.getElementById('notifPanel');
+      if (panel) panel.style.display = 'none';
+    }
+  });
+
+  // ── QUEUE AUTO-REFRESH ──────────────────────────────────────────────────
+  let queueRefreshInterval = null;
+  let queueRefreshCount = 0;
+
+  function startQueueAutoRefresh() {
+    if (queueRefreshInterval) return;
+    queueRefreshInterval = setInterval(() => {
+      if (document.getElementById('view-queue').classList.contains('active'))    loadQueueMonitor();
+      if (document.getElementById('view-checkin').classList.contains('active'))  loadCheckinView();
+    }, 30000);
+  }
+
+  // ── QUEUE MONITOR ────────────────────────────────────────────────────────
+  async function loadQueueMonitor() {
+    const grid = document.getElementById('queueMonitorGrid');
+    if (!grid) return;
+    const activeDocs = (_adminDoctors || []).filter(d => d.status === 'active');
+    if (!activeDocs.length) {
+      grid.innerHTML = '<div style="color:var(--gray);padding:20px;grid-column:1/-1;">No active doctors.</div>';
+      return;
+    }
+    try {
+      const queues = await Promise.all(activeDocs.map(d => sbGetQueue(d.id)));
+      grid.innerHTML = activeDocs.map((doc, i) => {
+        const entries = queues[i] || [];
+        const active  = entries.filter(e => e.status === 'waiting' || e.status === 'in_session');
+        const count   = active.length;
+        const bc      = count > 3 ? 'badge-crimson' : count > 0 ? 'badge-yellow' : 'badge-gray';
+        const initials= (doc.first_name[0]||'') + (doc.last_name[0]||'');
+        const photoHtml = doc.photo_url
+          ? `<img class="qdoc-av" src="${doc.photo_url}" alt="Dr. ${doc.last_name}" style="object-fit:cover;">`
+          : `<div class="qdoc-av" style="background:var(--crimson);display:flex;align-items:center;justify-content:center;font-family:'Montserrat',sans-serif;font-weight:800;font-size:14px;color:#fff;">${initials.toUpperCase()}</div>`;
+        const listHtml = entries.length ? entries.map(e => {
+          const p = e.patients;
+          const pname = p ? `${p.first_name} ${p.last_name}` : '—';
+          const isNow = e.status === 'in_session';
+          const isDone = e.status === 'completed' || e.status === 'no_show';
+          return `<div class="qdoc-item" style="${isDone?'opacity:0.4;':''}">
+            <div class="qdoc-num${isNow?' active':''}">Q${String(e.queue_number).padStart(2,'0')}</div>
+            <div>
+              <div class="qdoc-pname">${pname}</div>
+              <div class="qdoc-ptime">${e.appointments?.time||''} · ${isNow?'In session':isDone?e.status:'Waiting'}</div>
+            </div>
+            ${isNow?'<span class="badge badge-crimson" style="margin-left:auto;font-size:9px;">NOW</span>':''}
+          </div>`;
+        }).join('') : '<div style="padding:16px;font-size:12px;color:var(--gray);text-align:center;">No patients in queue</div>';
+        return `<div class="queue-doc-card">
+          <div class="qdoc-header">
+            ${photoHtml}
+            <div><div class="qdoc-name">Dr. ${doc.first_name} ${doc.last_name}</div><div class="qdoc-spec">${doc.specialty||'—'}</div></div>
+            <span class="badge ${bc} qdoc-stat" style="margin-left:auto;">${count} waiting</span>
+          </div>
+          <div class="qdoc-list">${listHtml}</div>
+        </div>`;
+      }).join('');
+    } catch(e) {
+      grid.innerHTML = `<div style="color:var(--crimson);padding:20px;grid-column:1/-1;">${e.message}</div>`;
+    }
+  }
+
+  // ── CHECK-IN SYSTEM ──────────────────────────────────────────────────────
+  let _todayAppts = [];
+
+  async function loadCheckinView() {
+    const now = new Date();
+    const days   = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+    const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    const label = document.getElementById('checkinDateLabel');
+    if (label) label.textContent = days[now.getDay()] + ', ' + months[now.getMonth()] + ' ' + now.getDate() + ', ' + now.getFullYear();
+    const tbody = document.getElementById('checkinBody');
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--gray);padding:24px;">Loading…</td></tr>';
+    try {
+      const appts = await sbGetTodayAppointments();
+      _todayAppts = appts || [];
+      renderCheckinTable(_todayAppts);
+      // Update badge
+      const pending = _todayAppts.filter(a => a.status !== 'Checked In').length;
+      const badge = document.getElementById('checkinBadge');
+      if (badge) {
+        badge.textContent = pending;
+        badge.style.display = pending > 0 ? '' : 'none';
+      }
+    } catch(e) {
+      tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:var(--crimson);padding:24px;">${e.message}</td></tr>`;
+    }
+  }
+
+  function renderCheckinTable(appts) {
+    const tbody = document.getElementById('checkinBody');
+    if (!appts?.length) {
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--gray);padding:32px;">No appointments for today.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = appts.map(a => {
+      const pname = a.patients ? `${a.patients.first_name} ${a.patients.last_name}` : '—';
+      const dname = a.doctors  ? `Dr. ${a.doctors.first_name[0]}. ${a.doctors.last_name}` : '—';
+      const typeTag = a.appointment_type === 'walk_in'
+        ? '<span class="badge badge-yellow">Walk-In</span>'
+        : '<span class="badge badge-blue">Booked</span>';
+      const isCheckedIn  = a.status === 'Checked In';
+      const isInSession  = a.status === 'In Session';
+      const statusBadge  = isInSession
+        ? '<span class="badge badge-crimson">In Session</span>'
+        : isCheckedIn
+          ? '<span class="badge badge-green">Checked In</span>'
+          : `<span class="badge ${a.status==='Confirmed'?'badge-blue':'badge-yellow'}">${a.status}</span>`;
+      const action = (isCheckedIn || isInSession)
+        ? `<span style="font-size:12px;color:var(--green);font-weight:700;">${isInSession ? '▶ Seeing Doctor' : '✓ In Queue'}</span>`
+        : `<button class="btn btn-green btn-sm" onclick="checkInPatient('${a.id}')">Check In</button>`;
+      return `<tr data-status="${a.status}" data-appt-id="${a.id}">
+        <td><div class="td-name">${pname}</div></td>
+        <td>${typeTag}</td>
+        <td>${dname}</td>
+        <td>${a.time}</td>
+        <td>${a.purpose||'—'}</td>
+        <td>${statusBadge}</td>
+        <td>${action}</td>
+      </tr>`;
+    }).join('');
+  }
+
+  async function checkInPatient(appointmentId) {
+    const btn = document.querySelector(`[data-appt-id="${appointmentId}"] .btn-green`);
+    if (btn) { btn.disabled = true; btn.textContent = 'Checking in…'; }
+    try {
+      const { queueNumber } = await sbCheckInPatient(appointmentId);
+      showToast('Patient checked in — Queue #' + String(queueNumber).padStart(2,'0'));
+      logActivity('Checked in patient → Queue #' + queueNumber);
+      await loadCheckinView();
+    } catch(e) {
+      showToast('Check-in failed: ' + e.message);
+      if (btn) { btn.disabled = false; btn.textContent = 'Check In'; }
+    }
+  }
+
+  function filterCheckin(btn, status) {
+    document.querySelectorAll('#checkinFilters .btn').forEach(b => b.className = 'btn btn-ghost btn-sm');
+    btn.className = 'btn btn-dark btn-sm';
+    document.querySelectorAll('#checkinBody tr[data-status]').forEach(row => {
+      row.style.display = (status === 'all' || row.dataset.status === status) ? '' : 'none';
+    });
+  }
+
+  async function openWalkinModal() {
+    const dSel = document.getElementById('wi-doctor');
+    dSel.innerHTML = '<option value="">Select doctor…</option>' +
+      (_adminDoctors||[]).filter(d => d.status === 'active').map(d =>
+        `<option value="${d.id}">Dr. ${d.first_name} ${d.last_name}${d.specialty?' — '+d.specialty:''}</option>`
+      ).join('');
+    const pSel = document.getElementById('wi-patient');
+    pSel.innerHTML = '<option value="">Loading patients…</option>';
+    try {
+      const patients = await sbGetPatients();
+      pSel.innerHTML = '<option value="">Select patient…</option>' +
+        (patients||[]).map(p => `<option value="${p.id}">${p.first_name} ${p.last_name}</option>`).join('');
+    } catch(e) {
+      pSel.innerHTML = '<option value="">Could not load patients</option>';
+    }
+    document.getElementById('wi-purpose').value = '';
+    const btn = document.getElementById('walkinSubmitBtn');
+    if (btn) { btn.disabled = false; btn.textContent = 'Add to Queue'; }
+    openModal('walkin');
+  }
+
+  async function addWalkin() {
+    const patientId = document.getElementById('wi-patient').value;
+    const doctorId  = document.getElementById('wi-doctor').value;
+    const purpose   = document.getElementById('wi-purpose').value.trim();
+    if (!patientId) { showToast('Please select a patient'); return; }
+    if (!doctorId)  { showToast('Please select a doctor');  return; }
+    const btn = document.getElementById('walkinSubmitBtn');
+    if (btn) { btn.disabled = true; btn.textContent = 'Adding…'; }
+    try {
+      const { queueNumber } = await sbAddWalkIn({ patientId, doctorId, purpose });
+      closeModal('walkin');
+      showToast('Walk-in added to queue — #' + String(queueNumber).padStart(2,'0'));
+      logActivity('Walk-in patient added to queue');
+      if (document.getElementById('view-checkin').classList.contains('active')) await loadCheckinView();
+      if (document.getElementById('view-queue').classList.contains('active'))   await loadQueueMonitor();
+    } catch(e) {
+      showToast('Failed: ' + e.message);
+      if (btn) { btn.disabled = false; btn.textContent = 'Add to Queue'; }
+    }
+  }
+
+  // ── ACTIVITY LOG ────────────────────────────────────────────────────────
+  const activityLog = [];
+
+  function logActivity(action) {
+    const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    activityLog.unshift({ action, time });
+    if (activityLog.length > 20) activityLog.pop();
+    renderActivityLog();
+  }
+
+  function renderActivityLog() {
+    const list = document.getElementById('activityLogList');
+    if (!list) return;
+    if (!activityLog.length) return;
+    list.innerHTML = activityLog.slice(0, 5).map(e =>
+      `<div style="display:flex;justify-content:space-between;gap:8px;padding:5px 2px;border-bottom:1px solid rgba(255,255,255,0.05);font-size:11px;">
+        <span style="color:rgba(255,255,255,0.45);line-height:1.4;">${e.action}</span>
+        <span style="color:rgba(255,255,255,0.2);flex-shrink:0;">${e.time}</span>
+      </div>`
+    ).join('');
+  }
+
+  // ── TOAST ────────────────────────────────────────────────────────────────
   let toastTimer;
   function showToast(msg) {
     const t = document.getElementById('toast');
@@ -770,6 +1741,199 @@
     clearTimeout(toastTimer);
     toastTimer = setTimeout(() => t.classList.remove('show'), 3200);
   }
+
+  // ── AVAILABILITY CALENDAR ────────────────────────────────────────────────
+  let availDoc = null;
+  let availBlocked = {};
+  let availCalYear, availCalMonth;
+
+  function openAvailModal(btn) {
+    const card = btn.closest('.doc-manage-card');
+    const body = card.querySelector('.doc-manage-body');
+    const av = card.querySelector('.doc-manage-av');
+    availDoc = {
+      name: body.querySelector('.doc-manage-name').textContent,
+      spec: body.querySelector('.doc-manage-spec').textContent,
+      initials: av.textContent.trim(),
+      color: av.style.background,
+    };
+    if (!availBlocked[availDoc.name]) {
+      // Load from localStorage if present
+      const stored = localStorage.getItem('avail-blocked-' + availDoc.name.replace(/\s+/g,'-').toLowerCase());
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        availBlocked[availDoc.name] = { dates: new Set(parsed.dates), reasons: parsed.reasons || {} };
+      } else {
+        availBlocked[availDoc.name] = { dates: new Set(), reasons: {} };
+      }
+    }
+    document.getElementById('availDocName').textContent = availDoc.name;
+    document.getElementById('availDocSpec').textContent = availDoc.spec;
+    document.getElementById('availDocAv').textContent = availDoc.initials;
+    document.getElementById('availDocAv').style.background = availDoc.color;
+    const now = new Date();
+    availCalYear = now.getFullYear();
+    availCalMonth = now.getMonth();
+    renderAvailCal();
+    renderBlockedList();
+    openModal('avail');
+  }
+
+  function renderAvailCal() {
+    const grid = document.getElementById('availCalGrid');
+    grid.innerHTML = '';
+    const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    document.getElementById('availCalTitle').textContent = monthNames[availCalMonth] + ' ' + availCalYear;
+    const today = new Date(); today.setHours(0,0,0,0);
+    const firstDay = new Date(availCalYear, availCalMonth, 1).getDay();
+    const daysInMonth = new Date(availCalYear, availCalMonth + 1, 0).getDate();
+    const blocked = availBlocked[availDoc?.name]?.dates || new Set();
+    for (let i = 0; i < firstDay; i++) {
+      const cell = document.createElement('div');
+      cell.className = 'avail-cal-day empty';
+      grid.appendChild(cell);
+    }
+    for (let d = 1; d <= daysInMonth; d++) {
+      const date = new Date(availCalYear, availCalMonth, d);
+      date.setHours(0,0,0,0);
+      const dateStr = formatAvailDateStr(availCalYear, availCalMonth + 1, d);
+      const cell = document.createElement('div');
+      cell.className = 'avail-cal-day';
+      cell.textContent = d;
+      if (date < today) {
+        cell.classList.add('past');
+      } else {
+        if (date.getTime() === today.getTime()) cell.classList.add('today');
+        if (blocked.has(dateStr)) cell.classList.add('blocked');
+        cell.onclick = () => toggleAvailDay(dateStr);
+      }
+      grid.appendChild(cell);
+    }
+  }
+
+  function formatAvailDateStr(y, m, d) {
+    return y + '-' + String(m).padStart(2,'0') + '-' + String(d).padStart(2,'0');
+  }
+
+  function changeAvailMonth(dir) {
+    availCalMonth += dir;
+    if (availCalMonth > 11) { availCalMonth = 0; availCalYear++; }
+    if (availCalMonth < 0)  { availCalMonth = 11; availCalYear--; }
+    renderAvailCal();
+  }
+
+  function toggleAvailDay(dateStr) {
+    const data = availBlocked[availDoc.name];
+    if (data.dates.has(dateStr)) { data.dates.delete(dateStr); delete data.reasons[dateStr]; }
+    else { data.dates.add(dateStr); }
+    renderAvailCal();
+    renderBlockedList();
+  }
+
+  function blockRange() {
+    const start  = document.getElementById('availRangeStart').value;
+    const end    = document.getElementById('availRangeEnd').value;
+    const reason = document.getElementById('availReason').value.trim();
+    if (!start || !end) { showToast('Please select both start and end dates'); return; }
+    if (start > end)    { showToast('Start date must be before end date'); return; }
+    const data = availBlocked[availDoc.name];
+    const cur  = new Date(start + 'T00:00:00');
+    const last = new Date(end   + 'T00:00:00');
+    let count = 0;
+    while (cur <= last) {
+      const ds = formatAvailDateStr(cur.getFullYear(), cur.getMonth() + 1, cur.getDate());
+      data.dates.add(ds);
+      if (reason) data.reasons[ds] = reason;
+      cur.setDate(cur.getDate() + 1);
+      count++;
+    }
+    document.getElementById('availRangeStart').value = '';
+    document.getElementById('availRangeEnd').value   = '';
+    document.getElementById('availReason').value     = '';
+    renderAvailCal();
+    renderBlockedList();
+    showToast(count + ' date' + (count > 1 ? 's' : '') + ' blocked');
+  }
+
+  function renderBlockedList() {
+    const list = document.getElementById('availBlockedList');
+    const noBlocks = document.getElementById('availNoBlocks');
+    const data = availBlocked[availDoc?.name];
+    const sorted = data ? [...data.dates].sort() : [];
+    list.querySelectorAll('.avail-blocked-item').forEach(el => el.remove());
+    if (sorted.length === 0) { noBlocks.style.display = ''; return; }
+    noBlocks.style.display = 'none';
+    sorted.forEach(ds => {
+      const reason = data.reasons[ds] || '';
+      const item = document.createElement('div');
+      item.className = 'avail-blocked-item';
+      const label = document.createElement('span');
+      label.textContent = formatAvailDisplayDate(ds) + (reason ? ' — ' + reason : '');
+      const unblockBtn = document.createElement('button');
+      unblockBtn.className = 'avail-unblock-btn';
+      unblockBtn.textContent = 'Unblock';
+      unblockBtn.onclick = () => {
+        data.dates.delete(ds);
+        delete data.reasons[ds];
+        renderAvailCal();
+        renderBlockedList();
+      };
+      item.appendChild(label);
+      item.appendChild(unblockBtn);
+      list.appendChild(item);
+    });
+  }
+
+  function formatAvailDisplayDate(ds) {
+    const [y, m, d] = ds.split('-');
+    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    return months[parseInt(m,10)-1] + ' ' + parseInt(d,10) + ', ' + y;
+  }
+
+  function saveAvailability() {
+    closeModal('avail');
+    const data = availBlocked[availDoc?.name];
+    const count = data?.dates.size || 0;
+    if (availDoc) {
+      const key = 'avail-blocked-' + availDoc.name.replace(/\s+/g,'-').toLowerCase();
+      localStorage.setItem(key, JSON.stringify({ dates: [...(data?.dates || [])], reasons: data?.reasons || {} }));
+    }
+    showToast('Availability saved' + (count > 0 ? ' · ' + count + ' date' + (count > 1 ? 's' : '') + ' blocked' : ''));
+    logActivity('Updated availability for ' + (availDoc?.name || 'doctor'));
+  }
+
+  // ── SUPABASE INIT + SESSION RESTORE ────────────────────────────────────
+  const _sbScript = document.createElement('script');
+  _sbScript.src = '/supabase-client.js';
+  _sbScript.onload = () => {
+    // Enable the login button now that db is ready
+    const loginBtn = document.getElementById('adminLoginBtn');
+    if (loginBtn) { loginBtn.disabled = false; loginBtn.textContent = 'Sign In to Admin Panel'; }
+
+    db.auth.onAuthStateChange(async (event, session) => {
+      if (event === 'INITIAL_SESSION' && session?.user) {
+        if (document.getElementById('adminApp').classList.contains('active')) return;
+        try {
+          // Check cache first so refresh works even if DB is slow
+          const cachedUid  = localStorage.getItem('drd-uid');
+          const cachedRole = localStorage.getItem('drd-role');
+          let profile = null;
+          try {
+            const { data } = await db.from('profiles').select('*').eq('id', session.user.id).single();
+            profile = data;
+          } catch(_) {}
+          const role = profile?.role || (cachedUid === session.user.id ? cachedRole : null);
+          if (role === 'admin') {
+            if (!profile) profile = { first_name: '', last_name: '' };
+            initAdminSession(profile);
+            const hash = location.hash.slice(1);
+            if (hash && viewTitles[hash]) showView(hash);
+          }
+        } catch(_) {}
+      }
+    });
+  };
+  document.head.appendChild(_sbScript);
 </script>
 </body>
 </html>

@@ -7,8 +7,11 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&family=Open+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    * { user-select: none; }
+    input, textarea, select { user-select: text; }
     :root {
       --crimson: #D31A22; --crimson-dark: #A8141B;
       --green: #00A859; --green-dark: #007A42;
@@ -138,11 +141,10 @@
       border-radius: 8px; margin-bottom: 8px;
     }
     .doc-av {
-      width: 36px; height: 36px; border-radius: 50%;
-      background: var(--crimson);
-      display: flex; align-items: center; justify-content: center;
-      font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: 12px; color: #fff;
+      width: 38px; height: 38px; border-radius: 50%;
+      object-fit: cover; object-position: center top;
       flex-shrink: 0;
+      border: 2px solid rgba(255,255,255,0.15);
     }
     .doc-sidebar-name { font-family: 'Montserrat', sans-serif; font-size: 12px; font-weight: 700; color: #fff; }
     .doc-sidebar-spec { font-size: 11px; color: rgba(255,255,255,0.35); }
@@ -203,15 +205,15 @@
     .q-time { font-size: 11px; color: var(--gray); }
     .q-status { margin-left: auto; }
     .queue-call-btn {
-      width: 100%; padding: 16px; background: var(--green);
-      color: #fff; border: none; cursor: pointer;
-      font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: 13px;
+      width: 100%; padding: 13px; background: transparent;
+      color: var(--gray); border: 1.5px solid rgba(0,0,0,0.12); cursor: pointer;
+      font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: 11px;
       letter-spacing: 0.08em; text-transform: uppercase;
       display: flex; align-items: center; justify-content: center; gap: 8px;
-      transition: background 0.2s;
+      transition: border-color 0.2s, color 0.2s;
     }
-    .queue-call-btn:hover { background: var(--green-dark); }
-    .queue-call-btn svg { width: 16px; height: 16px; }
+    .queue-call-btn:hover { border-color: var(--dark); color: var(--dark); }
+    .queue-call-btn svg { width: 14px; height: 14px; }
 
     /* Patient Panel */
     .patient-panel { display: flex; flex-direction: column; gap: 20px; }
@@ -324,6 +326,7 @@
     }
     .toast.show { transform: translateY(0); opacity: 1; }
     .toast-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--crimson); flex-shrink: 0; }
+    @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
     @media (max-width: 1000px) {
       .queue-layout { grid-template-columns: 1fr; }
@@ -339,6 +342,175 @@
       .frow { grid-template-columns: 1fr; }
       .content-body { padding: 16px; }
     }
+
+    /* ── HAMBURGER + DRAWER ── */
+    .hamburger-btn {
+      display: none; width: 38px; height: 38px; border-radius: 8px;
+      border: 1.5px solid rgba(0,0,0,0.1); background: #fff; cursor: pointer;
+      align-items: center; justify-content: center; flex-direction: column; gap: 4px;
+    }
+    @media (max-width: 768px) { .hamburger-btn { display: flex; } }
+    .hamburger-btn span { display: block; width: 16px; height: 2px; background: var(--gray); border-radius: 2px; }
+    .drawer-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 800;
+      display: none;
+    }
+    .drawer-overlay.open { display: block; }
+    .sidebar-drawer {
+      position: fixed; top: 0; left: 0; bottom: 0;
+      width: 260px; background: var(--dark-2); z-index: 900;
+      transform: translateX(-100%); transition: transform 0.3s;
+      display: flex; flex-direction: column; overflow-y: auto;
+    }
+    .sidebar-drawer.open { transform: translateX(0); }
+
+    /* ── END SESSION MODAL ── */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 9000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(4px); padding: 20px; }
+    .modal-overlay.open { display: flex; }
+    .modal-card { background: #fff; border-radius: 18px; padding: 36px; width: 100%; max-width: 400px; box-shadow: 0 24px 64px rgba(0,0,0,0.2); position: relative; }
+    .modal-title { font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 20px; color: var(--dark); margin-bottom: 8px; }
+    .modal-sub { font-size: 14px; color: var(--gray); margin-bottom: 24px; line-height: 1.5; }
+    .modal-btns { display: flex; gap: 10px; justify-content: flex-end; }
+
+    /* ── VITALS RANGE HINTS ── */
+    .vitals-hint { font-size: 10px; color: var(--gray); margin-top: 3px; text-align: center; transition: color 0.2s; }
+    .vitals-hint.warn { color: var(--crimson); font-weight: 700; }
+    .finput.vitals-warn { border-color: var(--crimson); box-shadow: 0 0 0 2px rgba(211,26,34,0.12); }
+
+    /* ── PREVIOUS VISITS PANEL ── */
+    .prev-visits-panel { margin-top: 12px; }
+    .prev-visit-item {
+      background: var(--light); border-radius: 8px; margin-bottom: 6px;
+      border: 1.5px solid transparent; cursor: pointer; overflow: hidden;
+    }
+    .prev-visit-item:hover { border-color: rgba(211,26,34,0.2); }
+    .prev-visit-header { padding: 10px 14px; display: flex; align-items: center; gap: 10px; }
+    .prev-visit-date { font-family: 'Montserrat', sans-serif; font-size: 11px; font-weight: 700; background: var(--dark); color: #fff; padding: 3px 9px; border-radius: 100px; }
+    .prev-visit-diag { font-size: 12px; color: var(--gray); flex: 1; }
+    .prev-visit-body { padding: 0 14px; max-height: 0; overflow: hidden; transition: max-height 0.3s, padding 0.3s; }
+    .prev-visit-body.open { max-height: 200px; padding: 10px 14px; }
+    .prev-visit-field { font-size: 12px; margin-bottom: 6px; }
+    .prev-visit-field strong { font-family: 'Montserrat', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--gray); display: block; margin-bottom: 2px; }
+
+    /* ── HISTORY FILTER DROPDOWN ── */
+    .hist-filter-wrap { position: relative; }
+    .hist-filter-dd { position: absolute; top: calc(100% + 6px); right: 0; background: #fff; border-radius: 10px; border: 1.5px solid rgba(0,0,0,0.1); box-shadow: 0 8px 24px rgba(0,0,0,0.1); z-index: 100; min-width: 200px; overflow: hidden; display: none; }
+    .hist-filter-dd.open { display: block; }
+    .hist-filter-opt { padding: 11px 16px; font-family: 'Montserrat', sans-serif; font-size: 12px; font-weight: 600; color: var(--dark); cursor: pointer; transition: background 0.15s; }
+    .hist-filter-opt:hover { background: var(--light); }
+    .hist-filter-opt.active { color: var(--crimson); }
+
+    /* ── START QUEUE SCREEN ── */
+    .start-screen {
+      display: none; min-height: 100vh; align-items: center; justify-content: center;
+      background: var(--dark);
+      position: relative; overflow: hidden;
+    }
+    .start-screen.active { display: flex; }
+    .start-screen::before {
+      content: ''; position: absolute; inset: 0; pointer-events: none;
+      background-image:
+        linear-gradient(rgba(0,168,89,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,168,89,0.04) 1px, transparent 1px);
+      background-size: 56px 56px;
+    }
+    .start-orb {
+      position: absolute; border-radius: 50%; pointer-events: none;
+      background: radial-gradient(circle, rgba(0,168,89,0.18) 0%, transparent 65%);
+      filter: blur(80px);
+      width: 60vw; height: 60vw; top: -20%; right: -10%;
+    }
+    .start-card {
+      position: relative; z-index: 1;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 24px; padding: 52px 60px; text-align: center;
+      max-width: 500px; width: 90%;
+      backdrop-filter: blur(12px);
+    }
+    .start-logo { width: 80px; height: 80px; object-fit: contain; border-radius: 12px; margin-bottom: 24px; }
+    .start-greeting {
+      font-family: 'Montserrat', sans-serif; font-weight: 900; font-size: 28px;
+      color: #fff; letter-spacing: -0.02em; margin-bottom: 8px;
+    }
+    .start-date { font-size: 14px; color: rgba(255,255,255,0.4); margin-bottom: 36px; }
+    .start-stats {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;
+      margin-bottom: 36px;
+    }
+    .start-stat {
+      background: rgba(255,255,255,0.05); border-radius: 12px; padding: 18px 12px;
+    }
+    .start-stat-val { font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 28px; color: #fff; }
+    .start-stat-lbl { font-size: 11px; color: rgba(255,255,255,0.35); margin-top: 4px; letter-spacing: 0.05em; }
+    .start-btn {
+      width: 100%; padding: 16px; border: none; border-radius: 12px;
+      background: var(--green); color: #fff; cursor: pointer;
+      font-family: 'Montserrat', sans-serif; font-size: 14px; font-weight: 800;
+      letter-spacing: 0.06em; text-transform: uppercase;
+      box-shadow: 0 8px 28px rgba(0,168,89,0.35);
+      transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+    }
+    .start-btn:hover { background: var(--green-dark); transform: translateY(-2px); box-shadow: 0 12px 36px rgba(0,168,89,0.4); }
+    .start-btn:active { transform: translateY(0); }
+
+    /* ── BREAK MODAL ── */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+      display: none; align-items: center; justify-content: center; z-index: 9998;
+      backdrop-filter: blur(4px);
+    }
+    .modal-overlay.open { display: flex; }
+    .modal-card {
+      background: #fff; border-radius: 18px; padding: 36px;
+      width: 100%; max-width: 400px;
+      box-shadow: 0 24px 64px rgba(0,0,0,0.2);
+    }
+    .modal-title { font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 20px; color: var(--dark); margin-bottom: 8px; }
+    .modal-sub { font-size: 14px; color: var(--gray); margin-bottom: 24px; line-height: 1.5; }
+    .break-opts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 24px; }
+    .break-opt {
+      padding: 14px 10px; border: 2px solid rgba(0,0,0,0.08);
+      border-radius: 10px; text-align: center; cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .break-opt:hover { border-color: rgba(255,193,7,0.5); }
+    .break-opt.selected { border-color: #F59E0B; background: rgba(255,193,7,0.08); }
+    .break-opt-time { font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 20px; color: var(--dark); }
+    .break-opt-lbl { font-size: 11px; color: var(--gray); margin-top: 2px; }
+    .modal-btns { display: flex; gap: 10px; }
+
+    /* ── SESSION SUMMARY OVERLAY ── */
+    .summary-overlay {
+      position: fixed; inset: 0; background: var(--dark);
+      display: none; align-items: center; justify-content: center;
+      z-index: 9999; overflow-y: auto; padding: 40px 20px;
+    }
+    .summary-overlay.open { display: flex; }
+    .summary-card {
+      background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 24px; padding: 48px 52px; width: 100%; max-width: 560px;
+      text-align: center;
+    }
+    .summary-icon {
+      width: 72px; height: 72px; border-radius: 50%; background: rgba(0,168,89,0.15);
+      display: flex; align-items: center; justify-content: center; margin: 0 auto 24px;
+    }
+    .summary-icon svg { width: 36px; height: 36px; stroke: var(--green); fill: none; stroke-width: 2; stroke-linecap: round; }
+    .summary-title { font-family: 'Montserrat', sans-serif; font-weight: 900; font-size: 26px; color: #fff; margin-bottom: 6px; letter-spacing: -0.02em; }
+    .summary-date { font-size: 13px; color: rgba(255,255,255,0.35); margin-bottom: 32px; }
+    .summary-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 32px; }
+    .summary-stat { background: rgba(255,255,255,0.06); border-radius: 12px; padding: 20px 12px; }
+    .summary-stat-val { font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 30px; color: #fff; }
+    .summary-stat-lbl { font-size: 11px; color: rgba(255,255,255,0.35); margin-top: 4px; }
+    .summary-patients { background: rgba(255,255,255,0.04); border-radius: 12px; padding: 20px; margin-bottom: 28px; text-align: left; }
+    .summary-patients-title { font-family: 'Montserrat', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: rgba(255,255,255,0.3); margin-bottom: 14px; }
+    .summary-patient-row { display: flex; justify-content: space-between; align-items: center; padding: 9px 0; border-bottom: 1px solid rgba(255,255,255,0.06); font-size: 13px; }
+    .summary-patient-row:last-child { border-bottom: none; }
+    .summary-patient-name { color: rgba(255,255,255,0.75); }
+    .summary-patient-status { font-family: 'Montserrat', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.08em; }
+    .spd-done { color: var(--green); }
+    .spd-skip { color: rgba(255,255,255,0.3); }
   </style>
 </head>
 <body>
@@ -359,27 +531,95 @@
       <div class="auth-sub">Enter your physician credentials to continue.</div>
       <div class="fgroup">
         <label class="flabel" for="d-email">Email Address</label>
-        <input class="finput" id="d-email" type="email" placeholder="doctor@delosreyes.com" value="santos@delosreyes.com">
-      </div>
-      <div class="fgroup">
-        <label class="flabel" for="d-pass">Password</label>
-        <input class="finput" id="d-pass" type="password" placeholder="Your password" value="doctor1234">
+        <input class="finput" id="d-email" type="email" placeholder="doctor@delosreyes.com">
       </div>
       <div class="fgroup" style="margin-bottom:28px;">
-        <label class="flabel" for="d-role">Login As</label>
-        <select class="finput" id="d-role">
-          <option value="Dr. Maria C. Santos — Internal Medicine">Dr. Maria C. Santos — Internal Medicine</option>
-          <option value="Dr. Juan B. dela Cruz — Pediatrics">Dr. Juan B. dela Cruz — Pediatrics</option>
-          <option value="Dr. Ana P. Reyes — OB-Gynecology">Dr. Ana P. Reyes — OB-Gynecology</option>
-        </select>
+        <label class="flabel" for="d-pass">Password</label>
+        <div style="position:relative;">
+          <input class="finput" id="d-pass" type="password" placeholder="Your password" style="padding-right:44px;">
+          <button type="button" onclick="toggleDocPass()" id="docPassToggle" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;padding:4px;color:var(--gray);">
+            <svg id="docPassEye" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
       </div>
-      <button class="btn btn-crimson btn-full" style="padding:13px;" onclick="doDocLogin()">Sign In to Doctor Portal</button>
+      <button class="btn btn-crimson btn-full" id="docLoginBtn" style="padding:13px;" disabled onclick="doDocLogin()">Connecting…</button>
       <div style="margin-top:20px;text-align:center;">
         <a href="index.html" style="font-size:12px;color:var(--gray);text-decoration:none;">← Back to main website</a>
         &nbsp;|&nbsp;
         <a href="patient-portal.html" style="font-size:12px;color:var(--gray);text-decoration:none;">Patient Portal</a>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- ── START QUEUE SCREEN ── -->
+<div class="start-screen" id="startScreen">
+  <div class="start-orb"></div>
+  <div class="start-card">
+    <img class="start-logo" src="brand_assets/brand_logo.jpg" alt="Logo">
+    <div class="start-greeting" id="startGreeting">Good morning, Dr. Santos!</div>
+    <div class="start-date" id="startDate">Tuesday, May 27, 2026 · Internal Medicine</div>
+    <div class="start-stats">
+      <div class="start-stat">
+        <div class="start-stat-val">6</div>
+        <div class="start-stat-lbl">Scheduled Today</div>
+      </div>
+      <div class="start-stat">
+        <div class="start-stat-val">2</div>
+        <div class="start-stat-lbl">Reserved Slots</div>
+      </div>
+      <div class="start-stat">
+        <div class="start-stat-val">9AM</div>
+        <div class="start-stat-lbl">First Patient</div>
+      </div>
+    </div>
+    <button class="start-btn" onclick="startQueue()">Start Today's Queue →</button>
+    <div style="margin-top:16px;">
+      <a href="index.html" style="font-size:12px;color:rgba(255,255,255,0.25);text-decoration:none;">← Back to main site</a>
+    </div>
+  </div>
+</div>
+
+<!-- ── TAKE A BREAK MODAL ── -->
+<div class="modal-overlay" id="breakModal">
+  <div class="modal-card">
+    <div class="modal-title">Take a Break</div>
+    <div class="modal-sub">Patients' appointment times will be automatically pushed forward by your break duration.</div>
+    <div class="break-opts" id="breakOpts">
+      <div class="break-opt" onclick="selectBreak(this,15)"><div class="break-opt-time">15</div><div class="break-opt-lbl">minutes</div></div>
+      <div class="break-opt selected" onclick="selectBreak(this,30)"><div class="break-opt-time">30</div><div class="break-opt-lbl">minutes</div></div>
+      <div class="break-opt" onclick="selectBreak(this,60)"><div class="break-opt-time">60</div><div class="break-opt-lbl">minutes</div></div>
+    </div>
+    <div class="modal-btns">
+      <button class="btn btn-ghost btn-full" onclick="closeBreakModal()">Cancel</button>
+      <button class="btn btn-full" style="background:#F59E0B;color:#fff;border:none;" onclick="confirmBreak()">Start Break</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── SESSION SUMMARY OVERLAY ── -->
+<div class="summary-overlay" id="summaryOverlay">
+  <div class="summary-card">
+    <div class="summary-icon">
+      <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+    </div>
+    <div class="summary-title">Session Complete</div>
+    <div class="summary-date" id="summaryDate">Tuesday, May 27, 2026</div>
+    <div class="summary-stats">
+      <div class="summary-stat"><div class="summary-stat-val" id="sumSeen">6</div><div class="summary-stat-lbl">Patients Seen</div></div>
+      <div class="summary-stat"><div class="summary-stat-val" id="sumSkip">1</div><div class="summary-stat-lbl">No-Shows</div></div>
+      <div class="summary-stat"><div class="summary-stat-val" id="sumTime">~25m</div><div class="summary-stat-lbl">Avg. Time</div></div>
+    </div>
+    <div class="summary-patients">
+      <div class="summary-patients-title">Patients Consulted Today</div>
+      <div class="summary-patient-row"><span class="summary-patient-name">Ana Rivera</span><span class="summary-patient-status spd-done">Completed</span></div>
+      <div class="summary-patient-row"><span class="summary-patient-name">Ben Marcos</span><span class="summary-patient-status spd-done">Completed</span></div>
+      <div class="summary-patient-row"><span class="summary-patient-name">Clara Tan</span><span class="summary-patient-status spd-done">Completed</span></div>
+      <div class="summary-patient-row"><span class="summary-patient-name">Diego Reyes</span><span class="summary-patient-status spd-done">Completed</span></div>
+      <div class="summary-patient-row"><span class="summary-patient-name">Elena Santos</span><span class="summary-patient-status spd-done">Completed</span></div>
+      <div class="summary-patient-row"><span class="summary-patient-name">Felix Cruz</span><span class="summary-patient-status spd-skip">No-Show</span></div>
+    </div>
+    <button class="btn btn-crimson btn-full" style="padding:14px;" onclick="signOutFromSummary()">Done &amp; Sign Out</button>
   </div>
 </div>
 
@@ -395,7 +635,7 @@
         <a class="active" onclick="showView('queue')">
           <svg fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
           Today's Queue
-          <span class="sidebar-queue-badge" id="queueBadge">4</span>
+          <span class="sidebar-queue-badge" id="queueBadge">0</span>
         </a>
       </li>
       <li>
@@ -413,7 +653,7 @@
     </ul>
     <div class="sidebar-bottom">
       <div class="sidebar-doc-card">
-        <div class="doc-av" id="docAvatar">MS</div>
+        <img class="doc-av" id="docAvatar" src="doctors/images.jpg" alt="Doctor">
         <div>
           <div class="doc-sidebar-name" id="docSidebarName">Dr. M. Santos</div>
           <div class="doc-sidebar-spec" id="docSidebarSpec">Internal Medicine</div>
@@ -433,8 +673,13 @@
         <div class="main-header-sub" id="viewSub">Tuesday, May 27, 2026 · Internal Medicine</div>
       </div>
       <div style="display:flex;gap:10px;align-items:center;">
-        <div style="font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;color:var(--green);background:var(--green-tint);padding:6px 14px;border-radius:100px;">● Available</div>
+        <div id="docStatusPill" style="font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;color:var(--green);background:var(--green-tint);padding:6px 14px;border-radius:100px;">● Available</div>
+        <button class="btn btn-sm" style="background:rgba(255,193,7,0.15);color:#B8860B;border:none;font-size:11px;" onclick="openBreakModal()">Take a Break</button>
+        <button class="btn btn-crimson btn-sm" onclick="openEndSessionModal()">End Session</button>
         <a href="index.html" class="btn btn-ghost btn-sm">← Main Site</a>
+        <button class="hamburger-btn" onclick="openDrawer()">
+          <span></span><span></span><span></span>
+        </button>
       </div>
     </header>
 
@@ -444,22 +689,22 @@
       <div class="view active" id="view-queue">
         <div class="stats-row" style="margin-bottom:20px;">
           <div class="stat-card">
-            <div class="stat-val">4</div>
+            <div class="stat-val" id="inQueueCount">0</div>
             <div class="stat-lbl">Patients in Queue</div>
             <div class="stat-delta">Remaining today</div>
           </div>
           <div class="stat-card">
-            <div class="stat-val" id="seenCount">2</div>
+            <div class="stat-val" id="seenCount">0</div>
             <div class="stat-lbl">Patients Seen</div>
             <div class="stat-delta" style="color:var(--green);">Completed today</div>
           </div>
           <div class="stat-card">
-            <div class="stat-val">6</div>
+            <div class="stat-val" id="totalTodayCount">—</div>
             <div class="stat-lbl">Total Today</div>
             <div class="stat-delta">Scheduled</div>
           </div>
           <div class="stat-card">
-            <div class="stat-val">~25m</div>
+            <div class="stat-val" id="avgConsultVal">—</div>
             <div class="stat-lbl">Avg. Consult Time</div>
             <div class="stat-delta">Per patient</div>
           </div>
@@ -471,62 +716,21 @@
             <div class="queue-panel">
               <div class="queue-panel-header">
                 <div class="queue-panel-title">Patient Queue</div>
-                <div class="queue-count" id="qCount">4 waiting</div>
+                <div class="queue-count" id="qCount">0 waiting</div>
               </div>
               <div class="queue-list" id="queueList">
-                <div class="queue-item active" data-idx="0" onclick="selectPatient(0)">
-                  <div class="q-num">Q3</div>
-                  <div>
-                    <div class="q-name">Ana Rivera</div>
-                    <div class="q-time">10:30 AM · Hypertension follow-up</div>
-                  </div>
-                  <span class="badge badge-crimson q-status">Now</span>
-                </div>
-                <div class="queue-item" data-idx="1" onclick="selectPatient(1)">
-                  <div class="q-num">Q4</div>
-                  <div>
-                    <div class="q-name">Ben Marcos</div>
-                    <div class="q-time">11:00 AM · Chest pain evaluation</div>
-                  </div>
-                  <span class="badge badge-yellow q-status">Next</span>
-                </div>
-                <div class="queue-item" data-idx="2" onclick="selectPatient(2)">
-                  <div class="q-num">Q5</div>
-                  <div>
-                    <div class="q-name">Clara Tan</div>
-                    <div class="q-time">11:30 AM · Diabetes management</div>
-                  </div>
-                  <span class="badge badge-gray q-status">Waiting</span>
-                </div>
-                <div class="queue-item" data-idx="3" onclick="selectPatient(3)">
-                  <div class="q-num">Q6</div>
-                  <div>
-                    <div class="q-name">David Reyes</div>
-                    <div class="q-time">12:00 PM · Annual check-up</div>
-                  </div>
-                  <span class="badge badge-gray q-status">Waiting</span>
-                </div>
-                <div class="queue-item done" data-idx="4">
-                  <div class="q-num">Q1</div>
-                  <div>
-                    <div class="q-name">Maria Cruz</div>
-                    <div class="q-time">9:00 AM · Completed</div>
-                  </div>
-                  <span class="badge badge-green q-status">Done</span>
-                </div>
-                <div class="queue-item done" data-idx="5">
-                  <div class="q-num">Q2</div>
-                  <div>
-                    <div class="q-name">Jose Santos</div>
-                    <div class="q-time">9:30 AM · Completed</div>
-                  </div>
-                  <span class="badge badge-green q-status">Done</span>
-                </div>
+                <div style="padding:24px;text-align:center;color:var(--gray);font-size:13px;">Queue loading…</div>
               </div>
-              <button class="queue-call-btn" onclick="callNext()">
-                <svg fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
-                Call Next Patient
-              </button>
+              <div style="padding:8px 12px 4px;display:flex;gap:8px;">
+                <button class="queue-call-btn" style="flex:1;" onclick="callNext()">
+                  <svg fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+                  Call Next Patient
+                </button>
+                <button class="queue-call-btn" style="flex:1;color:var(--gray);border-color:rgba(0,0,0,0.12);" onclick="markNoShow()">
+                  <svg fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+                  No-Show
+                </button>
+              </div>
             </div>
           </div>
 
@@ -534,20 +738,20 @@
           <div class="patient-panel">
             <!-- Current Patient Header -->
             <div class="patient-header-card">
-              <div class="patient-av" id="patientAv">AR</div>
+              <div class="patient-av" id="patientAv" style="background-size:cover;background-position:center;"></div>
               <div style="flex:1;">
-                <div class="patient-hd-name" id="patientName">Ana Rivera</div>
-                <div class="patient-hd-meta" id="patientMeta">F · 45 yrs · Appt #DRD-2026-1034</div>
+                <div class="patient-hd-name" id="patientName">Select a patient</div>
+                <div class="patient-hd-meta" id="patientMeta">—</div>
                 <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;">
-                  <div class="pinfo-card" style="padding:6px 12px;"><div class="pinfo-val" style="font-size:11px;">🩸 A+</div><div class="pinfo-label">Blood Type</div></div>
-                  <div class="pinfo-card" style="padding:6px 12px;"><div class="pinfo-val" style="font-size:11px;">No known allergies</div><div class="pinfo-label">Allergies</div></div>
-                  <div class="pinfo-card" style="padding:6px 12px;"><div class="pinfo-val" style="font-size:11px;">Hypertension</div><div class="pinfo-label">Existing Conditions</div></div>
+                  <div class="pinfo-card" style="padding:6px 12px;"><div class="pinfo-val" id="ptBloodType" style="font-size:11px;">—</div><div class="pinfo-label">Blood Type</div></div>
+                  <div class="pinfo-card" style="padding:6px 12px;"><div class="pinfo-val" id="ptAllergies" style="font-size:11px;">—</div><div class="pinfo-label">Allergies</div></div>
+                  <div class="pinfo-card" style="padding:6px 12px;"><div class="pinfo-val" id="ptConditions" style="font-size:11px;">—</div><div class="pinfo-label">Conditions</div></div>
                 </div>
               </div>
               <div>
                 <div style="font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.3);margin-bottom:6px;">Queue</div>
-                <div style="font-family:'Montserrat',sans-serif;font-weight:900;font-size:36px;color:var(--crimson);">Q3</div>
-                <div style="font-size:11px;color:rgba(255,255,255,0.35);" id="patientTime">10:30 AM</div>
+                <div id="patientQNum" style="font-family:'Montserrat',sans-serif;font-weight:900;font-size:36px;color:var(--crimson);">—</div>
+                <div style="font-size:11px;color:rgba(255,255,255,0.35);" id="patientTime">—</div>
               </div>
             </div>
 
@@ -559,14 +763,63 @@
               </div>
               <div class="reason-box" id="patientReason">
                 <div class="reason-label">Patient's Description</div>
-                <div class="reason-text">Patient reports persistent headache and morning blood pressure readings consistently above 150/95 mmHg. On Amlodipine 5mg — concerned about efficacy. Requesting medication review.</div>
+                <div class="reason-text" id="patientReasonText">No patient selected.</div>
               </div>
               <div style="margin-top:16px;">
-                <div style="font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--gray);margin-bottom:10px;">Previous Visits</div>
-                <div style="display:flex;gap:8px;flex-wrap:wrap;">
-                  <span class="badge badge-blue">May 12, 2026</span>
-                  <span class="badge badge-gray">Mar 5, 2026</span>
-                  <span class="badge badge-gray">Jan 20, 2026</span>
+                <div style="font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--gray);margin-bottom:10px;">Previous Visits <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:10px;">(click to expand)</span></div>
+                <div class="prev-visits-panel" id="prevVisitsPanel">
+                  <div style="font-size:12px;color:var(--gray);padding:4px 0;">No previous visits.</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Vitals -->
+            <div class="card">
+              <div class="card-title">
+                <svg width="17" height="17" fill="none" stroke="var(--crimson)" stroke-width="2" stroke-linecap="round" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                Vitals
+              </div>
+              <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:14px;">
+                <div class="fgroup" style="margin-bottom:0;">
+                  <label class="flabel">Blood Pressure</label>
+                  <div style="display:flex;align-items:center;gap:4px;">
+                    <input class="finput" id="v-sys" type="number" placeholder="120" style="text-align:center;padding:9px 4px;" oninput="checkVital('v-sys',90,130,'vh-sys')">
+                    <span style="color:var(--gray);font-weight:700;font-size:16px;flex-shrink:0;">/</span>
+                    <input class="finput" id="v-dia" type="number" placeholder="80" style="text-align:center;padding:9px 4px;" oninput="checkVital('v-dia',60,85,'vh-dia')">
+                  </div>
+                  <div style="font-size:10px;color:var(--gray);text-align:center;margin-top:3px;">mmHg</div>
+                  <div class="vitals-hint" id="vh-sys">Normal: 90–130 sys</div>
+                  <div class="vitals-hint" id="vh-dia">Normal: 60–85 dia</div>
+                </div>
+                <div class="fgroup" style="margin-bottom:0;">
+                  <label class="flabel">Heart Rate</label>
+                  <input class="finput" id="v-hr" type="number" placeholder="72" style="text-align:center;" oninput="checkVital('v-hr',60,100,'vh-hr')">
+                  <div style="font-size:10px;color:var(--gray);text-align:center;margin-top:3px;">bpm</div>
+                  <div class="vitals-hint" id="vh-hr">Normal: 60–100 bpm</div>
+                </div>
+                <div class="fgroup" style="margin-bottom:0;">
+                  <label class="flabel">Temperature</label>
+                  <input class="finput" id="v-temp" type="number" placeholder="36.6" step="0.1" style="text-align:center;" oninput="checkVital('v-temp',36.0,37.5,'vh-temp')">
+                  <div style="font-size:10px;color:var(--gray);text-align:center;margin-top:3px;">°C</div>
+                  <div class="vitals-hint" id="vh-temp">Normal: 36.0–37.5 °C</div>
+                </div>
+                <div class="fgroup" style="margin-bottom:0;">
+                  <label class="flabel">SpO₂</label>
+                  <input class="finput" id="v-spo2" type="number" placeholder="98" min="0" max="100" style="text-align:center;" oninput="checkVital('v-spo2',95,100,'vh-spo2')">
+                  <div style="font-size:10px;color:var(--gray);text-align:center;margin-top:3px;">%</div>
+                  <div class="vitals-hint" id="vh-spo2">Normal: 95–100 %</div>
+                </div>
+              </div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+                <div class="fgroup" style="margin-bottom:0;">
+                  <label class="flabel">Weight</label>
+                  <input class="finput" id="v-wt" type="number" placeholder="65" step="0.5" style="text-align:center;">
+                  <div style="font-size:10px;color:var(--gray);text-align:center;margin-top:3px;">kg</div>
+                </div>
+                <div class="fgroup" style="margin-bottom:0;">
+                  <label class="flabel">Height</label>
+                  <input class="finput" id="v-ht" type="number" placeholder="165" style="text-align:center;">
+                  <div style="font-size:10px;color:var(--gray);text-align:center;margin-top:3px;">cm</div>
                 </div>
               </div>
             </div>
@@ -579,29 +832,28 @@
               </div>
               <div class="fgroup">
                 <label class="flabel">Diagnosis</label>
-                <textarea class="finput" id="ehr-diagnosis" placeholder="Enter primary diagnosis…">Hypertension Stage 1 — inadequate control on current dose</textarea>
+                <textarea class="finput" id="ehr-diagnosis" placeholder="Enter primary diagnosis…"></textarea>
               </div>
               <div class="fgroup">
                 <label class="flabel">Clinical Notes</label>
-                <textarea class="finput" id="ehr-notes" style="min-height:100px;" placeholder="Clinical observations, vitals, examination findings…">BP: 154/96 mmHg. HR: 82 bpm. Patient alert and oriented. No signs of end-organ damage. Compliance confirmed — takes medication daily.</textarea>
+                <textarea class="finput" id="ehr-notes" style="min-height:100px;" placeholder="Clinical observations, vitals, examination findings…"></textarea>
               </div>
               <div class="frow">
                 <div class="fgroup">
                   <label class="flabel">Prescription</label>
-                  <textarea class="finput" id="ehr-rx" placeholder="Medications prescribed…">Amlodipine 10mg OD (dose increased)
-Losartan 50mg OD (continue)</textarea>
+                  <textarea class="finput" id="ehr-rx" placeholder="Medications prescribed…"></textarea>
                 </div>
                 <div class="fgroup">
                   <label class="flabel">Treatment Plan</label>
-                  <textarea class="finput" id="ehr-treatment" placeholder="Treatment plan…">Low-sodium diet strict compliance. Daily aerobic exercise. Home BP monitoring BID.</textarea>
+                  <textarea class="finput" id="ehr-treatment" placeholder="Treatment plan…"></textarea>
                 </div>
               </div>
               <div class="fgroup">
                 <label class="flabel">Follow-Up Instructions</label>
-                <textarea class="finput" id="ehr-followup" placeholder="Instructions for next visit…">Return in 2 weeks for BP recheck. Go to ER if BP exceeds 170/110 or develops severe headache, vision changes.</textarea>
+                <textarea class="finput" id="ehr-followup" placeholder="Instructions for next visit…"></textarea>
               </div>
               <div class="ehr-actions">
-                <button class="btn btn-ghost btn-sm" onclick="showToast('Draft saved')">Save Draft</button>
+                <button class="btn btn-ghost btn-sm" onclick="saveDraft()">Save Draft</button>
                 <button class="btn btn-dark btn-sm" onclick="saveAndComplete()">Save EHR &amp; Mark Complete</button>
               </div>
             </div>
@@ -612,46 +864,15 @@ Losartan 50mg OD (continue)</textarea>
       <!-- ── SCHEDULE VIEW ── -->
       <div class="view" id="view-schedule">
         <div class="card" style="margin-bottom:20px;">
-          <div class="card-title">Week of May 27, 2026 — <span id="scheduleDocName" style="color:var(--crimson);">Dr. Maria C. Santos</span></div>
-          <div class="schedule-grid">
-            <div class="day-col">
-              <div class="day-header today">Mon</div>
-              <div class="day-slot booked">9:00 AM – Maria Cruz</div>
-              <div class="day-slot booked">9:30 AM – Jose Santos</div>
-              <div class="day-slot booked">10:30 AM – Ana Rivera</div>
-              <div class="day-slot available">11:00 AM – Available</div>
-              <div class="day-slot booked">1:00 PM – Ben Marcos</div>
-              <div class="day-slot available">2:00 PM – Available</div>
-            </div>
-            <div class="day-col">
-              <div class="day-header">Tue</div>
-              <div class="day-slot booked">9:00 AM – Carlos Lim</div>
-              <div class="day-slot available">10:00 AM – Available</div>
-              <div class="day-slot available">11:00 AM – Available</div>
-              <div class="day-slot booked">2:00 PM – Rosa Tan</div>
-            </div>
-            <div class="day-col">
-              <div class="day-header">Wed</div>
-              <div class="day-slot booked">9:00 AM – Elena Ramos</div>
-              <div class="day-slot available">10:00 AM – Available</div>
-              <div class="day-slot booked">3:00 PM – Diego Reyes</div>
-            </div>
-            <div class="day-col">
-              <div class="day-header">Thu</div>
-              <div class="day-slot available">9:00 AM – Available</div>
-              <div class="day-slot available">10:00 AM – Available</div>
-              <div class="day-slot booked">1:00 PM – Felix Cruz</div>
-            </div>
-            <div class="day-col">
-              <div class="day-header">Fri</div>
-              <div class="day-slot booked">9:00 AM – Gloria Uy</div>
-              <div class="day-slot available">10:00 AM – Available</div>
-              <div class="day-slot available">3:00 PM – Available</div>
-            </div>
-            <div class="day-col">
-              <div class="day-header">Sat</div>
-              <div class="day-slot" style="color:var(--gray);font-style:italic;">Off Day</div>
-            </div>
+          <div class="card-title" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+            <span id="scheduleWeekLabel">Current Week</span> —
+            <span style="display:flex;align-items:center;gap:8px;color:var(--crimson);">
+              <img id="scheduleDocPhoto" src="doctors/images.jpg" style="width:26px;height:26px;border-radius:50%;object-fit:cover;object-position:top;border:1.5px solid var(--crimson);" alt="Doctor">
+              <span id="scheduleDocName">Dr. Maria C. Santos</span>
+            </span>
+          </div>
+          <div class="schedule-grid" id="scheduleGrid">
+            <!-- populated by buildSchedule() -->
           </div>
         </div>
       </div>
@@ -659,50 +880,20 @@ Losartan 50mg OD (continue)</textarea>
       <!-- ── PATIENT HISTORY VIEW ── -->
       <div class="view" id="view-history">
         <div class="hist-search">
-          <input class="finput" id="histSearch" placeholder="Search patient by name or ID…" oninput="filterHistory()">
-          <button class="btn btn-ghost btn-sm">Filter</button>
+          <input class="finput" id="histSearch" placeholder="Search by name, diagnosis, or visit info…" oninput="filterHistory()">
+          <div class="hist-filter-wrap">
+            <button class="btn btn-ghost btn-sm" onclick="toggleHistFilter(this)">Filter ▾</button>
+            <div class="hist-filter-dd" id="histFilterDd">
+              <div class="hist-filter-opt active" onclick="setHistFilter(this,'All')">All Patients</div>
+              <div class="hist-filter-opt" onclick="setHistFilter(this,'Active Patient')">Active</div>
+              <div class="hist-filter-opt" onclick="setHistFilter(this,'Pending Follow-up')">Pending Follow-up</div>
+              <div class="hist-filter-opt" onclick="setHistFilter(this,'Completed Today')">Completed Today</div>
+              <div class="hist-filter-opt" onclick="setHistFilter(this,'New Patient')">New Patient</div>
+            </div>
+          </div>
         </div>
         <div id="histList">
-          <div class="hist-item" data-name="ana rivera">
-            <div class="hist-av" style="background:var(--crimson);">AR</div>
-            <div>
-              <div class="hist-name">Ana Rivera</div>
-              <div class="hist-meta">Last visit: May 27, 2026 · 5 visits total · Hypertension</div>
-            </div>
-            <div class="hist-badge"><span class="badge badge-blue">Active Patient</span></div>
-          </div>
-          <div class="hist-item" data-name="ben marcos">
-            <div class="hist-av" style="background:#4A5568;">BM</div>
-            <div>
-              <div class="hist-name">Ben Marcos</div>
-              <div class="hist-meta">Last visit: Apr 15, 2026 · 2 visits total · Chest Pain Evaluation</div>
-            </div>
-            <div class="hist-badge"><span class="badge badge-yellow">Pending Follow-up</span></div>
-          </div>
-          <div class="hist-item" data-name="clara tan">
-            <div class="hist-av" style="background:var(--green);">CT</div>
-            <div>
-              <div class="hist-name">Clara Tan</div>
-              <div class="hist-meta">Last visit: Mar 22, 2026 · 8 visits total · Type 2 Diabetes</div>
-            </div>
-            <div class="hist-badge"><span class="badge badge-blue">Active Patient</span></div>
-          </div>
-          <div class="hist-item" data-name="david reyes">
-            <div class="hist-av" style="background:#805AD5;">DR</div>
-            <div>
-              <div class="hist-name">David Reyes</div>
-              <div class="hist-meta">Last visit: Jan 10, 2026 · 1 visit total · Annual Check-up</div>
-            </div>
-            <div class="hist-badge"><span class="badge badge-gray">New Patient</span></div>
-          </div>
-          <div class="hist-item" data-name="maria cruz">
-            <div class="hist-av" style="background:var(--crimson);">MC</div>
-            <div>
-              <div class="hist-name">Maria Cruz</div>
-              <div class="hist-meta">Last visit: May 27, 2026 · 12 visits total · Hypertension, GERD</div>
-            </div>
-            <div class="hist-badge"><span class="badge badge-green">Completed Today</span></div>
-          </div>
+          <div style="padding:32px;text-align:center;color:var(--gray);font-size:13px;">Loading patient history…</div>
         </div>
       </div>
 
@@ -710,38 +901,541 @@ Losartan 50mg OD (continue)</textarea>
   </div>
 </div>
 
+<!-- ── END SESSION MODAL ── -->
+<div class="modal-overlay" id="endSessionModal">
+  <div class="modal-card">
+    <div class="modal-title">End Today's Session?</div>
+    <div class="modal-sub">This will close the queue and generate a session summary. Any unsaved EHR data will be lost.</div>
+    <div class="modal-btns">
+      <button class="btn btn-ghost btn-sm" onclick="closeEndSessionModal()">Cancel</button>
+      <button class="btn btn-crimson btn-sm" onclick="doEndSession()">End Session</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── MOBILE DRAWER ── -->
+<div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()"></div>
+<aside class="sidebar-drawer" id="sidebarDrawer">
+  <div class="sidebar-brand" style="padding:18px;">
+    <img src="brand_assets/brand_logo.jpg" style="width:36px;height:36px;object-fit:contain;border-radius:6px;" alt="Logo">
+    <div><span class="sb-name">DRD Clinic</span><span class="sb-sub">Doctor Portal</span></div>
+    <button onclick="closeDrawer()" style="margin-left:auto;background:none;border:none;color:rgba(255,255,255,0.5);font-size:20px;cursor:pointer;">×</button>
+  </div>
+  <ul class="sidebar-nav" style="margin-top:8px;">
+    <li><a onclick="showView('queue');closeDrawer()">
+      <svg fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/></svg>
+      Today's Queue
+    </a></li>
+    <li><a onclick="showView('schedule');closeDrawer()">
+      <svg fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      My Schedule
+    </a></li>
+    <li><a onclick="showView('history');closeDrawer()">
+      <svg fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      Patient History
+    </a></li>
+  </ul>
+</aside>
+
 <div class="toast" id="toast"><div class="toast-dot"></div><span id="toastMsg">Done</span></div>
 
 <script>
-  const patients = [
-    { initials:'AR', name:'Ana Rivera', meta:'F · 45 yrs · Appt #DRD-2026-1034', time:'10:30 AM', reason:'Patient reports persistent headache and morning blood pressure readings consistently above 150/95 mmHg. Requesting medication review.' },
-    { initials:'BM', name:'Ben Marcos', meta:'M · 58 yrs · Appt #DRD-2026-1035', time:'11:00 AM', reason:'Intermittent chest tightness on exertion for the past 2 weeks. No prior cardiac history. Non-smoker.' },
-    { initials:'CT', name:'Clara Tan', meta:'F · 62 yrs · Appt #DRD-2026-1036', time:'11:30 AM', reason:'Regular diabetes management visit. Home glucose readings averaging 180 mg/dL fasting — above target range.' },
-    { initials:'DR', name:'David Reyes', meta:'M · 34 yrs · Appt #DRD-2026-1037', time:'12:00 PM', reason:'Annual physical examination. No current complaints. Patient wants full blood workup.' },
-  ];
-  let currentPatientIdx = 0;
-  let seenCount = 2;
+  // ── STATE ──
+  let sessionActive    = false;
+  let selectedBreakMins= 30;
+  let currentDocName   = '';
+  let currentDocSpec   = '';
+  let currentDocId     = null;
+  let currentDocRecord = null;
+  let _liveQueue       = [];
+  let _activeEntry     = null;
 
-  function doDocLogin() {
-    const roleEl = document.getElementById('d-role');
-    const role = roleEl.value;
-    const parts = role.split(' — ');
-    const name = parts[0];
-    const spec = parts[1];
-    const initials = name.replace('Dr. ', '').split(' ').map(p => p[0]).join('').slice(0,2);
-    document.getElementById('docAvatar').textContent = initials;
-    document.getElementById('docSidebarName').textContent = name.split(' ').slice(0,3).join(' ');
-    document.getElementById('docSidebarSpec').textContent = spec;
-    document.getElementById('viewSub').textContent = 'Tuesday, May 27, 2026 · ' + spec;
-    document.getElementById('scheduleDocName').textContent = name;
-    document.getElementById('loginScreen').style.display = 'none';
-    document.getElementById('doctorApp').classList.add('active');
-    showToast('Welcome back, ' + name.split(' ').slice(0,2).join(' ') + '!');
+  // ── HELPERS ──
+  function calcAge(dob) {
+    if (!dob) return '—';
+    const diff = Date.now() - new Date(dob).getTime();
+    return Math.floor(diff / (365.25 * 24 * 3600 * 1000));
+  }
+  function fmtDate(ds) {
+    if (!ds) return '—';
+    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const [y, m, d] = ds.split('-');
+    return months[parseInt(m,10)-1] + ' ' + parseInt(d,10) + ', ' + y;
   }
 
-  function doLogout() {
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && document.getElementById('loginScreen').style.display !== 'none') doDocLogin();
+  });
+
+  function toggleDocPass() {
+    const inp = document.getElementById('d-pass');
+    inp.type = inp.type === 'password' ? 'text' : 'password';
+    document.getElementById('docPassEye').style.opacity = inp.type === 'text' ? '0.4' : '1';
+  }
+
+  let _docLoggingIn = false;
+  async function doDocLogin() {
+    if (_docLoggingIn) return;
+    const email = document.getElementById('d-email').value.trim();
+    const pass  = document.getElementById('d-pass').value;
+    if (!email || !pass) { showToast('Please enter your credentials'); return; }
+    const btn = document.getElementById('docLoginBtn');
+    _docLoggingIn = true;
+    btn.disabled = true;
+    btn.innerHTML = '<span style="display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,0.35);border-top-color:#fff;border-radius:50%;animation:spin 0.7s linear infinite;vertical-align:middle;"></span>&nbsp;Signing in…';
+    try {
+      const { data, error } = await db.auth.signInWithPassword({ email, password: pass });
+      if (error) throw error;
+      const { data: profile } = await db.from('profiles').select('*').eq('id', data.user.id).single();
+      if (profile?.role !== 'doctor') {
+        await db.auth.signOut(); showToast('This portal is for doctors only.');
+        btn.disabled = false; btn.textContent = 'Sign In to Doctor Portal'; _docLoggingIn = false; return;
+      }
+      const { data: docRecord } = await db.from('doctors').select('*').eq('profile_id', data.user.id).maybeSingle();
+      if (!docRecord) {
+        await db.auth.signOut(); showToast('Doctor record not linked. Ask admin to link your profile.');
+        btn.disabled = false; btn.textContent = 'Sign In to Doctor Portal'; _docLoggingIn = false; return;
+      }
+      const firstName = profile.first_name || docRecord.first_name || '';
+      const lastName  = profile.last_name  || docRecord.last_name  || '';
+      currentDocName   = 'Dr. ' + firstName + ' ' + lastName;
+      currentDocSpec   = docRecord.specialty || 'General Practice';
+      currentDocId     = docRecord.id;
+      currentDocRecord = docRecord;
+      localStorage.setItem('drd-role',   'doctor');
+      localStorage.setItem('drd-uid',    data.user.id);
+      localStorage.setItem('drd-doc-id', docRecord.id);
+      showStartScreen();
+    } catch(e) {
+      showToast(e.message || 'Invalid credentials');
+      btn.disabled = false; btn.textContent = 'Sign In to Doctor Portal';
+    } finally {
+      _docLoggingIn = false;
+    }
+  }
+
+  async function showStartScreen() {
+    const now    = new Date();
+    const days   = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+    const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    document.getElementById('startGreeting').textContent = 'Good ' + (now.getHours()<12?'morning':now.getHours()<17?'afternoon':'evening') + ', ' + currentDocName.split(' ').slice(0,3).join(' ') + '!';
+    document.getElementById('startDate').textContent = days[now.getDay()] + ', ' + months[now.getMonth()] + ' ' + now.getDate() + ', ' + now.getFullYear() + ' · ' + currentDocSpec;
+    // Load today's stats for this doctor
+    if (currentDocId) {
+      try {
+        const today = new Date().toISOString().slice(0, 10);
+        const { data: todayAppts } = await db.from('appointments')
+          .select('id, time, status')
+          .eq('doctor_id', currentDocId).eq('date', today)
+          .in('status', ['Confirmed','Pending','Checked In','In Session']);
+        const cnt = todayAppts?.length || 0;
+        const firstTime = todayAppts?.sort((a,b)=>a.time<b.time?-1:1)[0]?.time || '—';
+        const statVals = document.querySelectorAll('.start-stat-val');
+        if (statVals[0]) statVals[0].textContent = cnt;
+        if (statVals[2]) statVals[2].textContent = firstTime.length === 5 ? (() => {
+          const [h,m] = firstTime.split(':'); const hr=parseInt(h); return (hr%12||12)+':'+ m+(hr<12?'AM':'PM');
+        })() : firstTime;
+      } catch(_) {}
+    }
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('startScreen').classList.add('active');
+  }
+
+  async function startQueue() {
+    if (!currentDocId) { showToast('No doctor session. Please log in again.'); return; }
+
+    const photoUrl = currentDocRecord?.photo_url || '';
+    const avEl = document.getElementById('docAvatar');
+    if (photoUrl) { avEl.src = photoUrl; } else { avEl.removeAttribute('src'); }
+    document.getElementById('docSidebarName').textContent = currentDocName.split(' ').slice(0,3).join(' ');
+    document.getElementById('docSidebarSpec').textContent = currentDocSpec;
+    const now = new Date();
+    const days  = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    document.getElementById('viewSub').textContent = days[now.getDay()] + ', ' + months[now.getMonth()] + ' ' + now.getDate() + ', ' + now.getFullYear() + ' · ' + currentDocSpec;
+    if (document.getElementById('scheduleDocName')) document.getElementById('scheduleDocName').textContent = currentDocName;
+    sessionActive = true;
+    sessionStorage.setItem('doc-session-active', '1');
+    document.getElementById('startScreen').classList.remove('active');
+    document.getElementById('doctorApp').classList.add('active');
+    buildSchedule();
+    await refreshDoctorQueue();
+    startRealtimeQueue();
+    const restoredHash = location.hash.slice(1);
+    if (restoredHash && viewTitles[restoredHash]) showView(restoredHash);
+    showToast('Session started. Queue is live!');
+  }
+
+  // ── REALTIME SUBSCRIPTION ────────────────────────────────
+  let _realtimeChannel = null;
+  function startRealtimeQueue() {
+    if (_realtimeChannel) { db.removeChannel(_realtimeChannel); }
+    _realtimeChannel = db.channel('doctor-queue-' + currentDocId)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'queue_entries',  filter: 'doctor_id=eq.' + currentDocId }, () => refreshDoctorQueue())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'appointments',   filter: 'doctor_id=eq.' + currentDocId }, () => refreshDoctorQueue())
+      .subscribe();
+  }
+
+  // ── LIVE QUEUE ────────────────────────────────────────────
+  async function refreshDoctorQueue() {
+    if (!currentDocId) return;
+    try {
+      const entries = await sbGetQueue(currentDocId);
+      _liveQueue = entries || [];
+      renderDoctorQueue(_liveQueue);
+      const inSession = _liveQueue.find(e => e.status === 'in_session');
+      if (inSession) { _activeEntry = inSession; loadPatientPanel(inSession); }
+      else if (!_activeEntry) clearPatientPanel();
+      // Sync Total Today stat
+      try {
+        const today = new Date().toISOString().slice(0, 10);
+        const { data: todayAppts } = await db.from('appointments').select('id,status').eq('doctor_id', currentDocId).eq('date', today).not('status','in','("Cancelled","No-Show")');
+        const totalEl = document.getElementById('totalTodayCount');
+        if (totalEl) totalEl.textContent = todayAppts?.length || 0;
+      } catch(_) {}
+    } catch(e) { showToast('Queue error: ' + e.message); }
+  }
+
+  function renderDoctorQueue(entries) {
+    const list = document.getElementById('queueList');
+    const waiting   = entries.filter(e => e.status === 'waiting').length;
+    const inSession = entries.filter(e => e.status === 'in_session').length;
+    const total     = waiting + inSession;
+    document.getElementById('qCount').textContent   = total + ' waiting';
+    document.getElementById('queueBadge').textContent = total;
+    const inQueueEl = document.getElementById('inQueueCount');
+    if (inQueueEl) inQueueEl.textContent = total;
+    const seenEl = document.getElementById('seenCount');
+    if (seenEl) seenEl.textContent = entries.filter(e => e.status === 'completed' || e.status === 'done').length;
+    if (!entries.length) {
+      list.innerHTML = '<div style="padding:28px 20px;text-align:center;color:var(--gray);font-size:13px;">No patients in queue.<br>Patients must be checked in by reception first.</div>';
+      return;
+    }
+    list.innerHTML = entries.map(e => {
+      const p    = e.patients;
+      const appt = e.appointments;
+      const name = p ? p.first_name + ' ' + p.last_name : '—';
+      const age  = p?.dob ? calcAge(p.dob) : '';
+      const sex  = p?.sex  ? p.sex[0].toUpperCase() : '';
+      const isNow  = e.status === 'in_session';
+      const isDone = e.status === 'completed' || e.status === 'no_show';
+      const typeTag = e.appointment_type === 'walk_in'
+        ? '<span class="badge badge-yellow" style="font-size:9px;padding:2px 6px;margin-left:4px;">WALK-IN</span>' : '';
+      let sb = '';
+      if (isNow)                                 sb = '<span class="badge badge-crimson q-status">Now</span>';
+      else if (e.status === 'waiting')           sb = '<span class="badge badge-gray q-status">Waiting</span>';
+      else if (e.status === 'completed')         sb = '<span class="badge badge-green q-status">Done</span>';
+      else if (e.status === 'no_show')           sb = '<span class="badge badge-gray q-status">No-Show</span>';
+      return `<div class="queue-item${isNow?' active':''}${isDone?' done':''}" data-entry-id="${e.id}" onclick="${!isDone?`selectQueueEntry('${e.id}')`:''}" style="cursor:${isDone?'default':'pointer'};">
+        <div class="q-num${isNow?' active':''}">${'Q'+String(e.queue_number).padStart(2,'0')}</div>
+        <div>
+          <div class="q-name">${name}${typeTag}${sex||age?`<span style="font-size:10px;color:var(--gray);font-weight:400;margin-left:4px;">${sex}${age?' · '+age+'y':''}</span>`:''}
+          </div>
+          <div class="q-time">${appt?.time||''} · ${appt?.purpose||'Visit'}</div>
+        </div>
+        ${sb}
+      </div>`;
+    }).join('');
+  }
+
+  function selectQueueEntry(entryId) {
+    const entry = _liveQueue.find(e => e.id === entryId);
+    if (!entry || entry.status === 'completed' || entry.status === 'no_show') return;
+    loadPatientPanel(entry);
+    document.querySelectorAll('.queue-item').forEach(el => {
+      el.classList.toggle('active', el.dataset.entryId === entryId);
+    });
+  }
+
+  function clearPatientPanel() {
+    const av = document.getElementById('patientAv');
+    av.textContent = '—'; av.style.backgroundImage = '';
+    document.getElementById('patientName').textContent = 'Select a patient';
+    document.getElementById('patientMeta').textContent = '—';
+    document.getElementById('patientQNum').textContent = '—';
+    document.getElementById('patientTime').textContent = '—';
+    document.getElementById('ptBloodType').textContent = '—';
+    document.getElementById('ptAllergies').textContent = '—';
+    document.getElementById('ptConditions').textContent= '—';
+    document.getElementById('patientReasonText').textContent = 'No patient selected.';
+    document.getElementById('prevVisitsPanel').innerHTML = '<div style="font-size:12px;color:var(--gray);padding:4px 0;">No previous visits.</div>';
+    ['ehr-diagnosis','ehr-notes','ehr-rx','ehr-treatment','ehr-followup'].forEach(id => document.getElementById(id).value='');
+    ['v-sys','v-dia','v-hr','v-temp','v-spo2','v-wt','v-ht'].forEach(id => document.getElementById(id).value='');
+  }
+
+  function loadPatientPanel(entry) {
+    _activeEntry = entry;
+    const p    = entry.patients;
+    const appt = entry.appointments;
+    if (!p) { clearPatientPanel(); return; }
+    const name     = p.first_name + ' ' + p.last_name;
+    const age      = calcAge(p.dob);
+    const initials = ((p.first_name[0]||'') + (p.last_name[0]||'')).toUpperCase();
+    const av = document.getElementById('patientAv');
+    if (p.photo_url) { av.textContent=''; av.style.backgroundImage=`url(${p.photo_url})`; av.style.backgroundSize='cover'; av.style.backgroundPosition='center'; }
+    else             { av.style.backgroundImage=''; av.textContent=initials; }
+    document.getElementById('patientName').textContent = name;
+    document.getElementById('patientMeta').textContent = (p.sex||'—') + ' · ' + age + ' yrs · Q' + String(entry.queue_number).padStart(2,'0');
+    document.getElementById('patientQNum').textContent = 'Q' + String(entry.queue_number).padStart(2,'0');
+    document.getElementById('patientTime').textContent = appt?.time || '—';
+    document.getElementById('ptBloodType').textContent = p.blood_type || 'Unknown';
+    document.getElementById('ptAllergies').textContent = p.allergies  || 'None known';
+    document.getElementById('ptConditions').textContent= p.medical_notes || 'None';
+    document.getElementById('patientReasonText').textContent = appt?.purpose || 'Walk-in visit';
+    ['ehr-diagnosis','ehr-notes','ehr-rx','ehr-treatment','ehr-followup'].forEach(id => document.getElementById(id).value='');
+    ['v-sys','v-dia','v-hr','v-temp','v-spo2','v-wt','v-ht'].forEach(id => document.getElementById(id).value='');
+    // Restore draft
+    const raw = localStorage.getItem('ehr-draft-' + p.id);
+    if (raw) { try { const d=JSON.parse(raw); document.getElementById('ehr-diagnosis').value=d.diagnosis||''; document.getElementById('ehr-notes').value=d.notes||''; document.getElementById('ehr-rx').value=d.rx||''; document.getElementById('ehr-treatment').value=d.treatment||''; document.getElementById('ehr-followup').value=d.followup||''; } catch(_){} }
+    loadPrevVisits(p.id);
+  }
+
+  async function loadPrevVisits(patientId) {
+    const panel = document.getElementById('prevVisitsPanel');
+    panel.innerHTML = '<div style="font-size:12px;color:var(--gray);padding:4px 0;">Loading…</div>';
+    try {
+      const records = await sbGetEHR(patientId);
+      if (!records?.length) { panel.innerHTML = '<div style="font-size:12px;color:var(--gray);padding:4px 0;">No previous visits.</div>'; return; }
+      panel.innerHTML = records.slice(0,5).map(r => `<div class="prev-visit-item">
+        <div class="prev-visit-header" onclick="togglePrevVisit(this)">
+          <span class="prev-visit-date">${fmtDate(r.visit_date || r.created_at?.slice(0,10))}</span>
+          <span class="prev-visit-diag">${r.diagnosis||'—'}</span>
+        </div>
+        <div class="prev-visit-body">
+          ${r.diagnosis   ? `<div class="prev-visit-field"><strong>Diagnosis</strong>${r.diagnosis}</div>`:''}
+          ${r.prescription? `<div class="prev-visit-field"><strong>Prescription</strong>${r.prescription}</div>`:''}
+          ${r.notes       ? `<div class="prev-visit-field"><strong>Notes</strong>${r.notes}</div>`:''}
+        </div>
+      </div>`).join('');
+    } catch(_) { panel.innerHTML = '<div style="font-size:12px;color:var(--gray);">Could not load history.</div>'; }
+  }
+
+  // ── CALL NEXT ────────────────────────────────────────────
+  async function callNext() {
+    if (!currentDocId) { showToast('No doctor session active'); return; }
+    showToast('Calling next patient…');
+    try {
+      const entry = await sbCallNext(currentDocId);
+      await refreshDoctorQueue();
+      if (!entry) showToast('Queue is empty — no more patients');
+      else showToast('Now seeing: Q' + String(entry.queue_number).padStart(2,'0'));
+    } catch(e) { showToast('Error: ' + e.message); }
+  }
+
+  async function markNoShow() {
+    if (!_activeEntry) { showToast('No active patient selected'); return; }
+    try {
+      await sbMarkNoShow(_activeEntry.id, _activeEntry.appointment_id);
+      _activeEntry = null;
+      showToast('Patient marked as No-Show');
+      await refreshDoctorQueue();
+    } catch(e) { showToast('Error: ' + e.message); }
+  }
+
+  async function saveAndComplete() {
+    const diag = document.getElementById('ehr-diagnosis').value.trim();
+    if (!diag) { showToast('Please enter a diagnosis before saving'); return; }
+    if (!_activeEntry) { showToast('No active patient'); return; }
+    const saveBtn = document.querySelector('.ehr-actions .btn-dark');
+    if (saveBtn) { saveBtn.disabled=true; saveBtn.textContent='Saving…'; }
+    try {
+      const vitals = {
+        systolic:   document.getElementById('v-sys').value   || null,
+        diastolic:  document.getElementById('v-dia').value   || null,
+        heart_rate: document.getElementById('v-hr').value    || null,
+        temperature:document.getElementById('v-temp').value  || null,
+        spo2:       document.getElementById('v-spo2').value  || null,
+        weight:     document.getElementById('v-wt').value    || null,
+        height:     document.getElementById('v-ht').value    || null,
+      };
+      const CLINIC_ID = 'a1b2c3d4-0000-0000-0000-000000000001';
+      await sbSaveEHR({
+        clinic_id:      CLINIC_ID,
+        appointment_id: _activeEntry.appointment_id,
+        patient_id:     _activeEntry.patients?.id || _activeEntry.patient_id,
+        doctor_id:      currentDocId,
+        visit_date:     new Date().toISOString().slice(0,10),
+        diagnosis:      diag,
+        notes:          document.getElementById('ehr-notes').value.trim(),
+        prescription:   document.getElementById('ehr-rx').value.trim(),
+        treatment_plan: document.getElementById('ehr-treatment').value.trim(),
+        follow_up:      document.getElementById('ehr-followup').value.trim(),
+        vitals,
+      });
+      // Clear draft
+      if (_activeEntry.patients?.id) localStorage.removeItem('ehr-draft-' + _activeEntry.patients.id);
+      // Auto-advance (marks current completed, loads next)
+      const nextEntry = await sbCallNext(currentDocId);
+      await refreshDoctorQueue();
+      showToast('✓ EHR saved. ' + (nextEntry ? 'Now seeing: Q'+String(nextEntry.queue_number).padStart(2,'0') : 'Queue empty.'));
+      if (saveBtn) { saveBtn.disabled=false; saveBtn.textContent='Save EHR & Mark Complete'; }
+    } catch(e) {
+      showToast('Save failed: ' + e.message);
+      if (saveBtn) { saveBtn.disabled=false; saveBtn.textContent='Save EHR & Mark Complete'; }
+    }
+  }
+
+  async function doLogout() {
+    await db.auth.signOut();
+    sessionStorage.removeItem('doc-session-active');
+    localStorage.removeItem('drd-role');
+    localStorage.removeItem('drd-uid');
+    localStorage.removeItem('drd-doc-id');
+    currentDocId     = null;
+    currentDocRecord = null;
+    currentDocName   = '';
+    currentDocSpec   = '';
+    _liveQueue       = [];
+    _activeEntry     = null;
+    sessionActive    = false;
+    if (_realtimeChannel) { db.removeChannel(_realtimeChannel); _realtimeChannel = null; }
+    history.replaceState(null, '', location.pathname);
+    document.getElementById('startScreen').classList.remove('active');
     document.getElementById('doctorApp').classList.remove('active');
     document.getElementById('loginScreen').style.display = 'flex';
+    document.getElementById('d-email').value = '';
+    document.getElementById('d-pass').value  = '';
+  }
+
+  // ── BREAK ──
+  function openBreakModal() { document.getElementById('breakModal').classList.add('open'); }
+  function closeBreakModal() { document.getElementById('breakModal').classList.remove('open'); }
+  function selectBreak(el, mins) {
+    selectedBreakMins = mins;
+    document.querySelectorAll('.break-opt').forEach(o => o.classList.remove('selected'));
+    el.classList.add('selected');
+  }
+  function confirmBreak() {
+    closeBreakModal();
+    const pill = document.getElementById('docStatusPill');
+    const endTime = Date.now() + selectedBreakMins * 60 * 1000;
+    localStorage.setItem('breakEnd', endTime);
+    localStorage.setItem('breakMins', selectedBreakMins);
+    pill.style.color = '#B8860B';
+    pill.style.background = 'rgba(255,193,7,0.15)';
+    pill.textContent = `⏸ On Break (${selectedBreakMins}m)`;
+    showToast(`Break started. ${selectedBreakMins} min — queue paused.`);
+    const breakTimer = setTimeout(() => {
+      pill.style.color = 'var(--green)';
+      pill.style.background = 'var(--green-tint)';
+      pill.textContent = '● Available';
+      localStorage.removeItem('breakEnd');
+      localStorage.removeItem('breakMins');
+      showToast('Break ended. Queue resumed.');
+    }, selectedBreakMins * 60 * 1000);
+  }
+
+  // Restore break on page load
+  (function restoreBreak() {
+    const breakEnd = parseInt(localStorage.getItem('breakEnd'));
+    if (!breakEnd) return;
+    const remaining = breakEnd - Date.now();
+    if (remaining <= 0) { localStorage.removeItem('breakEnd'); return; }
+    const pill = document.getElementById('docStatusPill');
+    const mins = Math.ceil(remaining / 60000);
+    pill.style.color = '#B8860B';
+    pill.style.background = 'rgba(255,193,7,0.15)';
+    pill.textContent = `⏸ On Break (~${mins}m left)`;
+    setTimeout(() => {
+      pill.style.color = 'var(--green)';
+      pill.style.background = 'var(--green-tint)';
+      pill.textContent = '● Available';
+      localStorage.removeItem('breakEnd');
+    }, remaining);
+  })();
+
+  // ── PREVIOUS VISITS TOGGLE ──
+  function togglePrevVisit(header) {
+    const body = header.nextElementSibling;
+    body.classList.toggle('open');
+  }
+
+  // ── VITALS RANGE CHECK ──
+  const VITALS_RANGES = {
+    'v-sys': { min: 90, max: 130, label: 'Normal: 90–130 sys' },
+    'v-dia': { min: 60, max: 85,  label: 'Normal: 60–85 dia' },
+    'v-hr':  { min: 60, max: 100, label: 'Normal: 60–100 bpm' },
+    'v-temp':{ min: 36.0, max: 37.5, label: 'Normal: 36.0–37.5 °C' },
+    'v-spo2':{ min: 95, max: 100, label: 'Normal: 95–100 %' },
+  };
+  function checkVital(inputId, min, max, hintId) {
+    const val = parseFloat(document.getElementById(inputId).value);
+    const hint = document.getElementById(hintId);
+    const inp  = document.getElementById(inputId);
+    if (isNaN(val)) {
+      inp.classList.remove('vitals-warn');
+      hint.classList.remove('warn');
+      hint.textContent = VITALS_RANGES[inputId]?.label || '';
+      return;
+    }
+    const outOfRange = val < min || val > max;
+    inp.classList.toggle('vitals-warn', outOfRange);
+    hint.classList.toggle('warn', outOfRange);
+    hint.textContent = outOfRange ? `⚠ Out of range (Normal: ${min}–${max})` : `✓ Within normal range`;
+  }
+
+  // ── SAVE DRAFT ──
+  function saveDraft() {
+    const patientId = document.getElementById('patientName').textContent;
+    const draft = {
+      diagnosis: document.getElementById('ehr-diagnosis').value,
+      notes: document.getElementById('ehr-notes').value,
+      rx: document.getElementById('ehr-rx').value,
+      treatment: document.getElementById('ehr-treatment').value,
+      followup: document.getElementById('ehr-followup').value,
+    };
+    localStorage.setItem('ehr-draft-' + patientId, JSON.stringify(draft));
+    showToast('Draft saved for ' + patientId);
+  }
+  function loadDraft(patientId) {
+    const raw = localStorage.getItem('ehr-draft-' + patientId);
+    if (!raw) return;
+    const draft = JSON.parse(raw);
+    document.getElementById('ehr-diagnosis').value = draft.diagnosis || '';
+    document.getElementById('ehr-notes').value = draft.notes || '';
+    document.getElementById('ehr-rx').value = draft.rx || '';
+    document.getElementById('ehr-treatment').value = draft.treatment || '';
+    document.getElementById('ehr-followup').value = draft.followup || '';
+    showToast('Draft restored for ' + patientId);
+  }
+
+  // ── HISTORY FILTER ──
+  let histFilterValue = 'All';
+  function toggleHistFilter(btn) {
+    document.getElementById('histFilterDd').classList.toggle('open');
+  }
+  function setHistFilter(el, val) {
+    histFilterValue = val;
+    document.querySelectorAll('.hist-filter-opt').forEach(o => o.classList.remove('active'));
+    el.classList.add('active');
+    document.getElementById('histFilterDd').classList.remove('open');
+    filterHistory();
+  }
+  document.addEventListener('click', e => {
+    if (!e.target.closest('.hist-filter-wrap')) {
+      document.getElementById('histFilterDd')?.classList.remove('open');
+    }
+  });
+
+  // ── END SESSION MODAL ──
+  function openEndSessionModal() { document.getElementById('endSessionModal').classList.add('open'); }
+  function closeEndSessionModal() { document.getElementById('endSessionModal').classList.remove('open'); }
+  function doEndSession() {
+    closeEndSessionModal();
+    const now = new Date();
+    const days  = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+    const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    document.getElementById('summaryDate').textContent = `${days[now.getDay()]}, ${months[now.getMonth()]} ${now.getDate()}, ${now.getFullYear()}`;
+    document.getElementById('sumSeen').textContent = seenCount;
+    const skips = document.querySelectorAll('.queue-item:not(.done)').length;
+    document.getElementById('sumSkip').textContent = skips;
+    document.getElementById('doctorApp').classList.remove('active');
+    document.getElementById('summaryOverlay').classList.add('open');
+  }
+
+  async function signOutFromSummary() {
+    document.getElementById('summaryOverlay').classList.remove('open');
+    await doLogout();
   }
 
   const viewTitles = {
@@ -757,64 +1451,209 @@ Losartan 50mg OD (continue)</textarea>
     if (link) link.classList.add('active');
     const [t, s] = viewTitles[id] || [id, ''];
     document.getElementById('viewTitle').textContent = t;
+    if (location.hash !== '#' + id) history.pushState(null,'','#'+id);
+    if (id === 'history') loadPatientHistory();
+  }
+  window.addEventListener('hashchange', () => {
+    const id = location.hash.slice(1);
+    if (id && viewTitles[id]) showView(id);
+  });
+
+  // ── DRAWER ──
+  function openDrawer() {
+    document.getElementById('sidebarDrawer').classList.add('open');
+    document.getElementById('drawerOverlay').classList.add('open');
+  }
+  function closeDrawer() {
+    document.getElementById('sidebarDrawer').classList.remove('open');
+    document.getElementById('drawerOverlay').classList.remove('open');
   }
 
-  function selectPatient(idx) {
-    if (idx >= patients.length) return;
-    currentPatientIdx = idx;
-    const p = patients[idx];
-    document.querySelectorAll('.queue-item').forEach((el, i) => {
-      el.classList.toggle('active', parseInt(el.dataset.idx) === idx);
-    });
-    document.getElementById('patientAv').textContent = p.initials;
-    document.getElementById('patientName').textContent = p.name;
-    document.getElementById('patientMeta').textContent = p.meta;
-    document.getElementById('patientTime').textContent = p.time;
-    document.getElementById('patientReason').querySelector('.reason-text').textContent = p.reason;
-    document.getElementById('ehr-diagnosis').value = '';
-    document.getElementById('ehr-notes').value = '';
-    document.getElementById('ehr-rx').value = '';
-    document.getElementById('ehr-treatment').value = '';
-    document.getElementById('ehr-followup').value = '';
-    showToast('Viewing patient: ' + p.name);
-  }
+  async function loadPatientHistory() {
+    const list = document.getElementById('histList');
+    if (!currentDocId) return;
+    list.innerHTML = '<div style="padding:32px;text-align:center;color:var(--gray);font-size:13px;">Loading…</div>';
+    try {
+      // Get all appointments for this doctor (completed or any)
+      const { data: appts } = await db.from('appointments')
+        .select('id, date, status, purpose, patients(id, first_name, last_name, photo_url)')
+        .eq('doctor_id', currentDocId)
+        .order('date', { ascending: false });
+      if (!appts?.length) {
+        list.innerHTML = '<div style="padding:32px;text-align:center;color:var(--gray);font-size:13px;">No patient history yet.</div>';
+        return;
+      }
+      // Group by patient
+      const today = new Date().toISOString().slice(0, 10);
+      const patientMap = {};
+      appts.forEach(a => {
+        const p = a.patients;
+        if (!p) return;
+        const pid = p.id;
+        if (!patientMap[pid]) {
+          patientMap[pid] = { patient: p, visits: [], lastDate: '', lastDiag: '' };
+        }
+        patientMap[pid].visits.push(a);
+        if (!patientMap[pid].lastDate || a.date > patientMap[pid].lastDate) {
+          patientMap[pid].lastDate = a.date;
+          patientMap[pid].lastDiag = a.purpose || '';
+        }
+      });
+      // Optionally enrich with EHR diagnosis
+      const patientIds = Object.keys(patientMap);
+      try {
+        const { data: ehrs } = await db.from('ehr_records')
+          .select('patient_id, diagnosis, visit_date')
+          .in('patient_id', patientIds)
+          .order('visit_date', { ascending: false });
+        (ehrs || []).forEach(e => {
+          if (patientMap[e.patient_id] && e.diagnosis) {
+            // Use most recent EHR diagnosis if not already set
+            if (!patientMap[e.patient_id]._ehrSet) {
+              patientMap[e.patient_id].lastDiag = e.diagnosis;
+              patientMap[e.patient_id]._ehrSet  = true;
+            }
+          }
+        });
+      } catch(_) {}
 
-  function callNext() {
-    const waiting = document.querySelectorAll('.queue-item:not(.done)');
-    let nextIdx = -1;
-    waiting.forEach(el => {
-      const idx = parseInt(el.dataset.idx);
-      if (idx > currentPatientIdx && nextIdx === -1) nextIdx = idx;
-    });
-    if (nextIdx === -1) { showToast('No more patients in queue'); return; }
-    selectPatient(nextIdx);
-    showToast('Called Q' + (nextIdx + 3) + ': ' + patients[nextIdx]?.name);
-  }
-
-  function saveAndComplete() {
-    const diag = document.getElementById('ehr-diagnosis').value.trim();
-    if (!diag) { showToast('Please enter a diagnosis before saving'); return; }
-    const activeItem = document.querySelector('.queue-item.active');
-    if (activeItem) {
-      activeItem.classList.remove('active');
-      activeItem.classList.add('done');
-      activeItem.querySelector('.q-status').textContent = 'Done';
-      activeItem.querySelector('.q-status').className = 'badge badge-green q-status';
+      const colors = ['var(--crimson)','var(--green)','#4A5568','#805AD5','#2563EB','#B45309'];
+      const entries = Object.values(patientMap).sort((a,b) => b.lastDate > a.lastDate ? 1 : -1);
+      const fmtDate = ds => {
+        if (!ds) return '—';
+        const [y,m,d] = ds.split('-');
+        const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        return months[parseInt(m)-1] + ' ' + parseInt(d) + ', ' + y;
+      };
+      list.innerHTML = entries.map((e, i) => {
+        const p = e.patient;
+        const name = (p.first_name + ' ' + p.last_name).trim();
+        const initials = (p.first_name?.[0]||'') + (p.last_name?.[0]||'');
+        const visitCount = e.visits.length;
+        const isToday = e.lastDate === today;
+        const completedToday = e.visits.some(v => v.date === today && v.status === 'Completed');
+        const badgeClass = completedToday ? 'badge-green' : visitCount === 1 ? 'badge-gray' : 'badge-blue';
+        const badgeLabel = completedToday ? 'Completed Today' : visitCount === 1 ? 'New Patient' : 'Active Patient';
+        const av = p.photo_url
+          ? `<img src="${p.photo_url}" style="width:40px;height:40px;border-radius:50%;object-fit:cover;flex-shrink:0;">`
+          : `<div class="hist-av" style="background:${colors[i % colors.length]};">${initials.toUpperCase()}</div>`;
+        return `<div class="hist-item" data-name="${name.toLowerCase()}">
+          ${av}
+          <div>
+            <div class="hist-name">${name}</div>
+            <div class="hist-meta">Last visit: ${fmtDate(e.lastDate)} · ${visitCount} visit${visitCount!==1?'s':''} total${e.lastDiag ? ' · ' + e.lastDiag : ''}</div>
+          </div>
+          <div class="hist-badge"><span class="badge ${badgeClass}">${badgeLabel}</span></div>
+        </div>`;
+      }).join('');
+    } catch(err) {
+      list.innerHTML = `<div style="padding:32px;text-align:center;color:var(--crimson);font-size:13px;">Failed to load history: ${err.message}</div>`;
     }
-    seenCount++;
-    document.getElementById('seenCount').textContent = seenCount;
-    const remaining = document.querySelectorAll('.queue-item:not(.done)').length;
-    document.getElementById('qCount').textContent = remaining + ' waiting';
-    document.getElementById('queueBadge').textContent = remaining;
-    showToast('✓ EHR saved. Patient marked as completed.');
-    if (remaining > 0) setTimeout(() => callNext(), 800);
   }
 
   function filterHistory() {
     const q = document.getElementById('histSearch').value.toLowerCase();
     document.querySelectorAll('.hist-item').forEach(el => {
-      el.style.display = el.dataset.name.includes(q) ? 'flex' : 'none';
+      const text = el.textContent.toLowerCase();
+      const badge = el.querySelector('.badge')?.textContent || '';
+      const matchesSearch = text.includes(q);
+      const matchesFilter = histFilterValue === 'All' || badge.includes(histFilterValue);
+      el.style.display = (matchesSearch && matchesFilter) ? 'flex' : 'none';
     });
+  }
+
+  // ── DYNAMIC SCHEDULE ──
+  async function buildSchedule() {
+    const grid = document.getElementById('scheduleGrid');
+    if (!grid) return;
+    grid.innerHTML = '';
+    const dayNames = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+    const months   = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const now = new Date();
+    const dayOfWeek = now.getDay();
+    const monday = new Date(now); monday.setDate(now.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1));
+    document.getElementById('scheduleWeekLabel').textContent = `Week of ${months[monday.getMonth()]} ${monday.getDate()}, ${monday.getFullYear()}`;
+
+    // Parse work_days string into a set of day abbreviations (Mon, Tue, etc.)
+    const workDaysRaw = currentDocRecord?.work_days || '';
+    const workDaySet = new Set();
+    ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].forEach(d => {
+      if (workDaysRaw.includes(d)) workDaySet.add(d);
+    });
+    // If work_days contains a range like "Mon – Fri", expand it
+    const rangeMatch = workDaysRaw.match(/(\w+)\s*[–-]\s*(\w+)/);
+    if (rangeMatch) {
+      const order = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+      const start = order.indexOf(rangeMatch[1]);
+      const end   = order.indexOf(rangeMatch[2]);
+      if (start !== -1 && end !== -1) for (let i = start; i <= end; i++) workDaySet.add(order[i]);
+    }
+    const hasWorkDays = workDaySet.size > 0;
+
+    // Fetch this week's real appointments
+    const weekDates = Array.from({length: 6}, (_, i) => {
+      const d = new Date(monday); d.setDate(monday.getDate() + i);
+      return d.toISOString().slice(0, 10);
+    });
+    let apptsByDate = {};
+    if (currentDocId) {
+      try {
+        const { data: appts } = await db.from('appointments')
+          .select('date, time, status, patients(first_name, last_name)')
+          .eq('doctor_id', currentDocId)
+          .in('date', weekDates)
+          .not('status', 'in', '("Cancelled","No-Show")');
+        (appts || []).forEach(a => {
+          if (!apptsByDate[a.date]) apptsByDate[a.date] = [];
+          apptsByDate[a.date].push(a);
+        });
+      } catch(_) {}
+    }
+
+    for (let d = 0; d < 6; d++) {
+      const date    = new Date(monday); date.setDate(monday.getDate() + d);
+      const isToday = date.toDateString() === now.toDateString();
+      const dayAbbr = dayNames[date.getDay()];
+      const dateStr = date.toISOString().slice(0, 10);
+      const isOff   = hasWorkDays && !workDaySet.has(dayAbbr);
+
+      const col = document.createElement('div');
+      col.className = 'day-col' + (isOff ? ' off-day' : '');
+      const header = document.createElement('div');
+      header.className = 'day-header' + (isToday ? ' today' : '') + (isOff ? ' off' : '');
+      header.textContent = dayAbbr + ' ' + date.getDate();
+      col.appendChild(header);
+
+      if (isOff) {
+        const sl = document.createElement('div');
+        sl.className = 'day-slot'; sl.style.fontStyle = 'italic'; sl.style.color = 'var(--gray)'; sl.style.opacity = '0.5';
+        sl.textContent = 'Day Off'; col.appendChild(sl); grid.appendChild(col); continue;
+      }
+
+      const dayAppts = (apptsByDate[dateStr] || []).sort((a,b) => a.time < b.time ? -1 : 1);
+      if (!dayAppts.length) {
+        const sl = document.createElement('div');
+        sl.className = 'day-slot available';
+        sl.textContent = 'No appointments'; col.appendChild(sl);
+      } else {
+        const nowMins = now.getHours() * 60 + now.getMinutes();
+        dayAppts.forEach(a => {
+          const sl = document.createElement('div');
+          const pName = a.patients ? a.patients.first_name + ' ' + a.patients.last_name : '—';
+          const isNow      = a.status === 'In Session' || a.status === 'Checked In';
+          const isOverdue  = isToday && !isNow && a.status !== 'Completed' && a.status !== 'No-Show' && a.time && (() => {
+            const [h, m] = a.time.split(':').map(Number);
+            return (h * 60 + m) < nowMins;
+          })();
+          sl.className = 'day-slot booked';
+          sl.textContent = (a.time || '') + ' – ' + pName;
+          if (isNow)     sl.style.borderLeft = '3px solid var(--crimson)';
+          if (isOverdue) { sl.style.borderLeft = '3px solid #B45309'; sl.style.opacity = '0.7'; sl.title = 'Overdue'; sl.textContent += ' ⚠'; }
+          col.appendChild(sl);
+        });
+      }
+      grid.appendChild(col);
+    }
   }
 
   let toastTimer;
@@ -825,6 +1664,59 @@ Losartan 50mg OD (continue)</textarea>
     clearTimeout(toastTimer);
     toastTimer = setTimeout(() => t.classList.remove('show'), 3200);
   }
+
+  // ── SUPABASE INIT + SESSION RESTORE ─────────────────────
+  const _sbScript = document.createElement('script');
+  _sbScript.src = '/supabase-client.js';
+  _sbScript.onload = () => {
+    const loginBtn = document.getElementById('docLoginBtn');
+    if (loginBtn) { loginBtn.disabled = false; loginBtn.textContent = 'Sign In to Doctor Portal'; }
+
+    db.auth.onAuthStateChange(async (event, session) => {
+      if (event === 'INITIAL_SESSION' && session?.user) {
+        if (document.getElementById('doctorApp').classList.contains('active')) return;
+        if (document.getElementById('startScreen').classList.contains('active')) return;
+        try {
+          const cachedUid  = localStorage.getItem('drd-uid');
+          const cachedRole = localStorage.getItem('drd-role');
+          let profile = null, docRecord = null;
+          try {
+            const { data: p } = await db.from('profiles').select('*').eq('id', session.user.id).maybeSingle();
+            profile = p;
+            if (profile?.role === 'doctor') {
+              const { data: d } = await db.from('doctors').select('*').eq('profile_id', session.user.id).maybeSingle();
+              docRecord = d;
+            }
+          } catch(_) {}
+          const role = profile?.role || (cachedUid === session.user.id ? cachedRole : null);
+          if (role !== 'doctor') return;
+          if (!docRecord && cachedUid === session.user.id) {
+            // DB unavailable — restore from cache minimally so user can still see start screen
+            const cachedDocId = localStorage.getItem('drd-doc-id');
+            if (cachedDocId) {
+              currentDocId     = cachedDocId;
+              currentDocName   = 'Doctor';
+              currentDocSpec   = 'General Practice';
+              currentDocRecord = { id: cachedDocId };
+            }
+          } else if (docRecord) {
+            const firstName  = profile.first_name || docRecord.first_name || '';
+            const lastName   = profile.last_name  || docRecord.last_name  || '';
+            currentDocName   = 'Dr. ' + firstName + ' ' + lastName;
+            currentDocSpec   = docRecord.specialty || 'General Practice';
+            currentDocId     = docRecord.id;
+            currentDocRecord = docRecord;
+          } else { return; }
+          if (sessionStorage.getItem('doc-session-active')) {
+            await startQueue();
+          } else {
+            showStartScreen();
+          }
+        } catch(_) {}
+      }
+    });
+  };
+  document.head.appendChild(_sbScript);
 </script>
 </body>
 </html>

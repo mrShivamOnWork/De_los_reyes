@@ -9,6 +9,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&family=Open+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    * { user-select: none; }
+    input, textarea, select { user-select: text; }
 
     :root {
       --crimson: #D31A22;
@@ -450,7 +452,8 @@
       padding: 32px 24px;
       border: 1.5px solid transparent;
       transition: border-color 0.3s, transform 0.3s, box-shadow 0.3s;
-      position: relative; overflow: hidden; cursor: default;
+      position: relative; overflow: hidden; cursor: pointer;
+      text-decoration: none; display: block; color: inherit;
     }
     .svc-card::after {
       content: ''; position: absolute;
@@ -523,55 +526,84 @@
 
     /* ── DOCTORS ── */
     .doctors-sec { background: var(--green-tint); }
-    .doctors-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+    .doctors-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; }
     .doc-card {
       background: #fff; border-radius: var(--radius);
       overflow: hidden;
-      box-shadow: 0 2px 20px rgba(0,0,0,0.05);
+      box-shadow: 0 4px 24px rgba(0,0,0,0.07);
       transition: transform 0.3s, box-shadow 0.3s;
+      display: flex; flex-direction: column;
     }
     .doc-card:hover {
       transform: translateY(-6px);
-      box-shadow: 0 20px 52px rgba(0,0,0,0.1);
+      box-shadow: 0 24px 60px rgba(0,0,0,0.13);
     }
-    .doc-avatar {
-      height: 200px;
-      background: linear-gradient(145deg, var(--dark) 0%, var(--dark-2) 100%);
-      display: flex; align-items: center; justify-content: center;
+    .doc-photo {
+      width: 100%;
+      padding-top: 60%;
       position: relative;
+      overflow: hidden;
+      background: linear-gradient(160deg, var(--dark) 0%, #0d2030 100%);
     }
-    .doc-avatar::after {
-      content: ''; position: absolute;
-      bottom: 0; left: 0; right: 0; height: 3px;
-      background: var(--green);
+    .doc-photo img {
+      position: absolute; inset: 0;
+      width: 100%; height: 100%;
+      object-fit: cover; object-position: top center;
+      transition: transform 0.4s;
     }
-    .doc-icon-wrap {
-      width: 90px; height: 90px; border-radius: 50%;
-      background: rgba(255,255,255,0.08);
-      display: flex; align-items: center; justify-content: center;
+    .doc-card:hover .doc-photo img { transform: scale(1.04); }
+    .doc-photo-overlay {
+      position: absolute; inset: 0;
+      background: linear-gradient(to top, rgba(17,22,27,0.72) 0%, rgba(17,22,27,0.1) 55%, transparent 100%);
     }
-    .doc-icon-wrap svg {
-      width: 48px; height: 48px;
-      fill: rgba(255,255,255,0.25);
+    .doc-status-badge {
+      position: absolute; top: 14px; right: 14px;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 10px; font-weight: 700;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      padding: 5px 11px; border-radius: 100px;
+      display: flex; align-items: center; gap: 5px;
     }
-    .doc-body { padding: 24px; }
+    .doc-status-badge.available   { background: rgba(0,168,89,0.92); color: #fff; }
+    .doc-status-badge.now-serving { background: rgba(0,168,89,1); color: #fff; }
+    .doc-status-badge.on-break    { background: rgba(255,193,7,0.95); color: #6b4e00; }
+    .doc-status-badge.queue-full  { background: rgba(211,26,34,0.9); color: #fff; }
+    .doc-status-badge.unavailable { background: rgba(100,100,100,0.85); color: #fff; }
+    .status-dot {
+      width: 6px; height: 6px; border-radius: 50%; background: currentColor;
+      animation: statusPulse 2s ease-in-out infinite;
+    }
+    @keyframes statusPulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+    .doc-body { padding: 22px 24px 24px; flex: 1; display: flex; flex-direction: column; }
     .doc-specialty {
       font-family: 'Montserrat', sans-serif;
       font-size: 10px; font-weight: 700;
       letter-spacing: 0.18em; text-transform: uppercase;
-      color: var(--green); margin-bottom: 6px;
+      color: var(--green); margin-bottom: 5px;
     }
     .doc-name {
       font-family: 'Montserrat', sans-serif;
       font-weight: 700; font-size: 17px;
-      color: var(--dark); margin-bottom: 9px;
+      color: var(--dark); margin-bottom: 8px;
     }
-    .doc-bio { font-size: 13px; color: var(--gray); line-height: 1.6; margin-bottom: 18px; }
+    .doc-bio { font-size: 13px; color: var(--gray); line-height: 1.6; margin-bottom: 18px; flex: 1; }
     .doc-sched {
       display: flex; align-items: center; gap: 9px;
       font-size: 12px; color: var(--gray);
       padding-top: 16px; border-top: 1px solid var(--light);
     }
+    .doc-book-btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-family: 'Montserrat', sans-serif; font-size: 11px; font-weight: 700;
+      letter-spacing: 0.08em; text-transform: uppercase;
+      padding: 9px 18px; border-radius: 7px; border: none;
+      background: var(--green); color: #fff; cursor: pointer;
+      text-decoration: none; margin-top: 14px; width: 100%; justify-content: center;
+      transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+      box-shadow: 0 3px 12px rgba(0,168,89,0.2);
+    }
+    .doc-book-btn:hover { background: var(--green-dark); transform: translateY(-1px); box-shadow: 0 6px 18px rgba(0,168,89,0.3); }
+    .doc-book-btn:active { transform: translateY(0); }
     .sched-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); flex-shrink: 0; }
 
     /* ── TESTIMONIALS ── */
@@ -984,26 +1016,26 @@
       <p class="section-lead">From routine check-ups to specialist consultations — quality care under one roof, close to home.</p>
     </div>
     <div class="services-grid">
-      <div class="svc-card fade-up">
+      <a class="svc-card fade-up" href="patient-portal.html?service=General%20Consultation">
         <div class="svc-icon"><svg viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></div>
         <div class="svc-name">General Consultation</div>
         <div class="svc-desc">Comprehensive check-ups and medical consultations for all ages. Our physicians take time to genuinely understand your health concerns.</div>
-      </div>
-      <div class="svc-card fade-up">
+      </a>
+      <a class="svc-card fade-up" href="patient-portal.html?service=Specialist%20Care">
         <div class="svc-icon"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
         <div class="svc-name">Specialist Care</div>
         <div class="svc-desc">Board-certified specialists across multiple medical disciplines with coordinated, patient-centered care and seamless referrals.</div>
-      </div>
-      <div class="svc-card fade-up">
+      </a>
+      <a class="svc-card fade-up" href="patient-portal.html?service=Health%20Screening">
         <div class="svc-icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="11" x2="12" y2="17"/><line x1="9" y1="14" x2="15" y2="14"/></svg></div>
         <div class="svc-name">Health Screening</div>
         <div class="svc-desc">Preventive health screenings and laboratory work-ups designed to detect conditions early for the best possible outcomes.</div>
-      </div>
-      <div class="svc-card fade-up">
+      </a>
+      <a class="svc-card fade-up" href="patient-portal.html?service=Pediatric%20Care">
         <div class="svc-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="5"/><path d="M3 21v-1a7 7 0 0 1 7-7h4a7 7 0 0 1 7 7v1"/></svg></div>
         <div class="svc-name">Pediatric Care</div>
         <div class="svc-desc">Dedicated pediatric services ensuring the health and wellness of your children from newborns through adolescence with expert, gentle care.</div>
-      </div>
+      </a>
     </div>
   </div>
 </section>
@@ -1044,46 +1076,8 @@
       <h2 class="section-h2">Meet Our Specialists</h2>
       <p class="section-lead">Board-certified physicians with decades of combined experience and genuine dedication to your wellbeing.</p>
     </div>
-    <div class="doctors-grid">
-      <div class="doc-card fade-up">
-        <div class="doc-avatar">
-          <div class="doc-icon-wrap">
-            <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-          </div>
-        </div>
-        <div class="doc-body">
-          <div class="doc-specialty">Internal Medicine</div>
-          <div class="doc-name">Dr. Maria C. Santos</div>
-          <div class="doc-bio">Board-certified internist with 18 years of clinical experience. Specializes in chronic disease management, hypertension, and diabetes care.</div>
-          <div class="doc-sched"><div class="sched-dot"></div> Mon – Fri: 9:00 AM – 5:00 PM</div>
-        </div>
-      </div>
-      <div class="doc-card fade-up">
-        <div class="doc-avatar">
-          <div class="doc-icon-wrap">
-            <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-          </div>
-        </div>
-        <div class="doc-body">
-          <div class="doc-specialty">Pediatrics</div>
-          <div class="doc-name">Dr. Juan B. dela Cruz</div>
-          <div class="doc-bio">Passionate pediatrician with 12 years of experience in pediatric primary care, immunizations, and neonatal follow-up consultations.</div>
-          <div class="doc-sched"><div class="sched-dot"></div> Mon, Wed, Fri: 8:00 AM – 4:00 PM</div>
-        </div>
-      </div>
-      <div class="doc-card fade-up">
-        <div class="doc-avatar">
-          <div class="doc-icon-wrap">
-            <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-          </div>
-        </div>
-        <div class="doc-body">
-          <div class="doc-specialty">OB-Gynecology</div>
-          <div class="doc-name">Dr. Ana P. Reyes</div>
-          <div class="doc-bio">Compassionate OB-GYN with expertise in prenatal care, family planning, high-risk pregnancies, and women's wellness across all life stages.</div>
-          <div class="doc-sched"><div class="sched-dot"></div> Tue, Thu, Sat: 9:00 AM – 3:00 PM</div>
-        </div>
-      </div>
+    <div class="doctors-grid" id="doctorsGrid">
+      <div style="grid-column:1/-1;text-align:center;padding:40px;color:#888;font-size:15px;">Loading doctors…</div>
     </div>
   </div>
 </section>
@@ -1425,6 +1419,47 @@
       }, 600);
     }, 2200);
   })();
+</script>
+
+<!-- ── LOAD DOCTORS FROM SUPABASE ── -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="/supabase-client.js"></script>
+<script>
+(async function loadDoctorsGrid() {
+  const grid = document.getElementById('doctorsGrid');
+  if (!grid) return;
+  try {
+    const doctors = await sbGetDoctors(); // active doctors only
+    if (!doctors || !doctors.length) {
+      grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:#888;">No doctors available at this time.</div>';
+      return;
+    }
+    grid.innerHTML = doctors.map(doc => {
+      const name     = 'Dr. ' + doc.first_name + ' ' + doc.last_name;
+      const sched    = [doc.work_days, doc.work_hours].filter(Boolean).join(': ');
+      const photoEl  = doc.photo_url
+        ? `<img src="${doc.photo_url}" alt="${name}" style="width:100%;height:100%;object-fit:cover;object-position:top;">`
+        : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#1a3a2a,#2d5a3d);font-family:'Montserrat',sans-serif;font-size:42px;font-weight:800;color:rgba(255,255,255,0.3);">${(doc.first_name[0]||'')+(doc.last_name[0]||'')}</div>`;
+      const svcParam = encodeURIComponent(doc.specialty || 'General Consultation');
+      return `<div class="doc-card fade-up">
+        <div class="doc-photo">
+          ${photoEl}
+          <div class="doc-photo-overlay"></div>
+          <div class="doc-status-badge available"><span class="status-dot"></span>Available</div>
+        </div>
+        <div class="doc-body">
+          <div class="doc-specialty">${doc.specialty || 'General Practice'}</div>
+          <div class="doc-name">${name}</div>
+          <div class="doc-bio">${doc.bio || 'Board-certified physician at De Los Reyes Doctors Clinic.'}</div>
+          ${sched ? `<div class="doc-sched"><div class="sched-dot"></div> ${sched}</div>` : ''}
+          <a href="patient-portal.html?service=${svcParam}" class="doc-book-btn">Book Appointment</a>
+        </div>
+      </div>`;
+    }).join('');
+  } catch(e) {
+    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:#888;">Could not load doctors.</div>';
+  }
+})();
 </script>
 </body>
 </html>
