@@ -21,10 +21,11 @@
       --sidebar-w: 252px; --radius: 12px;
     }
     html, body { height: 100%; }
-    body { font-family: 'Open Sans', sans-serif; color: var(--dark); background: var(--light); overflow-x: hidden; }
+    body { font-family: 'Open Sans', sans-serif; color: var(--dark); background: #0D1117; overflow-x: hidden; }
 
     /* ── AUTH ── */
-    .auth-screen { min-height: 100vh; display: flex; background: var(--dark-2); }
+    .auth-screen { min-height: 100vh; display: flex; background: var(--dark-2); position: relative; z-index: 9999; }
+    .auth-screen.hidden { display: none; }
     .auth-brand {
       width: 400px; flex-shrink: 0;
       background: var(--dark);
@@ -40,7 +41,7 @@
       background-size: 40px 40px;
     }
     .auth-brand-inner { position: relative; z-index: 1; }
-    .auth-brand img { width: 110px; height: 110px; object-fit: contain; margin-bottom: 22px; border-radius: 12px; }
+    .auth-brand img { width: 110px; height: 110px; object-fit: contain; margin-bottom: 22px; border-radius: 12px; mix-blend-mode: multiply; }
     .auth-brand h1 { font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 20px; color: #fff; margin-bottom: 10px; }
     .auth-brand p { font-size: 14px; color: rgba(255,255,255,0.4); line-height: 1.7; margin-bottom: 28px; }
     .auth-role-badge {
@@ -56,7 +57,7 @@
 
     /* ── FORMS ── */
     .fgroup { margin-bottom: 16px; }
-    .flabel { display: block; font-family: 'Montserrat', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--dark); margin-bottom: 7px; }
+    .flabel { display: block; font-family: 'Montserrat', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--dark); margin-bottom: 8px; }
     .finput {
       width: 100%; padding: 11px 14px; border: 1.5px solid rgba(0,0,0,0.12);
       border-radius: 8px; font-family: 'Open Sans', sans-serif; font-size: 14px;
@@ -158,7 +159,7 @@
     .table tr:last-child td { border-bottom: none; }
     .table tr:hover td { background: rgba(0,168,89,0.025); }
     .td-name { font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: 13px; }
-    .td-sub { font-size: 11px; color: var(--gray); margin-top: 2px; }
+    .td-sub { font-size: 11px; color: var(--gray); margin-top: 2px; white-space: nowrap; }
 
     /* ── BADGE ── */
     .badge { display: inline-flex; align-items: center; gap: 5px; font-family: 'Montserrat', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; padding: 4px 10px; border-radius: 100px; }
@@ -188,7 +189,7 @@
     .doctor-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
     .doc-manage-card { background: #fff; border-radius: var(--radius); border: 1.5px solid rgba(0,0,0,0.05); overflow: hidden; }
     .doc-manage-header { height: 120px; background: linear-gradient(135deg, var(--dark) 0%, var(--dark-2) 100%); position: relative; overflow: hidden; }
-    .doc-manage-header::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 3px; background: var(--green); z-index: 2; }
+    /* green line removed per design cleanup */
     .doc-manage-photo { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 12%; transition: transform 0.35s; }
     .doc-manage-card:hover .doc-manage-photo { transform: scale(1.05); }
     .doc-manage-photo-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(17,22,27,0.65) 0%, rgba(17,22,27,0.1) 60%, transparent 100%); z-index: 1; }
@@ -197,7 +198,15 @@
     .doc-manage-spec { font-family: 'Montserrat', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: var(--green); margin-bottom: 4px; }
     .doc-manage-name { font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: 15px; color: var(--dark); margin-bottom: 6px; }
     .doc-manage-sched { font-size: 12px; color: var(--gray); margin-bottom: 16px; }
-    .doc-manage-actions { display: flex; gap: 8px; }
+    .doc-manage-actions { display: flex; gap: 8px; align-items: center; }
+    .btn-doc-delete {
+      background: transparent; border: none; cursor: pointer;
+      font-family: 'Montserrat', sans-serif; font-size: 11px; font-weight: 700;
+      letter-spacing: 0.07em; text-transform: uppercase;
+      color: rgba(255,255,255,0.25); padding: 6px 10px; border-radius: 6px;
+      transition: color 0.2s, background 0.2s;
+    }
+    .btn-doc-delete:hover { color: #F87171; background: rgba(211,26,34,0.12); }
 
     /* ── MODAL ── */
     .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; display: none; align-items: center; justify-content: center; }
@@ -262,6 +271,191 @@
     .chart-labels { display: flex; gap: 6px; }
     .chart-label { flex: 1; text-align: center; font-size: 10px; color: var(--gray); padding-top: 6px; min-width: 0; font-family: 'Montserrat', sans-serif; font-weight: 600; }
 
+    /* ── CLINIC FLOOR ── */
+    #view-clinicfloor.active { display:flex; flex-direction:column; margin:-28px -32px; height:calc(100vh - 65px); overflow:hidden; background:#0D1117; }
+    .cf-topbar { display:flex; align-items:center; gap:10px; padding:11px 20px; background:#161D27; border-bottom:1px solid rgba(255,255,255,0.06); flex-shrink:0; flex-wrap:wrap; }
+    .cf-live-pill { display:flex; align-items:center; gap:6px; padding:4px 12px; background:rgba(0,168,89,0.1); border:1px solid rgba(0,168,89,0.2); border-radius:100px; flex-shrink:0; }
+    .cf-live-dot { width:7px; height:7px; border-radius:50%; background:#00A859; flex-shrink:0; animation:cf-pulse 2.5s infinite; }
+    .cf-live-label { font-family:'Montserrat',sans-serif; font-size:10px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:#00A859; }
+    @keyframes cf-pulse { 0%,100%{box-shadow:0 0 0 0 rgba(0,168,89,0.5);} 50%{box-shadow:0 0 0 5px rgba(0,168,89,0.1);} }
+    .cf-stats { display:flex; gap:4px; flex:1; min-width:0; }
+    .cf-stat-pill { display:flex; align-items:center; gap:10px; padding:6px 14px; border-radius:9px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.07); }
+    .cf-stat-num { font-family:'Montserrat',sans-serif; font-weight:900; font-size:20px; line-height:1; }
+    .cf-stat-label { font-family:'Montserrat',sans-serif; font-size:10px; font-weight:600; letter-spacing:0.08em; text-transform:uppercase; color:rgba(255,255,255,0.3); }
+    .cf-stat-total .cf-stat-num { color:rgba(255,255,255,0.8); }
+    .cf-stat-waiting .cf-stat-num { color:#F59E0B; }
+    .cf-stat-consult .cf-stat-num { color:#A78BFA; }
+    .cf-stat-done .cf-stat-num { color:#34D399; }
+    .cf-tb-actions { display:flex; gap:8px; flex-shrink:0; }
+    .cf-btn-refresh { height:34px; padding:0 14px; border:1px solid rgba(255,255,255,0.12); background:rgba(255,255,255,0.06); border-radius:8px; color:rgba(255,255,255,0.65); font-family:'Montserrat',sans-serif; font-size:12px; font-weight:600; cursor:pointer; transition:background 0.15s,color 0.15s; }
+    .cf-btn-refresh:hover { background:rgba(255,255,255,0.1); color:rgba(255,255,255,0.9); }
+    .cf-btn-walkin { height:34px; padding:0 16px; border:none; background:#D31A22; border-radius:8px; color:#fff; font-family:'Montserrat',sans-serif; font-size:12px; font-weight:700; cursor:pointer; transition:background 0.15s,transform 0.1s; }
+    .cf-btn-walkin:hover { background:#A8141B; }
+    .cf-btn-walkin:active { transform:scale(0.97); }
+    .cf-body { display:flex; flex:1; overflow:hidden; }
+    .cf-schedule-panel { width:290px; flex-shrink:0; background:#161D27; border-right:1px solid rgba(255,255,255,0.06); display:flex; flex-direction:column; overflow:hidden; }
+    .cf-panel-hdr { padding:13px 18px 10px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid rgba(255,255,255,0.05); flex-shrink:0; }
+    .cf-panel-title { font-family:'Montserrat',sans-serif; font-weight:800; font-size:11px; letter-spacing:0.12em; text-transform:uppercase; color:rgba(255,255,255,0.4); }
+    .cf-date-label { font-family:'Montserrat',sans-serif; font-size:11px; font-weight:700; color:rgba(255,255,255,0.25); }
+    .cf-schedule-list { flex:1; overflow-y:auto; }
+    .cf-schedule-list::-webkit-scrollbar { width:4px; }
+    .cf-schedule-list::-webkit-scrollbar-thumb { background:rgba(255,255,255,0.08); border-radius:2px; }
+    .cf-appt-row { padding:10px 18px; border-bottom:1px solid rgba(255,255,255,0.04); display:flex; align-items:center; gap:10px; transition:background 0.12s; }
+    .cf-appt-row:last-child { border-bottom:none; }
+    .cf-appt-row:hover { background:rgba(255,255,255,0.03); }
+    .cf-appt-row.cf-row-done { opacity:0.38; }
+    .cf-appt-row.cf-row-cancelled { opacity:0.22; }
+    .cf-time { font-family:'Montserrat',sans-serif; font-weight:800; font-size:11px; color:rgba(255,255,255,0.4); min-width:46px; }
+    .cf-av { width:32px; height:32px; border-radius:50%; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-family:'Montserrat',sans-serif; font-weight:700; font-size:11px; color:#fff; object-fit:cover; }
+    .cf-pname { font-family:'Montserrat',sans-serif; font-weight:700; font-size:12px; color:rgba(255,255,255,0.85); }
+    .cf-psub { font-size:10px; color:rgba(255,255,255,0.28); margin-top:1px; }
+    .cf-status { margin-left:auto; flex-shrink:0; }
+    .cf-walkin-btn { width:100%; padding:12px 18px; border:none; background:none; border-top:1px dashed rgba(0,168,89,0.25); display:flex; align-items:center; gap:9px; color:#00A859; font-family:'Montserrat',sans-serif; font-weight:700; font-size:12px; cursor:pointer; transition:background 0.15s; flex-shrink:0; }
+    .cf-walkin-btn:hover { background:rgba(0,168,89,0.07); }
+    .cf-kanban-area { flex:1; min-width:0; display:grid; grid-template-columns:repeat(4,1fr); gap:10px; padding:12px; overflow:hidden; }
+    .cf-col { display:flex; flex-direction:column; background:#161D27; border-radius:12px; border:1px solid rgba(255,255,255,0.06); overflow:hidden; min-width:0; transition:border-color 0.15s,background 0.15s; }
+    .cf-col.drag-over { border-color:rgba(255,255,255,0.22); background:rgba(255,255,255,0.04); }
+    .cf-col-hdr { padding:11px 14px 9px; display:flex; align-items:center; gap:8px; border-bottom:1px solid rgba(255,255,255,0.05); flex-shrink:0; }
+    .cf-col-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+    .cf-col-name { font-family:'Montserrat',sans-serif; font-size:11px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; flex:1; }
+    .cf-col-cnt { font-family:'Montserrat',sans-serif; font-weight:700; font-size:11px; padding:2px 8px; border-radius:100px; }
+    .cf-col-waiting .cf-col-dot { background:#F59E0B; } .cf-col-waiting .cf-col-name { color:#F59E0B; } .cf-col-waiting .cf-col-cnt { background:rgba(245,158,11,0.12); color:#F59E0B; }
+    .cf-col-consult .cf-col-dot { background:#A78BFA; } .cf-col-consult .cf-col-name { color:#A78BFA; } .cf-col-consult .cf-col-cnt { background:rgba(167,139,250,0.12); color:#A78BFA; }
+    .cf-col-billing .cf-col-dot { background:#60A5FA; } .cf-col-billing .cf-col-name { color:#60A5FA; } .cf-col-billing .cf-col-cnt { background:rgba(96,165,250,0.12); color:#60A5FA; }
+    .cf-col-done    .cf-col-dot { background:#34D399; } .cf-col-done    .cf-col-name { color:#34D399; } .cf-col-done    .cf-col-cnt { background:rgba(52,211,153,0.12); color:#34D399; }
+    .cf-col-body { flex:1; overflow-y:auto; padding:8px; }
+    .cf-col-body::-webkit-scrollbar { width:4px; }
+    .cf-col-body::-webkit-scrollbar-thumb { background:rgba(255,255,255,0.08); border-radius:2px; }
+    .cf-col-empty,.kanban-empty { padding:28px 10px; text-align:center; font-size:11px; color:rgba(255,255,255,0.22); font-family:'Montserrat',sans-serif; font-weight:600; display:flex; flex-direction:column; align-items:center; gap:8px; }
+    .cf-empty-icon { width:32px; height:32px; border-radius:50%; background:rgba(255,255,255,0.04); display:flex; align-items:center; justify-content:center; }
+    .cf-empty-icon svg { width:15px; height:15px; opacity:0.35; }
+    .cf-kc { background:#1C2638; border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:11px 12px; margin-bottom:7px; cursor:grab; transition:transform 0.12s,border-color 0.12s,box-shadow 0.12s; position:relative; overflow:hidden; }
+    .cf-kc::before { content:''; position:absolute; left:0; top:0; bottom:0; width:3px; }
+    .cf-kc:hover { transform:translateY(-2px); border-color:rgba(255,255,255,0.16); box-shadow:0 8px 24px rgba(0,0,0,0.35); }
+    .cf-kc:active { cursor:grabbing; }
+    .cf-kc-dragging { opacity:0.35; transform:scale(0.96); }
+    .cf-col-waiting .cf-kc::before { background:#F59E0B; }
+    .cf-col-consult .cf-kc::before { background:#A78BFA; }
+    .cf-col-billing .cf-kc::before { background:#60A5FA; }
+    .cf-col-done    .cf-kc::before { background:#34D399; }
+    .cf-kc-q { font-family:'Montserrat',sans-serif; font-size:10px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:rgba(255,255,255,0.28); margin-bottom:7px; }
+    .cf-kc-body { display:flex; align-items:center; gap:9px; margin-bottom:9px; }
+    .cf-kc-av { width:30px; height:30px; border-radius:50%; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-family:'Montserrat',sans-serif; font-weight:700; font-size:11px; color:#fff; object-fit:cover; }
+    .cf-kc-name { font-family:'Montserrat',sans-serif; font-weight:700; font-size:12px; color:rgba(255,255,255,0.9); }
+    .cf-kc-meta { font-size:10px; color:rgba(255,255,255,0.32); margin-top:1px; }
+    .cf-kc-footer { display:flex; align-items:center; justify-content:space-between; gap:6px; }
+    .cf-kc-time { font-family:'Montserrat',sans-serif; font-size:10px; font-weight:700; color:rgba(255,255,255,0.28); }
+    .cf-kc-btn { height:25px; padding:0 10px; border:none; border-radius:6px; font-family:'Montserrat',sans-serif; font-size:10px; font-weight:700; cursor:pointer; letter-spacing:0.04em; transition:opacity 0.12s,transform 0.1s; }
+    .cf-kc-btn:hover { opacity:0.8; } .cf-kc-btn:active { transform:scale(0.95); }
+    .cf-kc-btn-green  { background:rgba(52,211,153,0.15); color:#34D399; }
+    .cf-kc-btn-purple { background:rgba(167,139,250,0.15); color:#A78BFA; }
+    .cf-kc-btn-blue   { background:rgba(96,165,250,0.15); color:#60A5FA; }
+    .cf-kc-btn-ghost  { background:rgba(255,255,255,0.06); color:rgba(255,255,255,0.38); }
+    .cf-stage-badge { font-family:'Montserrat',sans-serif; font-size:10px; font-weight:700; padding:3px 9px; border-radius:100px; letter-spacing:0.04em; white-space:nowrap; }
+    .cf-badge-waiting { background:rgba(245,158,11,0.15); color:#F59E0B; }
+    .cf-badge-session { background:rgba(167,139,250,0.15); color:#A78BFA; }
+    .cf-badge-billing { background:rgba(96,165,250,0.15); color:#60A5FA; }
+    .cf-badge-done    { background:rgba(52,211,153,0.15); color:#34D399; }
+    #view-clinicfloor .btn-green { background:rgba(0,168,89,0.15); border:1px solid rgba(0,168,89,0.25); color:#00A859; font-family:'Montserrat',sans-serif; }
+    #view-clinicfloor .btn-green:hover { background:rgba(0,168,89,0.25); }
+    @media(max-width:1100px){ .cf-kanban-area{grid-template-columns:repeat(2,1fr);} .cf-schedule-panel{width:260px;} }
+    @media(max-width:768px){ #view-clinicfloor.active{margin:-16px -16px;} .cf-body{flex-direction:column;} .cf-schedule-panel{width:100%;max-height:40%;border-right:none;border-bottom:1px solid rgba(255,255,255,0.06);} .cf-kanban-area{grid-template-columns:repeat(2,1fr);} }
+    /* ── LIVE FLOW BOARD ── */
+    .kanban-board { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; align-items:start; }
+    .kanban-col { background:rgba(0,0,0,0.03); border-radius:12px; padding:12px; min-height:200px; }
+    .kanban-col-hdr { display:flex; align-items:center; gap:8px; padding:8px 4px 12px; }
+    .kanban-col-hdr-title { font-family:'Montserrat',sans-serif; font-weight:700; font-size:12px; letter-spacing:0.06em; text-transform:uppercase; }
+    .kanban-col-cnt { font-family:'Montserrat',sans-serif; font-weight:700; font-size:11px; padding:2px 8px; border-radius:100px; }
+    .kanban-dot { width:9px; height:9px; border-radius:50%; flex-shrink:0; }
+    .kd-waiting   .kanban-dot { background:#F59E0B; } .kd-waiting   .kanban-col-hdr-title { color:#B45309; } .kd-waiting   .kanban-col-cnt { background:rgba(245,158,11,0.15); color:#B45309; }
+    .kd-consult   .kanban-dot { background:#8B5CF6; } .kd-consult   .kanban-col-hdr-title { color:#6D28D9; } .kd-consult   .kanban-col-cnt { background:rgba(139,92,246,0.15); color:#6D28D9; }
+    .kd-billing   .kanban-dot { background:#3B82F6; } .kd-billing   .kanban-col-hdr-title { color:#1D4ED8; } .kd-billing   .kanban-col-cnt { background:rgba(59,130,246,0.15); color:#1D4ED8; }
+    .kd-done      .kanban-dot { background:#10B981; } .kd-done      .kanban-col-hdr-title { color:#065F46; } .kd-done      .kanban-col-cnt { background:rgba(16,185,129,0.15); color:#065F46; }
+    .kc { background:#fff; border-radius:10px; padding:12px 14px; margin-bottom:10px; border:1.5px solid rgba(0,0,0,0.06); box-shadow:0 1px 4px rgba(0,0,0,0.05); transition:box-shadow 0.18s, transform 0.18s; cursor:default; }
+    .kc:hover { box-shadow:0 4px 14px rgba(0,0,0,0.1); transform:translateY(-1px); }
+    .kc-q { font-family:'Montserrat',sans-serif; font-size:10px; font-weight:800; color:var(--gray); letter-spacing:0.08em; margin-bottom:6px; }
+    .kc-name { font-family:'Montserrat',sans-serif; font-weight:700; font-size:13px; color:var(--dark); }
+    .kc-meta { font-size:11px; color:var(--gray); margin-top:3px; line-height:1.5; }
+    .kc-actions { display:flex; gap:6px; margin-top:10px; flex-wrap:wrap; }
+    .kc-btn-move { flex:1; padding:6px; border:none; border-radius:6px; font-family:'Montserrat',sans-serif; font-weight:700; font-size:10px; letter-spacing:0.05em; cursor:pointer; transition:opacity 0.15s; white-space:nowrap; }
+    .kc-btn-move:hover { opacity:0.82; }
+    .kc-btn-move.green { background:var(--green); color:#fff; }
+    .kc-btn-move.purple { background:#8B5CF6; color:#fff; }
+    .kc-btn-move.blue { background:#3B82F6; color:#fff; }
+    .kc-btn-move.ghost { background:rgba(0,0,0,0.06); color:var(--gray); }
+    .kanban-empty { text-align:center; padding:32px 12px; color:var(--gray); font-size:12px; opacity:0.6; }
+    .flow-realtime-bar { display:flex; align-items:center; gap:8px; margin-bottom:18px; font-family:'Montserrat',sans-serif; font-size:12px; color:var(--gray); }
+    .flow-live-dot { width:8px; height:8px; border-radius:50%; background:var(--green); animation:pulseDot 2s infinite; }
+    @keyframes pulseDot { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.4;transform:scale(0.8)} }
+    @media(max-width:1100px){ .kanban-board{grid-template-columns:1fr 1fr;} }
+    @media(max-width:700px){ .kanban-board{grid-template-columns:1fr;} }
+
+    /* ── BILLING MODULE ── */
+    .billing-stats { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:24px; }
+    .billing-stat { background:#fff; border-radius:12px; border:1.5px solid rgba(0,0,0,0.07); padding:18px 20px; box-shadow:0 1px 5px rgba(0,0,0,0.04); }
+    .billing-stat-label { font-family:'Montserrat',sans-serif; font-size:11px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--gray); margin-bottom:8px; }
+    .billing-stat-val { font-family:'Montserrat',sans-serif; font-size:26px; font-weight:800; color:var(--dark); }
+    .billing-stat-sub { font-size:12px; color:var(--gray); margin-top:4px; }
+    .bill-filters { display:flex; gap:6px; margin-bottom:16px; flex-wrap:wrap; }
+    .bill-chip { padding:5px 13px; border-radius:100px; border:1.5px solid rgba(0,0,0,0.1); background:#fff; font-family:'Montserrat',sans-serif; font-size:10px; font-weight:700; letter-spacing:0.07em; text-transform:uppercase; color:var(--gray); cursor:pointer; transition:all 0.15s; }
+    .bill-chip.active { background:var(--dark); color:#fff; border-color:var(--dark); }
+    .bill-chip:hover:not(.active) { border-color:var(--green); color:var(--green-dark); }
+    .pay-badge-unpaid   { background:rgba(239,68,68,0.1);   color:#DC2626; font-family:'Montserrat',sans-serif; font-size:10px; font-weight:700; padding:3px 9px; border-radius:100px; }
+    .pay-badge-partial  { background:rgba(245,158,11,0.12); color:#B45309; font-family:'Montserrat',sans-serif; font-size:10px; font-weight:700; padding:3px 9px; border-radius:100px; }
+    .pay-badge-paid     { background:rgba(16,185,129,0.12); color:#065F46; font-family:'Montserrat',sans-serif; font-size:10px; font-weight:700; padding:3px 9px; border-radius:100px; }
+    .pay-badge-waived   { background:rgba(0,0,0,0.06);      color:var(--gray); font-family:'Montserrat',sans-serif; font-size:10px; font-weight:700; padding:3px 9px; border-radius:100px; }
+    .pay-badge-insurance{ background:rgba(99,102,241,0.12); color:#4338CA; font-family:'Montserrat',sans-serif; font-size:10px; font-weight:700; padding:3px 9px; border-radius:100px; }
+    @media(max-width:900px){ .billing-stats{grid-template-columns:1fr 1fr;} }
+
+    /* ── APPOINTMENT MANAGEMENT ── */
+    .apmt-header { display:flex; align-items:center; gap:12px; margin-bottom:18px; flex-wrap:wrap; }
+    .apmt-tabs { display:flex; background:rgba(0,0,0,0.06); border-radius:10px; padding:3px; gap:2px; }
+    .apmt-tab { padding:7px 18px; border-radius:8px; border:none; background:none; cursor:pointer; font-family:'Montserrat',sans-serif; font-weight:700; font-size:12px; letter-spacing:0.04em; color:var(--gray); transition:all 0.18s; white-space:nowrap; }
+    .apmt-tab.active { background:#fff; color:var(--dark); box-shadow:0 1px 6px rgba(0,0,0,0.12); }
+    .apmt-tab:not(.active):hover { color:var(--dark); }
+    .apmt-search-wrap { flex:1; position:relative; min-width:180px; max-width:280px; }
+    .apmt-search-wrap svg { position:absolute; left:11px; top:50%; transform:translateY(-50%); pointer-events:none; }
+    .apmt-search-wrap .finput { padding-left:34px; height:36px; font-size:13px; }
+    .apmt-chip-row { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:18px; }
+    .apmt-chip { padding:5px 13px; border-radius:100px; border:1.5px solid rgba(0,0,0,0.1); background:#fff; font-family:'Montserrat',sans-serif; font-size:10px; font-weight:700; letter-spacing:0.07em; text-transform:uppercase; color:var(--gray); cursor:pointer; transition:all 0.15s; user-select:none; position:relative; }
+    .apmt-chip.active { background:rgba(0,168,89,0.18); color:#34D399; border-color:rgba(0,168,89,0.45); box-shadow:0 0 0 1px rgba(0,168,89,0.2); }
+    .apmt-chip:hover:not(.active) { border-color:var(--green); color:var(--green-dark); }
+    /* Today queue */
+    .tq-wrap { display:flex; flex-direction:column; gap:8px; }
+    .tq-item { background:#fff; border-radius:12px; border:1.5px solid rgba(0,0,0,0.07); padding:13px 18px; display:flex; align-items:center; gap:14px; box-shadow:0 1px 5px rgba(0,0,0,0.05); transition:box-shadow 0.18s; }
+    .tq-item:hover { box-shadow:0 4px 14px rgba(0,0,0,0.09); }
+    .tq-item.tq-now { border-left:4px solid var(--crimson); border-color:var(--crimson); background:rgba(211,26,34,0.025); }
+    .tq-item.tq-done { opacity:0.5; }
+    .tq-item.tq-overdue { border-left:4px solid #B45309; }
+    .tq-time { font-family:'Montserrat',sans-serif; font-size:14px; font-weight:800; color:var(--dark); min-width:68px; }
+    .tq-av { width:38px; height:38px; border-radius:50%; flex-shrink:0; object-fit:cover; display:flex; align-items:center; justify-content:center; font-family:'Montserrat',sans-serif; font-weight:700; font-size:13px; color:#fff; }
+    .tq-info { flex: 1; min-width: 0; overflow: hidden; }
+    .tq-name { font-family:'Montserrat',sans-serif; font-weight:700; font-size:13px; color:var(--dark); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .tq-sub { font-size:12px; color:var(--gray); margin-top:1px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .tq-actions { display:flex; gap:6px; margin-left:auto; flex-shrink:0; flex-wrap:nowrap; justify-content:flex-end; align-items:center; }
+    /* Patient grouped cards */
+    .pg-card { background:#fff; border-radius:12px; border:1.5px solid rgba(0,0,0,0.07); margin-bottom:10px; overflow:hidden; box-shadow:0 1px 5px rgba(0,0,0,0.04); transition:box-shadow 0.18s; }
+    .pg-card:hover { box-shadow:0 4px 14px rgba(0,0,0,0.09); }
+    .pg-header { padding:14px 18px; display:flex; align-items:center; gap:14px; cursor:pointer; }
+    .pg-header:hover { background:rgba(0,168,89,0.025); }
+    .pg-av { width:40px; height:40px; border-radius:50%; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-family:'Montserrat',sans-serif; font-weight:700; font-size:13px; color:#fff; object-fit:cover; }
+    .pg-name { font-family:'Montserrat',sans-serif; font-weight:700; font-size:14px; color:var(--dark); }
+    .pg-meta { font-size:12px; color:var(--gray); margin-top:2px; }
+    .pg-right { display:flex; align-items:center; gap:10px; margin-left:auto; flex-shrink:0; }
+    .pg-count-pill { background:var(--green-tint); color:var(--green-dark); font-family:'Montserrat',sans-serif; font-size:11px; font-weight:700; padding:3px 10px; border-radius:100px; }
+    .pg-today-pill { background:rgba(211,26,34,0.1); color:var(--crimson); font-family:'Montserrat',sans-serif; font-size:10px; font-weight:700; padding:3px 9px; border-radius:100px; letter-spacing:0.05em; }
+    .pg-chevron { color:var(--gray); transition:transform 0.22s; flex-shrink:0; }
+    .pg-card.open .pg-chevron { transform:rotate(180deg); }
+    .pg-rows { border-top:1px solid rgba(0,0,0,0.06); }
+    .pg-row { display:flex; align-items:center; gap:12px; padding:11px 18px 11px 72px; border-bottom:1px solid rgba(0,0,0,0.04); }
+    .pg-row:last-child { border-bottom:none; }
+    .pg-row-date { font-family:'Montserrat',sans-serif; font-size:12px; font-weight:700; color:var(--dark); min-width:110px; }
+    .pg-row-doc { font-size:12px; color:var(--gray); min-width:130px; }
+    .pg-row-purpose { font-size:12px; color:var(--dark); flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .pg-row-actions { display:flex; gap:5px; margin-left:auto; flex-shrink:0; }
+    .apmt-empty { text-align:center; padding:56px 24px; color:var(--gray); }
+    .apmt-empty-icon { font-size:36px; margin-bottom:12px; }
+    .apmt-empty-title { font-family:'Montserrat',sans-serif; font-weight:700; font-size:15px; color:var(--dark); margin-bottom:6px; }
     /* ── TOAST ── */
     .toast { position: fixed; bottom: 24px; right: 24px; background: var(--dark); color: #fff; padding: 14px 20px; border-radius: 10px; font-family: 'Montserrat', sans-serif; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 10px; box-shadow: 0 8px 30px rgba(0,0,0,0.25); transform: translateY(80px); opacity: 0; transition: transform 0.35s, opacity 0.35s; z-index: 9999; }
     .toast.show { transform: translateY(0); opacity: 1; }
@@ -307,6 +501,202 @@
     .activity-item { display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--light); font-size: 13px; color: var(--dark); }
     .activity-item:last-child { border-bottom: none; }
     .activity-time { font-size: 11px; color: var(--gray); flex-shrink: 0; }
+
+    /* ══════════════════════════════════════════════════════════════
+       GLOBAL DARK THEME
+    ══════════════════════════════════════════════════════════════ */
+    body { background: #0D1117; color: rgba(255,255,255,0.82); }
+
+    /* Auth login card */
+    .auth-main { background: #0D1117; }
+    .auth-card { background: #1A2332 !important; box-shadow: 0 8px 40px rgba(0,0,0,0.5) !important; border: 1px solid rgba(255,255,255,0.08); }
+    .auth-title { color: rgba(255,255,255,0.9) !important; }
+    .auth-sub { color: rgba(255,255,255,0.4) !important; }
+
+    /* Main header */
+    .main-header { background: #161D27; border-bottom: 1px solid rgba(255,255,255,0.06); }
+    .main-header-title { color: rgba(255,255,255,0.9); }
+    .main-header-sub { color: rgba(255,255,255,0.35); }
+    .notif-btn { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.1); }
+    .notif-btn svg { stroke: rgba(255,255,255,0.45); }
+    .hamburger-btn { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.1); }
+    .hamburger-btn span { background: rgba(255,255,255,0.5); }
+
+    /* Buttons */
+    .btn-ghost { background: transparent; border-color: rgba(255,255,255,0.15); color: rgba(255,255,255,0.5); }
+    .btn-ghost:hover { border-color: rgba(255,255,255,0.35); color: rgba(255,255,255,0.85); }
+    .btn-dark { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.1); color: rgba(255,255,255,0.8); }
+    .btn-dark:hover { background: rgba(255,255,255,0.13); }
+
+    /* Cards */
+    .card { background: #161D27; border-color: rgba(255,255,255,0.06); box-shadow: none; }
+    .card-title { color: rgba(255,255,255,0.85); border-color: rgba(255,255,255,0.06); }
+
+    /* Stat cards (dashboard) */
+    .stat-card { background: #161D27; border-color: rgba(255,255,255,0.06); box-shadow: none; }
+    .stat-val { color: rgba(255,255,255,0.9); }
+    .stat-lbl { color: rgba(255,255,255,0.38); }
+    .stat-icon { background: rgba(255,255,255,0.05) !important; }
+    .stat-icon svg { stroke: rgba(255,255,255,0.5); }
+    .delta-up { color: #34D399; }
+    .delta-down { color: #F87171; }
+
+    /* Tables */
+    .table th { color: rgba(255,255,255,0.32); border-color: rgba(255,255,255,0.06); }
+    .table td { color: rgba(255,255,255,0.78); border-color: rgba(255,255,255,0.05); }
+    .table tr:hover td { background: rgba(255,255,255,0.03); }
+    .td-name { color: rgba(255,255,255,0.9); }
+    .td-sub { color: rgba(255,255,255,0.32); }
+
+    /* Badges */
+    .badge-gray { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.45); }
+    .badge-green { background: rgba(0,168,89,0.15); color: #34D399; }
+    .badge-crimson { background: rgba(211,26,34,0.15); color: #F87171; }
+    .badge-blue { background: rgba(96,165,250,0.15); color: #60A5FA; }
+    .badge-yellow { background: rgba(245,158,11,0.15); color: #F59E0B; }
+
+    /* Modal */
+    .modal { background: #1A2332; border: 1px solid rgba(255,255,255,0.08); }
+    .modal-title { color: rgba(255,255,255,0.9); }
+    .modal-sub { color: rgba(255,255,255,0.4); }
+    .modal-close { color: rgba(255,255,255,0.4); }
+    .modal-close:hover { color: rgba(255,255,255,0.8); }
+
+    /* Notifications panel */
+    #notifPanel { background: #1A2332 !important; border-color: rgba(255,255,255,0.08) !important; box-shadow: 0 8px 32px rgba(0,0,0,0.5) !important; }
+    #notifPanel > div:first-child { border-color: rgba(255,255,255,0.07) !important; }
+    #notifPanel span { color: rgba(255,255,255,0.85) !important; }
+    #notifPanel button { color: rgba(255,255,255,0.35) !important; }
+
+    /* Forms */
+    .flabel { color: rgba(255,255,255,0.6); }
+    .finput { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.1); color: rgba(255,255,255,0.85); }
+    .finput::placeholder { color: rgba(255,255,255,0.42); }
+    .finput:focus { border-color: #00A859; background: rgba(255,255,255,0.08); }
+    .finput:focus-visible { outline: none; border-color: #00A859; background: rgba(255,255,255,0.08); box-shadow: 0 0 0 3px rgba(0,168,89,0.22), 0 0 10px rgba(0,168,89,0.12); }
+    select.finput option { background: #1A2332; color: rgba(255,255,255,0.85); }
+
+    /* Detail rows (appointment detail modal) */
+    .detail-row { border-color: rgba(255,255,255,0.06); }
+    .detail-key { color: rgba(255,255,255,0.35); }
+    .detail-val { color: rgba(255,255,255,0.82); }
+
+    /* Activity log (modal) */
+    .activity-item { border-color: rgba(255,255,255,0.05); color: rgba(255,255,255,0.78); }
+
+    /* ── Queue Monitor ── */
+    .queue-doc-card { background: #161D27; border-color: rgba(255,255,255,0.06); }
+    .qdoc-header { background: #0D1117; }
+    .qdoc-name { color: rgba(255,255,255,0.9) !important; }
+    .qdoc-spec { color: rgba(255,255,255,0.35) !important; }
+    .qdoc-list { background: #161D27; }
+    .qdoc-item { border-color: rgba(255,255,255,0.05); }
+    .qdoc-num { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.55); }
+    .qdoc-num.active { background: #00A859; color: #fff; }
+    .qdoc-pname { color: rgba(255,255,255,0.85) !important; }
+    .qdoc-ptime { color: rgba(255,255,255,0.35) !important; }
+
+    /* ── Doctors ── */
+    .doc-manage-card { background: #161D27; border-color: rgba(255,255,255,0.06); }
+    .doc-manage-body { background: #161D27; }
+    .doc-manage-name { color: rgba(255,255,255,0.9); }
+    .doc-manage-sched { color: rgba(255,255,255,0.35); }
+    .doc-manage-header { background: linear-gradient(135deg,#0D1117 0%,#161D27 100%); }
+
+    /* ── Billing ── */
+    .billing-stat { background: #161D27; border-color: rgba(255,255,255,0.06); box-shadow: none; }
+    .billing-stat-label { color: rgba(255,255,255,0.32); }
+    .billing-stat-val { color: rgba(255,255,255,0.9); }
+    .billing-stat-sub { color: rgba(255,255,255,0.32); }
+    .bill-chip { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.1); color: rgba(255,255,255,0.38); }
+    .bill-chip.active { background: rgba(0,168,89,0.18); color: #34D399; border-color: rgba(0,168,89,0.45); box-shadow: 0 0 0 1px rgba(0,168,89,0.2); }
+    .bill-chip:hover:not(.active) { border-color: #00A859; color: #00A859; }
+    .pay-badge-waived { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.45); }
+
+    /* ── Appointments ── */
+    .apmt-tabs { background: rgba(255,255,255,0.06); }
+    .apmt-tab { color: rgba(255,255,255,0.38); }
+    .apmt-tab.active { background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.9); box-shadow: none; }
+    .apmt-tab:not(.active):hover { color: rgba(255,255,255,0.7); }
+    .apmt-chip { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.1); color: rgba(255,255,255,0.38); }
+    .apmt-chip.active { background: rgba(255,255,255,0.12); color: rgba(255,255,255,0.88); border-color: rgba(255,255,255,0.2); }
+    .apmt-chip:hover:not(.active) { border-color: #00A859; color: #00A859; }
+    .apmt-search-wrap svg { stroke: rgba(255,255,255,0.3) !important; color: rgba(255,255,255,0.3) !important; }
+
+    /* Today's Queue items */
+    .tq-item { background: #161D27; border-color: rgba(255,255,255,0.06); box-shadow: none; }
+    .tq-item:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.3); border-color: rgba(255,255,255,0.12); }
+    .tq-item.tq-now { background: rgba(211,26,34,0.07); border-color: rgba(211,26,34,0.35); border-left-color: #D31A22; }
+    .tq-time { color: rgba(255,255,255,0.85); }
+    .tq-name { color: rgba(255,255,255,0.9); }
+    .tq-sub { color: rgba(255,255,255,0.35); }
+
+    /* Patient grouped cards */
+    .pg-card { background: #161D27; border-color: rgba(255,255,255,0.06); box-shadow: none; }
+    .pg-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.3); border-color: rgba(255,255,255,0.12); }
+    .pg-header:hover { background: rgba(255,255,255,0.02); }
+    .pg-name { color: rgba(255,255,255,0.9); }
+    .pg-meta { color: rgba(255,255,255,0.35); }
+    .pg-chevron { color: rgba(255,255,255,0.3); }
+    .pg-count-pill { background: rgba(0,168,89,0.12); color: #34D399; }
+    .pg-rows { border-color: rgba(255,255,255,0.05); }
+    .pg-row { border-color: rgba(255,255,255,0.04); }
+    .pg-row-date { color: rgba(255,255,255,0.85); }
+    .pg-row-doc { color: rgba(255,255,255,0.38); }
+    .pg-row-purpose { color: rgba(255,255,255,0.72); }
+
+    /* Empty states */
+    .apmt-empty { color: rgba(255,255,255,0.3); }
+    .apmt-empty-title { color: rgba(255,255,255,0.55); }
+
+    /* Live Flow Board kanban */
+    .kanban-col { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); }
+    .kc { background: #1C2638; border-color: rgba(255,255,255,0.08); box-shadow: none; }
+    .kc:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.3); border-color: rgba(255,255,255,0.15); }
+    .kc-q { color: rgba(255,255,255,0.3); }
+    .kc-name { color: rgba(255,255,255,0.9); }
+    .kc-meta { color: rgba(255,255,255,0.35); }
+    .kd-waiting   .kanban-col-hdr-title { color: #F59E0B; }
+    .kd-consult   .kanban-col-hdr-title { color: #A78BFA; }
+    .kd-billing   .kanban-col-hdr-title { color: #60A5FA; }
+    .kd-done      .kanban-col-hdr-title { color: #34D399; }
+    .kd-waiting   .kanban-col-cnt { background: rgba(245,158,11,0.12); color: #F59E0B; }
+    .kd-consult   .kanban-col-cnt { background: rgba(167,139,250,0.12); color: #A78BFA; }
+    .kd-billing   .kanban-col-cnt { background: rgba(96,165,250,0.12); color: #60A5FA; }
+    .kd-done      .kanban-col-cnt { background: rgba(52,211,153,0.12); color: #34D399; }
+    .kc-btn-move.ghost { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.45); }
+    .flow-realtime-bar { color: rgba(255,255,255,0.38); }
+
+    /* Dashboard chart */
+    .chart-label { color: rgba(255,255,255,0.55) !important; }
+    .chart-bar { background: rgba(0,168,89,0.25) !important; }
+    .chart-bar.peak { background: rgba(0,168,89,0.55) !important; }
+    .chart-bar::after { color: rgba(255,255,255,0.55) !important; }
+
+    /* Fix green-tint variable for dark theme */
+    :root { --green-tint: rgba(0,168,89,0.1); }
+
+    /* Dashboard status tiles — fix hardcoded light colours */
+    #mini-completed { color: #34D399 !important; }
+    #mini-confirmed { color: #60A5FA !important; }
+    #mini-pending   { color: #F59E0B !important; }
+    #mini-noshow    { color: #F87171 !important; }
+    #mini-completed + div, #mini-confirmed + div,
+    #mini-pending + div, #mini-noshow + div { color: rgba(255,255,255,0.35) !important; }
+    /* Dim the tile backgrounds */
+    [style*="var(--green-tint)"] { background: rgba(0,168,89,0.1) !important; }
+    [style*="rgba(66,133,244,0.07)"] { background: rgba(96,165,250,0.07) !important; }
+    [style*="rgba(255,193,7,0.08)"] { background: rgba(245,158,11,0.08) !important; }
+    [style*="rgba(211,26,34,0.07)"] { background: rgba(211,26,34,0.08) !important; }
+
+    /* Scrollbars global */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.18); }
+
+    /* Clinic Floor — refit to dark page (no need for edge-to-edge bleed) */
+    #view-clinicfloor.active { display:flex; flex-direction:column; margin:-28px -32px; height:calc(100vh - 65px); overflow:hidden; background:#0D1117; }
   </style>
 </head>
 <body>
@@ -325,15 +715,16 @@
     <div class="auth-card">
       <div class="auth-title">Admin Sign In</div>
       <div class="auth-sub">Enter your clinic staff credentials to continue.</div>
+      <div id="loginErrorBanner" style="display:none;background:rgba(211,26,34,0.12);border:1px solid rgba(211,26,34,0.3);border-radius:8px;padding:10px 14px;margin-bottom:16px;font-size:13px;color:#F87171;line-height:1.5;"></div>
       <div class="fgroup">
         <label class="flabel" for="a-email">Email Address</label>
-        <input class="finput" id="a-email" type="email" placeholder="admin@delosreyes.com">
+        <input class="finput" id="a-email" type="email" placeholder="admin@delosreyes.com" oninput="document.getElementById('loginErrorBanner').style.display='none'">
       </div>
       <div class="fgroup" style="margin-bottom:16px;">
         <label class="flabel" for="a-pass">Password</label>
-        <input class="finput" id="a-pass" type="password" placeholder="Admin password">
+        <input class="finput" id="a-pass" type="password" placeholder="Admin password" oninput="document.getElementById('loginErrorBanner').style.display='none'">
       </div>
-      <button class="btn btn-green btn-full" id="adminLoginBtn" style="padding:13px;" disabled onclick="doAdminLogin()">Connecting…</button>
+      <button class="btn btn-green btn-full" id="adminLoginBtn" style="padding:13px;display:flex;align-items:center;justify-content:center;gap:10px;" disabled onclick="doAdminLogin()">Connecting…</button>
       <div style="margin-top:20px;text-align:center;">
         <a href="index.html" style="font-size:12px;color:var(--gray);text-decoration:none;">← Back to main website</a>
         &nbsp;|&nbsp;
@@ -356,18 +747,14 @@
         <svg fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
         Dashboard
       </a></li>
-      <li><a onclick="showView('queue')">
-        <svg fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-        Queue Monitor
+      <li><a onclick="showView('clinicfloor')">
+        <svg fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        Clinic Floor
+        <span id="clinicFloorBadge" style="margin-left:auto;background:var(--green);color:#fff;font-size:10px;font-weight:800;padding:2px 7px;border-radius:100px;font-family:'Montserrat',sans-serif;display:none;"></span>
       </a></li>
     </ul>
     <div class="sidebar-section">Management</div>
     <ul class="sidebar-nav">
-      <li><a onclick="showView('checkin')">
-        <svg fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><polyline points="16 11 18 13 22 9"/></svg>
-        Check-In
-        <span id="checkinBadge" style="margin-left:auto;background:var(--green);color:#fff;font-size:10px;font-weight:800;padding:2px 7px;border-radius:100px;font-family:'Montserrat',sans-serif;display:none;"></span>
-      </a></li>
       <li><a onclick="showView('appointments')">
         <svg fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
         Appointments
@@ -379,6 +766,11 @@
       <li><a onclick="showView('patients')">
         <svg fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="23" y1="11" x2="17" y2="11"/><line x1="20" y1="8" x2="20" y2="14"/></svg>
         Patients
+      </a></li>
+      <li><a onclick="showView('billing')">
+        <svg fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+        Billing
+        <span id="unpaidBadge" style="margin-left:auto;background:var(--crimson);color:#fff;font-size:10px;font-weight:800;padding:2px 7px;border-radius:100px;font-family:'Montserrat',sans-serif;display:none;"></span>
       </a></li>
     </ul>
     <div style="padding:10px 10px 0;border-top:1px solid rgba(255,255,255,0.06);margin-top:auto;">
@@ -406,7 +798,7 @@
     <header class="main-header">
       <div>
         <div class="main-header-title" id="viewTitle">Dashboard Overview</div>
-        <div class="main-header-sub" id="viewSub">Tuesday, May 27, 2026 · De Los Reyes Doctors Clinic</div>
+        <div class="main-header-sub" id="viewSub">De Los Reyes Doctors Clinic</div>
       </div>
       <div style="display:flex;gap:10px;align-items:center;">
         <div class="notif-wrap" style="position:relative;">
@@ -572,36 +964,40 @@
 
       <!-- ── APPOINTMENTS ── -->
       <div class="view" id="view-appointments">
-        <div class="card">
-          <div class="card-title">
-            All Appointments
-            <div style="display:flex;gap:8px;">
-              <input class="finput" style="width:200px;padding:8px 12px;font-size:13px;" placeholder="Search by patient…" oninput="searchAppts(this.value)">
-              <button class="btn btn-ghost btn-sm" onclick="generateCSV()">Export CSV</button>
-              <button class="btn btn-green btn-sm" onclick="openModal('appt')">+ New</button>
-            </div>
+        <!-- Header bar -->
+        <div class="apmt-header">
+          <div class="apmt-tabs">
+            <button class="apmt-tab active" data-tab="today" onclick="switchApptTab('today')">Today's Queue</button>
+            <button class="apmt-tab" data-tab="all" onclick="switchApptTab('all')">All Patients</button>
           </div>
-          <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;" id="apptFilters">
-            <button class="btn btn-dark btn-sm" onclick="filterAdminAppts(this,'all')">All</button>
-            <button class="btn btn-ghost btn-sm" onclick="filterAdminAppts(this,'Confirmed')">Confirmed</button>
-            <button class="btn btn-ghost btn-sm" onclick="filterAdminAppts(this,'Completed')">Completed</button>
-            <button class="btn btn-ghost btn-sm" onclick="filterAdminAppts(this,'Pending')">Pending</button>
-            <button class="btn btn-ghost btn-sm" onclick="filterAdminAppts(this,'Cancelled')">Cancelled</button>
-            <button class="btn btn-ghost btn-sm" onclick="filterAdminAppts(this,'In Session')">In Session</button>
+          <div class="apmt-search-wrap">
+            <svg width="14" height="14" fill="none" stroke="var(--gray)" stroke-width="2" stroke-linecap="round" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input class="finput" placeholder="Search patient or purpose…" oninput="searchApmtMgmt(this.value)">
           </div>
-          <table class="table" id="adminApptTable">
-            <thead>
-              <tr><th>Patient</th><th>Doctor</th><th>Date &amp; Time</th><th>Purpose</th><th>Status</th><th>Actions</th></tr>
-            </thead>
-            <tbody id="adminApptBody">
-              <tr data-status="In Session"><td><div class="td-name">Ana Rivera</div><div class="td-sub">#DRD-00042</div></td><td>Dr. M. Santos</td><td>May 27 · 10:30 AM</td><td>Hypertension follow-up</td><td><span class="badge badge-crimson">In Session</span></td><td><button class="btn btn-ghost btn-sm" onclick="openApptDetail(this)">View</button></td></tr>
-              <tr data-status="Confirmed"><td><div class="td-name">Ben Marcos</div><div class="td-sub">#DRD-00078</div></td><td>Dr. M. Santos</td><td>May 27 · 11:00 AM</td><td>Chest pain</td><td><span class="badge badge-yellow">Confirmed</span></td><td><button class="btn btn-ghost btn-sm" onclick="openApptDetail(this)">Edit</button></td></tr>
-              <tr data-status="Completed"><td><div class="td-name">Eva Gomez</div><div class="td-sub">#DRD-00021</div></td><td>Dr. A. Reyes</td><td>May 27 · 10:00 AM</td><td>Prenatal 28wk</td><td><span class="badge badge-green">Completed</span></td><td><button class="btn btn-ghost btn-sm" onclick="openApptDetail(this)">View</button></td></tr>
-              <tr data-status="Completed"><td><div class="td-name">Felix Uy</div><div class="td-sub">#DRD-00055</div></td><td>Dr. J. dela Cruz</td><td>May 27 · 9:30 AM</td><td>Vaccination</td><td><span class="badge badge-green">Completed</span></td><td><button class="btn btn-ghost btn-sm" onclick="openApptDetail(this)">View</button></td></tr>
-              <tr data-status="Pending"><td><div class="td-name">Grace Reyes</div><div class="td-sub">#DRD-00109</div></td><td>Dr. M. Santos</td><td>May 27 · 2:00 PM</td><td>Diabetes management</td><td><span class="badge badge-blue">Pending</span></td><td><button class="btn btn-ghost btn-sm" onclick="openApptDetail(this)">Edit</button></td></tr>
-              <tr data-status="Cancelled"><td><div class="td-name">Hector Ramos</div><div class="td-sub">#DRD-00091</div></td><td>Dr. A. Reyes</td><td>May 27 · 1:00 PM</td><td>Annual check</td><td><span class="badge badge-crimson">Cancelled</span></td><td><button class="btn btn-ghost btn-sm" onclick="openApptDetail(this)">Reschedule</button></td></tr>
-            </tbody>
-          </table>
+          <div style="display:flex;gap:8px;margin-left:auto;">
+            <button class="btn btn-ghost btn-sm" onclick="generateCSV()">Export CSV</button>
+          </div>
+        </div>
+        <!-- Filter chips -->
+        <div class="apmt-chip-row">
+          <button class="apmt-chip active" data-filter="all" onclick="setApmtFilter(this,'all')">All</button>
+          <button class="apmt-chip" data-filter="today" onclick="setApmtFilter(this,'today')">Today</button>
+          <button class="apmt-chip" data-filter="Pending" onclick="setApmtFilter(this,'Pending')">Pending</button>
+          <button class="apmt-chip" data-filter="Confirmed" onclick="setApmtFilter(this,'Confirmed')">Confirmed</button>
+          <button class="apmt-chip" data-filter="Completed" onclick="setApmtFilter(this,'Completed')">Completed</button>
+          <button class="apmt-chip" data-filter="Cancelled" onclick="setApmtFilter(this,'Cancelled')">Cancelled</button>
+        </div>
+        <!-- Today view -->
+        <div id="apmtTodayView">
+          <div class="tq-wrap" id="apmtTodayList">
+            <div class="apmt-empty"><div class="apmt-empty-icon">📅</div><div class="apmt-empty-title">Loading…</div></div>
+          </div>
+        </div>
+        <!-- All patients view -->
+        <div id="apmtAllView" style="display:none;">
+          <div id="apmtGroupedList">
+            <div class="apmt-empty"><div class="apmt-empty-icon">👥</div><div class="apmt-empty-title">Loading…</div></div>
+          </div>
         </div>
       </div>
 
@@ -636,6 +1032,183 @@
               <tr><td><div class="td-name">Eva Gomez</div><div class="td-sub">DOB: Jun 7, 1996 · F</div></td><td>0917-222-3333</td><td>May 27, 2026</td><td>6</td><td><span class="badge badge-green">Active</span></td><td><button class="btn btn-ghost btn-sm" onclick="showToast('Patient record opened')">View</button></td></tr>
             </tbody>
           </table>
+        </div>
+      </div>
+
+      <!-- ── CLINIC FLOOR ── -->
+      <div class="view" id="view-clinicfloor">
+        <!-- Top bar -->
+        <div class="cf-topbar">
+          <div class="cf-live-pill">
+            <div class="cf-live-dot"></div>
+            <span class="cf-live-label">Live</span>
+          </div>
+          <div class="cf-stats">
+            <div class="cf-stat-pill cf-stat-total">
+              <div><div class="cf-stat-num" id="cf-cnt-scheduled">0</div><div class="cf-stat-label">Scheduled</div></div>
+            </div>
+            <div class="cf-stat-pill cf-stat-waiting">
+              <div><div class="cf-stat-num" id="cf-cnt-waiting">0</div><div class="cf-stat-label">Waiting</div></div>
+            </div>
+            <div class="cf-stat-pill cf-stat-consult">
+              <div><div class="cf-stat-num" id="cf-cnt-session">0</div><div class="cf-stat-label">In Session</div></div>
+            </div>
+            <div class="cf-stat-pill cf-stat-done">
+              <div><div class="cf-stat-num" id="cf-cnt-done">0</div><div class="cf-stat-label">Completed</div></div>
+            </div>
+          </div>
+          <div class="cf-tb-actions">
+            <button class="cf-btn-refresh" onclick="loadClinicFloor()">⟳ Refresh</button>
+            <button class="cf-btn-walkin" onclick="openWalkinModal()">+ Walk-In</button>
+          </div>
+        </div>
+
+        <!-- Body: schedule + kanban -->
+        <div class="cf-body">
+          <!-- LEFT: Today's Schedule -->
+          <div class="cf-schedule-panel">
+            <div class="cf-panel-hdr">
+              <span class="cf-panel-title">Today's Schedule</span>
+              <span class="cf-date-label" id="cf-date-label"></span>
+            </div>
+            <div class="cf-schedule-list" id="cf-schedule-list">
+              <div class="cf-col-empty">Loading…</div>
+            </div>
+            <button class="cf-walkin-btn" onclick="openWalkinModal()">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+              Add Walk-In Patient
+            </button>
+          </div>
+
+          <!-- RIGHT: Live Kanban (drag & drop) -->
+          <div class="cf-kanban-area">
+            <div class="cf-col cf-col-waiting" ondragover="cfDragOver(event)" ondragleave="cfDragLeave(event)" ondrop="cfDrop(event,'waiting')">
+              <div class="cf-col-hdr">
+                <div class="cf-col-dot"></div>
+                <div class="cf-col-name">Waiting</div>
+                <span class="cf-col-cnt" id="cf-kb-cnt-waiting">0</span>
+              </div>
+              <div class="cf-col-body" id="cf-kb-waiting"><div class="cf-col-empty"><div class="cf-empty-icon"><svg fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div>No patients waiting</div></div>
+            </div>
+            <div class="cf-col cf-col-consult" ondragover="cfDragOver(event)" ondragleave="cfDragLeave(event)" ondrop="cfDrop(event,'in_session')">
+              <div class="cf-col-hdr">
+                <div class="cf-col-dot"></div>
+                <div class="cf-col-name">In Consultation</div>
+                <span class="cf-col-cnt" id="cf-kb-cnt-consult">0</span>
+              </div>
+              <div class="cf-col-body" id="cf-kb-consult"><div class="cf-col-empty"><div class="cf-empty-icon"><svg fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>No active sessions</div></div>
+            </div>
+            <div class="cf-col cf-col-billing" ondragover="cfDragOver(event)" ondragleave="cfDragLeave(event)" ondrop="cfDrop(event,'billing')">
+              <div class="cf-col-hdr">
+                <div class="cf-col-dot"></div>
+                <div class="cf-col-name">Billing</div>
+                <span class="cf-col-cnt" id="cf-kb-cnt-billing">0</span>
+              </div>
+              <div class="cf-col-body" id="cf-kb-billing"><div class="cf-col-empty"><div class="cf-empty-icon"><svg fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg></div>No pending billing</div></div>
+            </div>
+            <div class="cf-col cf-col-done" ondragover="cfDragOver(event)" ondragleave="cfDragLeave(event)" ondrop="cfDrop(event,'done')">
+              <div class="cf-col-hdr">
+                <div class="cf-col-dot"></div>
+                <div class="cf-col-name">Completed</div>
+                <span class="cf-col-cnt" id="cf-kb-cnt-done">0</span>
+              </div>
+              <div class="cf-col-body" id="cf-kb-done"><div class="cf-col-empty"><div class="cf-empty-icon"><svg fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>None completed yet</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── LIVE FLOW BOARD ── -->
+      <div class="view" id="view-flowboard">
+        <div class="flow-realtime-bar">
+          <div class="flow-live-dot"></div>
+          <span>Live Clinic Flow — Today · Auto-refreshes every 30 seconds</span>
+          <button class="btn btn-ghost btn-sm" style="margin-left:auto;" onclick="loadFlowBoard()">⟳ Refresh</button>
+        </div>
+        <div class="kanban-board">
+          <div class="kanban-col kd-waiting">
+            <div class="kanban-col-hdr">
+              <div class="kanban-dot"></div>
+              <div class="kanban-col-hdr-title">Waiting</div>
+              <span class="kanban-col-cnt" id="kb-cnt-waiting">0</span>
+            </div>
+            <div id="kb-waiting"><div class="kanban-empty">No patients waiting</div></div>
+          </div>
+          <div class="kanban-col kd-consult">
+            <div class="kanban-col-hdr">
+              <div class="kanban-dot"></div>
+              <div class="kanban-col-hdr-title">In Consultation</div>
+              <span class="kanban-col-cnt" id="kb-cnt-consult">0</span>
+            </div>
+            <div id="kb-consult"><div class="kanban-empty">No active consultations</div></div>
+          </div>
+          <div class="kanban-col kd-billing">
+            <div class="kanban-col-hdr">
+              <div class="kanban-dot"></div>
+              <div class="kanban-col-hdr-title">Billing / Checkout</div>
+              <span class="kanban-col-cnt" id="kb-cnt-billing">0</span>
+            </div>
+            <div id="kb-billing"><div class="kanban-empty">No pending billing</div></div>
+          </div>
+          <div class="kanban-col kd-done">
+            <div class="kanban-col-hdr">
+              <div class="kanban-dot"></div>
+              <div class="kanban-col-hdr-title">Completed</div>
+              <span class="kanban-col-cnt" id="kb-cnt-done">0</span>
+            </div>
+            <div id="kb-done"><div class="kanban-empty">No completed yet</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── BILLING MODULE ── -->
+      <div class="view" id="view-billing">
+        <div class="billing-stats">
+          <div class="billing-stat">
+            <div class="billing-stat-label">Today's Revenue</div>
+            <div class="billing-stat-val" id="bill-revenue">₱0</div>
+            <div class="billing-stat-sub" id="bill-revenue-sub">Paid consultations</div>
+          </div>
+          <div class="billing-stat">
+            <div class="billing-stat-label">Unpaid</div>
+            <div class="billing-stat-val" style="color:var(--crimson);" id="bill-unpaid">0</div>
+            <div class="billing-stat-sub" id="bill-unpaid-sub">Awaiting payment</div>
+          </div>
+          <div class="billing-stat">
+            <div class="billing-stat-label">Paid</div>
+            <div class="billing-stat-val" style="color:var(--green);" id="bill-paid">0</div>
+            <div class="billing-stat-sub">Transactions today</div>
+          </div>
+          <div class="billing-stat">
+            <div class="billing-stat-label">Avg. Fee</div>
+            <div class="billing-stat-val" id="bill-avg">₱—</div>
+            <div class="billing-stat-sub">Per consultation</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">
+            Payment Records
+            <div style="display:flex;gap:8px;">
+              <input class="finput" style="width:200px;padding:8px 12px;font-size:13px;" placeholder="Search patient…" oninput="searchBilling(this.value)">
+            </div>
+          </div>
+          <div class="bill-filters">
+            <button class="bill-chip active" data-filter="all" onclick="setBillFilter(this,'all')">All</button>
+            <button class="bill-chip" data-filter="unpaid" onclick="setBillFilter(this,'unpaid')">Unpaid</button>
+            <button class="bill-chip" data-filter="partial" onclick="setBillFilter(this,'partial')">Partial</button>
+            <button class="bill-chip" data-filter="paid" onclick="setBillFilter(this,'paid')">Paid</button>
+            <button class="bill-chip" data-filter="waived" onclick="setBillFilter(this,'waived')">Waived</button>
+          </div>
+          <div style="overflow-x:auto;">
+            <table class="table">
+              <thead>
+                <tr><th>Patient</th><th>Doctor</th><th>Date</th><th>Service</th><th>Fee</th><th>Paid</th><th>Status</th><th>Actions</th></tr>
+              </thead>
+              <tbody id="billingBody">
+                <tr><td colspan="8" style="text-align:center;color:var(--gray);padding:24px;">Loading billing records…</td></tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
 
@@ -922,31 +1495,67 @@
     const btn = document.getElementById('adminLoginBtn');
     _adminLoggingIn = true;
     btn.disabled = true;
-    btn.innerHTML = '<span style="display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,0.35);border-top-color:#fff;border-radius:50%;animation:spin 0.7s linear infinite;vertical-align:middle;"></span>&nbsp;Signing in…';
+    btn.innerHTML = '<span style="display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:spin 0.7s linear infinite;flex-shrink:0;"></span><span style="opacity:0.8;">Signing in, please wait...</span>';
+    const watchdog = setTimeout(() => {
+      if (_adminLoggingIn) {
+        _adminLoggingIn = false;
+        btn.disabled = false; btn.textContent = 'Sign In';
+        const alert = document.getElementById('loginErrorBanner');
+        if (alert) { alert.textContent = 'Authentication taking longer than expected. Please check your network connection and try again.'; alert.style.display = ''; }
+      }
+    }, 5000);
     try {
       const { data, error } = await db.auth.signInWithPassword({ email, password: pass });
+      clearTimeout(watchdog);
       if (error) throw error;
       const { data: profile } = await db.from('profiles').select('*').eq('id', data.user.id).single();
       if (profile?.role !== 'admin') {
         await db.auth.signOut();
         showToast('This portal is for admins only.');
-        btn.disabled = false; btn.textContent = 'Sign In to Admin Panel';
+        btn.disabled = false; btn.textContent = 'Sign In';
         _adminLoggingIn = false; return;
       }
       localStorage.setItem('drd-role', 'admin');
       localStorage.setItem('drd-uid',  data.user.id);
       initAdminSession(profile);
     } catch(e) {
+      clearTimeout(watchdog);
       showToast(e.message || 'Invalid credentials');
-      btn.disabled = false; btn.textContent = 'Sign In to Admin Panel';
+      const alert = document.getElementById('loginErrorBanner');
+      if (alert) { alert.textContent = e.message || 'Invalid credentials. Please check your email and password.'; alert.style.display = ''; }
+      btn.disabled = false; btn.textContent = 'Sign In';
     } finally {
       _adminLoggingIn = false;
     }
   }
 
+  // Force login screen whenever adminApp is not active
+  (function guardRoute() {
+    const hash = location.hash.slice(1);
+    const loginEl = document.getElementById('loginScreen');
+    const appEl   = document.getElementById('adminApp');
+    if (hash && !appEl?.classList.contains('active')) {
+      if (loginEl) loginEl.style.display = 'flex';
+      history.replaceState(null, '', location.pathname);
+    }
+  })();
+
   function initAdminSession(profile) {
     const name = ((profile?.first_name||'') + ' ' + (profile?.last_name||'')).trim() || 'Admin';
     document.querySelector('.admin-sb-name').textContent = name;
+    // Set live date in header and clinic floor
+    const now = new Date();
+    const days   = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+    const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    const monthsShort = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const liveDate = days[now.getDay()] + ', ' + months[now.getMonth()] + ' ' + now.getDate() + ', ' + now.getFullYear();
+    const liveDateShort = monthsShort[now.getMonth()] + ' ' + now.getDate() + ', ' + now.getFullYear();
+    const viewSubEl = document.getElementById('viewSub');
+    if (viewSubEl) viewSubEl.textContent = liveDate + ' · De Los Reyes Doctors Clinic';
+    const cfDateEl = document.getElementById('cf-date-label');
+    if (cfDateEl) cfDateEl.textContent = liveDateShort;
+    const checkinDateEl = document.getElementById('checkinDateLabel');
+    if (checkinDateEl) checkinDateEl.textContent = liveDate;
     document.getElementById('loginScreen').style.display = 'none';
     document.getElementById('adminApp').classList.add('active');
     showToast('Welcome, ' + name + '! Clinic dashboard loaded.');
@@ -954,6 +1563,7 @@
     loadNotifications();
     startQueueAutoRefresh();
     loadAdminData();
+    loadBillingView();
   }
 
   async function loadAdminData() {
@@ -970,24 +1580,197 @@
     } catch(e) { console.error('Admin data load error:', e); }
   }
 
+  // ── APPOINTMENT MANAGEMENT STATE ────────────────────────────────────────
+  let _allAppts   = [];
+  let _apmtTab    = 'today';
+  let _apmtFilter = 'all';
+  let _apmtSearch = '';
+  const _AV_COLORS = ['#00A859','#2563EB','#D31A22','#B45309','#805AD5','#0891B2','#7C3AED','#BE185D'];
+
   function renderAdminAppointments(appts) {
-    const tbody = document.getElementById('adminApptBody');
-    if (!tbody || !appts?.length) return;
-    tbody.innerHTML = appts.map(a => {
-      const p    = a.patients;
-      const d    = a.doctors;
-      const pname = p ? p.first_name + ' ' + p.last_name : '—';
-      const dname = d ? 'Dr. ' + d.first_name[0] + '. ' + d.last_name : '—';
-      const bc   = a.status==='Completed'?'badge-green':a.status==='Cancelled'||a.status==='No-Show'?'badge-crimson':a.status==='In Session'?'badge-crimson':a.status==='Pending'?'badge-blue':'badge-yellow';
-      return `<tr data-status="${a.status}" data-id="${a.id}">
-        <td><div class="td-name">${pname}</div><div class="td-sub">#${a.id.slice(0,8).toUpperCase()}</div></td>
-        <td>${dname}</td>
-        <td>${a.date} · ${a.time}</td>
-        <td>${a.purpose||'—'}</td>
-        <td><span class="badge ${bc}">${a.status}</span></td>
-        <td><button class="btn btn-ghost btn-sm" onclick="openApptDetail(this)">View</button></td>
-      </tr>`;
+    _allAppts = appts || [];
+    renderApmtViews();
+  }
+
+  function switchApptTab(tab) {
+    _apmtTab = tab;
+    document.querySelectorAll('.apmt-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
+    document.getElementById('apmtTodayView').style.display = tab === 'today' ? '' : 'none';
+    document.getElementById('apmtAllView').style.display   = tab === 'all'   ? '' : 'none';
+  }
+
+  function setApmtFilter(chip, filter) {
+    _apmtFilter = filter;
+    document.querySelectorAll('.apmt-chip').forEach(c => c.classList.toggle('active', c.dataset.filter === filter));
+    renderApmtViews();
+  }
+
+  function searchApmtMgmt(q) {
+    _apmtSearch = q.toLowerCase().trim();
+    renderApmtViews();
+  }
+
+  function renderApmtViews() {
+    const today = new Date().toISOString().slice(0, 10);
+    let filtered = _allAppts;
+    if (_apmtFilter === 'today')    filtered = filtered.filter(a => a.date === today);
+    else if (_apmtFilter !== 'all') filtered = filtered.filter(a => a.status === _apmtFilter);
+    if (_apmtSearch) {
+      filtered = filtered.filter(a => {
+        const p    = a.patients;
+        const name = p ? (p.first_name + ' ' + p.last_name).toLowerCase() : '';
+        return name.includes(_apmtSearch) || (a.purpose||'').toLowerCase().includes(_apmtSearch) || a.id.toLowerCase().includes(_apmtSearch);
+      });
+    }
+    renderTodayQueue(filtered.filter(a => a.date === today));
+    renderGroupedPatients(filtered);
+  }
+
+  function _fmtTime(t) {
+    if (!t) return '—';
+    const [h, m] = t.split(':');
+    const hr = parseInt(h);
+    return (hr % 12 || 12) + ':' + m + (hr < 12 ? ' AM' : ' PM');
+  }
+  function _fmtDate(ds) {
+    if (!ds) return '—';
+    const [y, mo, d] = ds.split('-');
+    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    return months[parseInt(mo)-1] + ' ' + parseInt(d);
+  }
+  function _bc(s) {
+    return s==='Completed'?'badge-green':s==='Cancelled'||s==='No-Show'?'badge-crimson':s==='In Session'||s==='Checked In'?'badge-crimson':s==='Pending'?'badge-blue':'badge-yellow';
+  }
+  function _av(p, size) {
+    const sz = size || 38;
+    const initials = p ? ((p.first_name||'')[0]||'') + ((p.last_name||'')[0]||'') : '?';
+    const name  = p ? p.first_name + p.last_name : 'Z';
+    const color = _AV_COLORS[name.charCodeAt(0) % _AV_COLORS.length];
+    return p?.photo_url
+      ? `<img class="tq-av" src="${p.photo_url}" style="width:${sz}px;height:${sz}px;" alt="">`
+      : `<div class="tq-av" style="background:${color};width:${sz}px;height:${sz}px;">${initials.toUpperCase()}</div>`;
+  }
+  function _quickBtns(a) {
+    const pname = a.patients ? (a.patients.first_name + ' ' + a.patients.last_name) : '—';
+    const safe  = pname.replace(/'/g,"\\'");
+    const s = a.status;
+    let html = '';
+    if (s === 'Pending')                                              html += `<button class="btn btn-green btn-sm" onclick="quickConfirmAppt('${a.id}')">Confirm</button>`;
+    if (s !== 'Completed' && s !== 'Cancelled' && s !== 'No-Show')   html += `<button class="btn btn-ghost btn-sm" onclick="openRescheduleModal('${a.id}','${safe}')">Reschedule</button>`;
+    if (s !== 'Completed' && s !== 'Cancelled' && s !== 'No-Show')   html += `<button style="background:rgba(211,26,34,0.08);color:var(--crimson);border:none;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;padding:6px 11px;border-radius:6px;cursor:pointer;" onclick="cancelApptFromDetail('${a.id}','${safe}')">Cancel</button>`;
+    return html;
+  }
+
+  function renderTodayQueue(todayAppts) {
+    const wrap = document.getElementById('apmtTodayList');
+    if (!wrap) return;
+    const sorted   = [...todayAppts].sort((a, b) => (a.time||'') < (b.time||'') ? -1 : 1);
+    const nowMins  = new Date().getHours() * 60 + new Date().getMinutes();
+    if (!sorted.length) {
+      wrap.innerHTML = `<div class="apmt-empty"><div class="apmt-empty-icon">📅</div><div class="apmt-empty-title">No appointments today</div><div style="font-size:13px;">Today's schedule is clear.</div></div>`;
+      return;
+    }
+    wrap.innerHTML = sorted.map(a => {
+      const p = a.patients;
+      const d = a.doctors;
+      const dname   = d ? 'Dr. ' + d.first_name + ' ' + d.last_name : '—';
+      const apptMin = a.time ? (() => { const [h,m] = a.time.split(':').map(Number); return h*60+m; })() : 9999;
+      const isNow   = a.status === 'In Session' || a.status === 'Checked In';
+      const isDone  = a.status === 'Completed'  || a.status === 'No-Show' || a.status === 'Cancelled';
+      const isLate  = !isNow && !isDone && apptMin < nowMins;
+      const cls     = isNow ? 'tq-now' : isDone ? 'tq-done' : isLate ? 'tq-overdue' : '';
+      return `<div class="tq-item ${cls}">
+        <div class="tq-time">${_fmtTime(a.time)}</div>
+        ${_av(p, 38)}
+        <div style="min-width:0;flex:1;">
+          <div class="tq-name">${p ? p.first_name+' '+p.last_name : '—'}</div>
+          <div class="tq-sub">${dname} · ${a.purpose||'General'}</div>
+        </div>
+        <span class="badge ${_bc(isLate ? 'Overdue' : a.status)}" style="flex-shrink:0;">${isLate ? 'Overdue' : a.status}</span>
+        <div class="tq-actions">${_quickBtns(a)}</div>
+      </div>`;
     }).join('');
+  }
+
+  function renderGroupedPatients(appts) {
+    const wrap  = document.getElementById('apmtGroupedList');
+    if (!wrap)  return;
+    const today = new Date().toISOString().slice(0, 10);
+    const groups = {};
+    appts.forEach(a => {
+      const pid = (a.patients?.id) || a.patient_id || a.id;
+      if (!groups[pid]) groups[pid] = { patient: a.patients, appts: [] };
+      groups[pid].appts.push(a);
+    });
+    const entries = Object.values(groups);
+    if (!entries.length) {
+      wrap.innerHTML = `<div class="apmt-empty"><div class="apmt-empty-icon">🔍</div><div class="apmt-empty-title">No appointments found</div><div style="font-size:13px;">Try a different filter or search term.</div></div>`;
+      return;
+    }
+    // Sort: patients with today's appointment first, then by next upcoming date
+    entries.sort((a, b) => {
+      const aToday = a.appts.some(x => x.date === today);
+      const bToday = b.appts.some(x => x.date === today);
+      if (aToday !== bToday) return aToday ? -1 : 1;
+      const aNext = a.appts.filter(x => x.date >= today && x.status !== 'Cancelled').sort((x,y) => x.date < y.date ? -1 : 1)[0]?.date || 'z';
+      const bNext = b.appts.filter(x => x.date >= today && x.status !== 'Cancelled').sort((x,y) => x.date < y.date ? -1 : 1)[0]?.date || 'z';
+      return aNext < bNext ? -1 : 1;
+    });
+
+    wrap.innerHTML = entries.map((g, gi) => {
+      const p      = g.patient;
+      const pname  = p ? p.first_name + ' ' + p.last_name : '—';
+      const sorted = [...g.appts].sort((a, b) => a.date < b.date ? 1 : a.date > b.date ? -1 : (a.time||'') > (b.time||'') ? -1 : 1);
+      const next   = [...g.appts].filter(a => a.date >= today && a.status !== 'Cancelled' && a.status !== 'No-Show').sort((a,b) => a.date < b.date ? -1 : 1)[0];
+      const hasToday = g.appts.some(a => a.date === today);
+      const isOpen = gi < 2;
+
+      const rows = sorted.map(a => {
+        const d = a.doctors;
+        const dname = d ? 'Dr. ' + d.first_name + ' ' + d.last_name : '—';
+        const isToday = a.date === today;
+        return `<div class="pg-row" data-id="${a.id}">
+          <div class="pg-row-date">${isToday ? '<span style="color:var(--crimson);font-weight:800;">Today</span>' : _fmtDate(a.date)} <span style="color:var(--gray);font-weight:400;">${_fmtTime(a.time)}</span></div>
+          <div class="pg-row-doc">${dname}</div>
+          <div class="pg-row-purpose">${a.purpose||'General'}</div>
+          <span class="badge ${_bc(a.status)}" style="flex-shrink:0;">${a.status}</span>
+          <div class="pg-row-actions">${_quickBtns(a)}</div>
+        </div>`;
+      }).join('');
+
+      return `<div class="pg-card${isOpen ? ' open' : ''}" id="pgcard-${gi}">
+        <div class="pg-header" onclick="togglePgCard(${gi})">
+          ${_av(p, 40)}
+          <div style="min-width:0;flex:1;">
+            <div class="pg-name">${pname}${hasToday ? ' <span class="pg-today-pill">Today</span>' : ''}</div>
+            <div class="pg-meta">${next ? 'Next: ' + _fmtDate(next.date) + ' ' + _fmtTime(next.time) : 'No upcoming'} · ${sorted.length} appt${sorted.length!==1?'s':''}</div>
+          </div>
+          <div class="pg-right">
+            <span class="pg-count-pill">${sorted.length}</span>
+            <div class="pg-chevron"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></div>
+          </div>
+        </div>
+        <div class="pg-rows" id="pgrows-${gi}" ${!isOpen ? 'style="display:none;"' : ''}>${rows}</div>
+      </div>`;
+    }).join('');
+  }
+
+  function togglePgCard(idx) {
+    const card = document.getElementById('pgcard-' + idx);
+    const rows = document.getElementById('pgrows-' + idx);
+    const open = card.classList.toggle('open');
+    rows.style.display = open ? '' : 'none';
+  }
+
+  async function quickConfirmAppt(apptId) {
+    try {
+      const { error } = await db.from('appointments').update({ status: 'Confirmed' }).eq('id', apptId);
+      if (error) throw error;
+      showToast('Appointment confirmed');
+      const appts = await sbGetAllAppointments();
+      renderAdminAppointments(appts);
+      buildDynamicStats();
+    } catch(e) { showToast('Error: ' + e.message); }
   }
 
   function renderAdminPatients(patients) {
@@ -1015,12 +1798,15 @@
 
   // ── NAVIGATION ──────────────────────────────────────────────────────────
   const viewTitles = {
-    overview: 'Dashboard Overview',
-    queue: 'Live Queue Monitor',
-    checkin: 'Today\'s Check-In',
+    overview:     'Dashboard Overview',
+    clinicfloor:  'Clinic Floor',
+    flowboard:    'Live Clinic Flow Board',
+    queue:        'Live Queue Monitor',
+    checkin:      'Today\'s Check-In',
     appointments: 'Appointment Management',
-    doctors: 'Doctor Management',
-    patients: 'Patient Registry',
+    doctors:      'Doctor Management',
+    patients:     'Patient Registry',
+    billing:      'Billing & Payments',
   };
 
   function showView(id) {
@@ -1031,9 +1817,12 @@
     });
     document.getElementById('viewTitle').textContent = viewTitles[id] || id;
     if (location.hash !== '#' + id) history.pushState(null, '', '#' + id);
-    if (id === 'overview') buildDynamicStats();
-    if (id === 'queue')    loadQueueMonitor();
-    if (id === 'checkin')  loadCheckinView();
+    if (id === 'overview')     buildDynamicStats();
+    if (id === 'clinicfloor')  loadClinicFloor();
+    if (id === 'queue')        loadQueueMonitor();
+    if (id === 'checkin')      loadCheckinView();
+    if (id === 'flowboard')    loadFlowBoard();
+    if (id === 'billing')      loadBillingView();
   }
 
   window.addEventListener('hashchange', () => {
@@ -1194,7 +1983,7 @@
           <div class="doc-manage-actions">
             <button class="btn btn-ghost btn-sm" onclick="openEditDoctorModal('${d.id}')">Edit</button>
             <button class="btn btn-ghost btn-sm" onclick="openAvailModal(this)">Availability</button>
-            <button class="btn btn-sm" style="background:rgba(211,26,34,0.1);color:var(--crimson);border:none;padding:7px 12px;border-radius:6px;cursor:pointer;font-family:'Montserrat',sans-serif;font-weight:700;font-size:11px;" onclick="deleteDoctor('${d.id}','${name.replace(/'/g, "\\'")}')">Delete</button>
+            <button class="btn-doc-delete" onclick="deleteDoctor('${d.id}','${name.replace(/'/g, "\\'")}')">Delete</button>
           </div>
         </div>
       </div>`;
@@ -1323,20 +2112,8 @@
     }
   }
 
-  function filterAdminAppts(btn, status) {
-    document.querySelectorAll('#apptFilters .btn').forEach(b => { b.className = 'btn btn-ghost btn-sm'; });
-    btn.className = 'btn btn-dark btn-sm';
-    document.querySelectorAll('#adminApptBody tr').forEach(row => {
-      row.style.display = (status === 'all' || row.dataset.status === status) ? '' : 'none';
-    });
-  }
-
-  function searchAppts(q) {
-    q = q.toLowerCase();
-    document.querySelectorAll('#adminApptBody tr').forEach(row => {
-      row.style.display = row.textContent.toLowerCase().includes(q) ? '' : 'none';
-    });
-  }
+  function filterAdminAppts(btn, status) { setApmtFilter(btn, status); }
+  function searchAppts(q) { searchApmtMgmt(q); }
 
   // ── PATIENT REGISTRY SEARCH ─────────────────────────────────────────────
   function searchPatients(q) {
@@ -1419,7 +2196,7 @@
           const pt = a.patients ? a.patients.first_name+' '+a.patients.last_name : '—';
           const dr = a.doctors  ? 'Dr. '+a.doctors.first_name+' '+a.doctors.last_name : '—';
           const photo = a.doctors?.photo_url ? `<img src="${a.doctors.photo_url}" style="width:28px;height:28px;border-radius:50%;object-fit:cover;flex-shrink:0;">` : '';
-          const fmtTime = t => { if (!t) return '—'; const [h,m]=t.split(':'); const hr=parseInt(h); return (hr%12||12)+':'+m+(hr<12?'AM':'PM'); };
+          const fmtTime = t => { if (!t) return '—'; const [h,m]=t.split(':'); const hr=parseInt(h); return (hr%12||12)+':'+m+(hr<12?' AM':' PM'); };
           return `<tr>
             <td><div class="td-name">${pt}</div></td>
             <td><div style="display:flex;align-items:center;gap:8px;">${photo}${dr}</div></td>
@@ -1532,9 +2309,548 @@
   function startQueueAutoRefresh() {
     if (queueRefreshInterval) return;
     queueRefreshInterval = setInterval(() => {
-      if (document.getElementById('view-queue').classList.contains('active'))    loadQueueMonitor();
-      if (document.getElementById('view-checkin').classList.contains('active'))  loadCheckinView();
+      if (document.getElementById('view-clinicfloor').classList.contains('active'))  loadClinicFloor();
+      if (document.getElementById('view-queue').classList.contains('active'))        loadQueueMonitor();
+      if (document.getElementById('view-checkin').classList.contains('active'))      loadCheckinView();
+      if (document.getElementById('view-flowboard').classList.contains('active'))    loadFlowBoard();
+      if (document.getElementById('view-billing').classList.contains('active'))      loadBillingView();
     }, 30000);
+  }
+
+  // ── CLINIC FLOOR ─────────────────────────────────────────────────────────
+  async function loadClinicFloor() {
+    const today = new Date().toISOString().slice(0, 10);
+    const days  = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+    const months= ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const now   = new Date();
+    const dateEl = document.getElementById('cf-date-label');
+    if (dateEl) dateEl.textContent = days[now.getDay()] + ', ' + months[now.getMonth()] + ' ' + now.getDate();
+
+    try {
+      const [{ data: appts }, { data: queue }] = await Promise.all([
+        db.from('appointments')
+          .select('*, patients(*), doctors(*)')
+          .eq('date', today)
+          .order('time', { ascending: true }),
+        db.from('queue_entries')
+          .select('*, patients(*), appointments(*, doctors(*))')
+          .eq('queue_date', today)
+          .order('queue_number', { ascending: true }),
+      ]);
+
+      const allAppts = (appts || []).filter(a => a.status !== 'Cancelled');
+      const allQueue = queue || [];
+
+      // Map appointment_id → queue entry for fast lookup
+      const qMap = {};
+      allQueue.forEach(e => { if (e.appointment_id) qMap[e.appointment_id] = e; });
+
+      // Stats
+      const waitingCnt = allQueue.filter(e => e.status === 'waiting').length;
+      const sessionCnt = allQueue.filter(e => e.status === 'in_session').length;
+      const doneCnt    = allAppts.filter(a => a.status === 'Completed' && (a.payment_status === 'paid' || a.payment_status === 'waived')).length;
+
+      const el = (id, v) => { const e = document.getElementById(id); if (e) e.textContent = v; };
+      el('cf-cnt-scheduled', allAppts.length);
+      el('cf-cnt-waiting',   waitingCnt);
+      el('cf-cnt-session',   sessionCnt);
+      el('cf-cnt-done',      doneCnt);
+
+      // Clinic Floor badge on sidebar
+      const badge = document.getElementById('clinicFloorBadge');
+      if (badge) {
+        const active = waitingCnt + sessionCnt;
+        badge.textContent = active;
+        badge.style.display = active > 0 ? '' : 'none';
+      }
+
+      // Render left schedule
+      cfRenderSchedule(allAppts, qMap);
+
+      // Render kanban
+      const waiting  = allQueue.filter(e => e.status === 'waiting');
+      const consult  = allQueue.filter(e => e.status === 'in_session');
+      const billing  = allAppts.filter(a => a.status === 'Completed' && (!a.payment_status || a.payment_status === 'unpaid' || a.payment_status === 'partial'));
+      const done     = allAppts.filter(a => a.status === 'Completed' && (a.payment_status === 'paid' || a.payment_status === 'waived'));
+
+      _renderKanbanCol('cf-kb-waiting', 'cf-kb-cnt-waiting', waiting,  cfCardQueue);
+      _renderKanbanCol('cf-kb-consult', 'cf-kb-cnt-consult', consult,  cfCardQueue);
+      _renderKanbanCol('cf-kb-billing', 'cf-kb-cnt-billing', billing,  cfCardAppt);
+      _renderKanbanCol('cf-kb-done',    'cf-kb-cnt-done',    done,     cfCardAppt);
+      loadBillingBadge(billing.length);
+    } catch(e) { console.error('Clinic floor error:', e); }
+  }
+
+  function cfRenderSchedule(appts, qMap) {
+    const list = document.getElementById('cf-schedule-list');
+    if (!list) return;
+    if (!appts.length) {
+      list.innerHTML = '<div style="padding:32px;text-align:center;color:var(--gray);font-size:13px;">No appointments today.</div>';
+      return;
+    }
+    const fmtT = t => { if(!t)return'—'; const[h,m]=t.split(':'); const hr=parseInt(h); return(hr%12||12)+':'+m+(hr<12?' AM':' PM'); };
+    const colors = ['#00A859','#2563EB','#D31A22','#B45309','#805AD5','#0891B2'];
+    const nowMins = new Date().getHours() * 60 + new Date().getMinutes();
+
+    list.innerHTML = appts.map(a => {
+      const p = a.patients;
+      const d = a.doctors;
+      const pname   = p ? p.first_name + ' ' + p.last_name : '—';
+      const dname   = d ? 'Dr. ' + d.first_name[0] + '. ' + d.last_name : '—';
+      const initials= p ? ((p.first_name[0]||'')+(p.last_name[0]||'')).toUpperCase() : '?';
+      const color   = colors[(pname.charCodeAt(0)||0) % colors.length];
+      const avEl    = p?.photo_url
+        ? `<img class="cf-av" src="${p.photo_url}" style="width:34px;height:34px;" alt="">`
+        : `<div class="cf-av" style="background:${color};width:34px;height:34px;">${initials}</div>`;
+
+      const qEntry = qMap[a.id];
+      let statusHtml, rowClass = '';
+
+      if (a.status === 'Cancelled') {
+        statusHtml = '<span style="font-size:11px;color:var(--gray);">Cancelled</span>';
+        rowClass   = 'cf-row-cancelled';
+      } else if (a.status === 'Completed' && (a.payment_status === 'paid' || a.payment_status === 'waived')) {
+        statusHtml = '<span style="font-size:11px;color:var(--green);font-weight:700;">✓ Done</span>';
+        rowClass   = 'cf-row-done';
+      } else if (a.status === 'Completed') {
+        const fee = a.consultation_fee ? '₱' + Number(a.consultation_fee).toLocaleString() : '₱500';
+        statusHtml = `<button class="btn btn-sm" style="background:rgba(59,130,246,0.1);color:#1D4ED8;border:none;font-family:'Montserrat',sans-serif;font-weight:700;font-size:10px;padding:5px 10px;border-radius:6px;cursor:pointer;" onclick="quickMarkPaid('${a.id}')">Pay ${fee}</button>`;
+      } else if (qEntry?.status === 'in_session') {
+        statusHtml = '<span class="cf-stage-badge cf-badge-session">Seeing Doctor</span>';
+      } else if (qEntry?.status === 'waiting') {
+        statusHtml = `<span class="cf-stage-badge cf-badge-waiting">Q${String(qEntry.queue_number).padStart(2,'0')} · Waiting</span>`;
+      } else if (qEntry?.status === 'completed' || qEntry?.status === 'done') {
+        statusHtml = '<span style="font-size:11px;color:var(--green);font-weight:700;">✓ Seen</span>';
+        rowClass   = 'cf-row-done';
+      } else {
+        // Not yet checked in — check if overdue
+        const apptMins = a.time ? (() => { const[h,m]=a.time.split(':').map(Number); return h*60+m; })() : 9999;
+        const isLate   = apptMins < nowMins;
+        statusHtml = `<button class="btn btn-green btn-sm${isLate ? '" style="background:#B45309;' : '"'} onclick="cfCheckIn('${a.id}')">Check In${isLate ? ' ⚠' : ''}</button>`;
+      }
+
+      return `<div class="cf-appt-row ${rowClass}">
+        <div class="cf-time">${fmtT(a.time)}</div>
+        ${avEl}
+        <div style="min-width:0;flex:1;">
+          <div class="cf-pname">${pname}</div>
+          <div class="cf-psub">${dname}</div>
+        </div>
+        <div class="cf-status">${statusHtml}</div>
+      </div>`;
+    }).join('');
+  }
+
+  async function cfCheckIn(apptId) {
+    const btn = document.querySelector(`[onclick="cfCheckIn('${apptId}')"]`);
+    if (btn) { btn.disabled = true; btn.textContent = '…'; }
+    try {
+      const { queueNumber } = await sbCheckInPatient(apptId);
+      showToast('✓ Checked in — Queue #' + String(queueNumber).padStart(2,'0'));
+      logActivity('Patient checked in from Clinic Floor');
+      await loadClinicFloor();
+    } catch(e) {
+      showToast('Check-in failed: ' + e.message);
+      if (btn) { btn.disabled = false; btn.textContent = 'Check In'; }
+    }
+  }
+
+  // ── CF CARD RENDERERS (dark-themed, draggable) ───────────────────────────
+  function cfCardQueue(entry) {
+    const p = entry.patients, appt = entry.appointments, d = appt?.doctors;
+    const pname = p ? p.first_name + ' ' + p.last_name : '—';
+    const dname = d ? 'Dr. ' + d.first_name[0] + '. ' + d.last_name : '—';
+    const initials = p ? ((p.first_name[0]||'')+(p.last_name[0]||'')).toUpperCase() : '?';
+    const colors = ['#00A859','#8B5CF6','#3B82F6','#F59E0B','#D31A22'];
+    const color = colors[(pname.charCodeAt(0)||0) % colors.length];
+    const avEl = p?.photo_url
+      ? `<img class="cf-kc-av" src="${p.photo_url}" alt="" style="border-radius:50%;object-fit:cover;">`
+      : `<div class="cf-kc-av" style="background:${color};">${initials}</div>`;
+    const fmtT = t => { if(!t)return''; const[h,m]=t.split(':'); const hr=parseInt(h); return(hr%12||12)+':'+m+(hr<12?' AM':' PM'); };
+    const qNum = 'Q' + String(entry.queue_number).padStart(2,'0');
+    const apptId = appt?.id || '';
+    const isWalkin = entry.appointment_type === 'walk_in';
+    const fromStatus = entry.status;
+    const action = fromStatus === 'waiting'
+      ? `<button class="cf-kc-btn cf-kc-btn-purple" onclick="cfCallIn('${entry.id}')">→ Consult</button>`
+      : `<button class="cf-kc-btn cf-kc-btn-blue" onclick="cfMarkBilling('${apptId}','${entry.id}')">→ Billing</button>`;
+    return `<div class="cf-kc" draggable="true"
+      ondragstart="cfDragStart(event,'queue','${entry.id}','${apptId}','${fromStatus}')"
+      ondragend="this.classList.remove('cf-kc-dragging')">
+      <div class="cf-kc-q">${qNum} · ${isWalkin?'Walk-In':'Booked'}</div>
+      <div class="cf-kc-body">${avEl}<div><div class="cf-kc-name">${pname}</div><div class="cf-kc-meta">${dname}</div></div></div>
+      <div class="cf-kc-footer"><span class="cf-kc-time">${fmtT(appt?.time||'')}</span>${action}</div>
+    </div>`;
+  }
+
+  function cfCardAppt(appt) {
+    const p = appt.patients, d = appt.doctors;
+    const pname = p ? p.first_name + ' ' + p.last_name : '—';
+    const dname = d ? 'Dr. ' + d.first_name[0] + '. ' + d.last_name : '—';
+    const isPaid = appt.payment_status === 'paid' || appt.payment_status === 'waived';
+    const fee = appt.consultation_fee ? '₱' + Number(appt.consultation_fee).toLocaleString() : '₱500';
+    const initials = p ? ((p.first_name[0]||'')+(p.last_name[0]||'')).toUpperCase() : '?';
+    const colors = ['#00A859','#8B5CF6','#3B82F6','#F59E0B','#D31A22'];
+    const color = colors[(pname.charCodeAt(0)||0) % colors.length];
+    const avEl = p?.photo_url
+      ? `<img class="cf-kc-av" src="${p.photo_url}" alt="" style="border-radius:50%;object-fit:cover;">`
+      : `<div class="cf-kc-av" style="background:${color};">${initials}</div>`;
+    const fromStatus = isPaid ? 'done' : 'billing';
+    const action = isPaid
+      ? `<span style="font-size:10px;color:#34D399;font-weight:700;font-family:'Montserrat',sans-serif;">✓ Paid</span>`
+      : `<button class="cf-kc-btn cf-kc-btn-green" onclick="cfQuickPaid('${appt.id}')">Mark Paid ✓</button>`;
+    return `<div class="cf-kc${isPaid?' cf-kc-done':''}" draggable="${!isPaid}"
+      ondragstart="cfDragStart(event,'appt','','${appt.id}','${fromStatus}')"
+      ondragend="this.classList.remove('cf-kc-dragging')">
+      <div class="cf-kc-body">${avEl}<div><div class="cf-kc-name">${pname}</div><div class="cf-kc-meta">${dname}</div></div></div>
+      <div class="cf-kc-footer"><span class="cf-kc-time" style="color:rgba(255,255,255,0.55);font-weight:800;">${fee}</span>${action}</div>
+    </div>`;
+  }
+
+  // ── CF DRAG & DROP ────────────────────────────────────────────────────────
+  let _cfDrag = null;
+
+  function cfDragStart(e, type, entryId, apptId, fromStatus) {
+    _cfDrag = { type, entryId, apptId, fromStatus };
+    e.dataTransfer.effectAllowed = 'move';
+    requestAnimationFrame(() => e.currentTarget.classList.add('cf-kc-dragging'));
+  }
+
+  function cfDragOver(e) {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    e.currentTarget.classList.add('drag-over');
+  }
+
+  function cfDragLeave(e) {
+    if (!e.currentTarget.contains(e.relatedTarget)) e.currentTarget.classList.remove('drag-over');
+  }
+
+  async function cfDrop(e, toStatus) {
+    e.preventDefault();
+    e.currentTarget.classList.remove('drag-over');
+    if (!_cfDrag) return;
+    const { type, entryId, apptId, fromStatus } = _cfDrag;
+    _cfDrag = null;
+    if (fromStatus === toStatus) return;
+    const order = ['waiting','in_session','billing','done'];
+    const fromIdx = order.indexOf(fromStatus);
+    const toIdx   = order.indexOf(toStatus);
+    if (toIdx !== fromIdx + 1) { showToast('Patients move forward only in the flow'); return; }
+    if (toStatus === 'in_session') await cfCallIn(entryId);
+    else if (toStatus === 'billing') await cfMarkBilling(apptId, entryId);
+    else if (toStatus === 'done') await cfQuickPaid(apptId);
+  }
+
+  // ── CF ACTION HELPERS ─────────────────────────────────────────────────────
+  async function cfCallIn(entryId) {
+    try {
+      await db.from('queue_entries').update({ status: 'in_session' }).eq('id', entryId);
+      showToast('Patient called in ✓');
+      await loadClinicFloor();
+    } catch(e) { showToast('Error: ' + e.message); }
+  }
+
+  async function cfMarkBilling(apptId, entryId) {
+    try {
+      await Promise.all([
+        apptId   ? db.from('appointments').update({ status: 'Completed' }).eq('id', apptId) : Promise.resolve(),
+        entryId  ? db.from('queue_entries').update({ status: 'completed' }).eq('id', entryId) : Promise.resolve(),
+      ]);
+      showToast('Consultation done — moved to billing');
+      await loadClinicFloor();
+    } catch(e) { showToast('Error: ' + e.message); }
+  }
+
+  async function cfQuickPaid(apptId) {
+    try {
+      const { error } = await db.from('appointments')
+        .update({ payment_status: 'paid', paid_at: new Date().toISOString() }).eq('id', apptId);
+      if (error) throw error;
+      showToast('Payment recorded ✓');
+      await loadClinicFloor();
+      loadBillingView();
+    } catch(e) { showToast('Error: ' + e.message); }
+  }
+
+  // ── LIVE FLOW BOARD ───────────────────────────────────────────────────────
+  async function loadFlowBoard() {
+    const today = new Date().toISOString().slice(0, 10);
+    try {
+      const [{ data: queueEntries }, { data: todayAppts }] = await Promise.all([
+        db.from('queue_entries')
+          .select('*, patients(*), appointments(*, doctors(*))')
+          .eq('queue_date', today)
+          .order('queue_number', { ascending: true }),
+        db.from('appointments')
+          .select('*, patients(*), doctors(*)')
+          .eq('date', today)
+          .eq('status', 'Completed'),
+      ]);
+
+      const waiting  = (queueEntries||[]).filter(e => e.status === 'waiting');
+      const consult  = (queueEntries||[]).filter(e => e.status === 'in_session');
+      const billingQ = (todayAppts||[]).filter(a => !a.payment_status || a.payment_status === 'unpaid' || a.payment_status === 'partial');
+      const done     = (todayAppts||[]).filter(a => a.payment_status === 'paid' || a.payment_status === 'waived');
+
+      _renderKanbanCol('kb-waiting',  'kb-cnt-waiting', waiting,  _kanbanCardQueue);
+      _renderKanbanCol('kb-consult',  'kb-cnt-consult', consult,  _kanbanCardQueue);
+      _renderKanbanCol('kb-billing',  'kb-cnt-billing', billingQ, _kanbanCardAppt);
+      _renderKanbanCol('kb-done',     'kb-cnt-done',    done,     _kanbanCardAppt);
+      loadBillingBadge(billingQ.length);
+    } catch(e) { console.error('Flow board error:', e); }
+  }
+
+  function _renderKanbanCol(listId, cntId, items, cardFn) {
+    const list = document.getElementById(listId);
+    const cnt  = document.getElementById(cntId);
+    if (!list) return;
+    cnt.textContent = items.length;
+    if (!items.length) { list.innerHTML = '<div class="kanban-empty">None right now</div>'; return; }
+    list.innerHTML = items.map(cardFn).join('');
+  }
+
+  function _kanbanCardQueue(entry) {
+    const p = entry.patients;
+    const appt = entry.appointments;
+    const d = appt?.doctors;
+    const pname  = p ? p.first_name + ' ' + p.last_name : '—';
+    const dname  = d ? 'Dr. ' + d.first_name[0] + '. ' + d.last_name : '—';
+    const isNow  = entry.status === 'in_session';
+    const initials = p ? ((p.first_name[0]||'')+(p.last_name[0]||'')).toUpperCase() : '?';
+    const colors = ['#00A859','#8B5CF6','#3B82F6','#F59E0B','#D31A22'];
+    const color  = colors[(pname.charCodeAt(0)||0) % colors.length];
+    const avEl   = p?.photo_url
+      ? `<img src="${p.photo_url}" style="width:34px;height:34px;border-radius:50%;object-fit:cover;">`
+      : `<div style="width:34px;height:34px;border-radius:50%;background:${color};display:flex;align-items:center;justify-content:center;font-family:'Montserrat',sans-serif;font-weight:700;font-size:12px;color:#fff;flex-shrink:0;">${initials}</div>`;
+    const fmtT = t => { if(!t)return''; const[h,m]=t.split(':'); const hr=parseInt(h); return(hr%12||12)+':'+m+(hr<12?' AM':' PM'); };
+    return `<div class="kc">
+      <div class="kc-q">Q${String(entry.queue_number).padStart(2,'0')} · ${entry.appointment_type==='walk_in'?'Walk-In':'Booked'}</div>
+      <div style="display:flex;gap:10px;align-items:center;">
+        ${avEl}
+        <div>
+          <div class="kc-name">${pname}</div>
+          <div class="kc-meta">${dname}<br>${fmtT(appt?.time||'')}</div>
+        </div>
+      </div>
+      <div class="kc-actions">
+        ${isNow
+          ? `<button class="kc-btn-move blue" onclick="fbMarkBilling('${appt?.id||''}','${entry.id}')">→ Billing</button>`
+          : `<button class="kc-btn-move purple" onclick="fbCallIn('${entry.id}')">→ Consult</button>`}
+        <button class="kc-btn-move ghost" onclick="showToast('Marked No-Show')">No-Show</button>
+      </div>
+    </div>`;
+  }
+
+  function _kanbanCardAppt(appt) {
+    const p = appt.patients;
+    const d = appt.doctors;
+    const pname = p ? p.first_name + ' ' + p.last_name : '—';
+    const dname = d ? 'Dr. ' + d.first_name[0] + '. ' + d.last_name : '—';
+    const isPaid = appt.payment_status === 'paid' || appt.payment_status === 'waived';
+    const fee    = appt.consultation_fee ? '₱' + Number(appt.consultation_fee).toLocaleString() : '₱500';
+    const initials = p ? ((p.first_name[0]||'')+(p.last_name[0]||'')).toUpperCase() : '?';
+    const colors = ['#00A859','#8B5CF6','#3B82F6','#F59E0B','#D31A22'];
+    const color  = colors[(pname.charCodeAt(0)||0) % colors.length];
+    const avEl   = p?.photo_url
+      ? `<img src="${p.photo_url}" style="width:34px;height:34px;border-radius:50%;object-fit:cover;">`
+      : `<div style="width:34px;height:34px;border-radius:50%;background:${color};display:flex;align-items:center;justify-content:center;font-family:'Montserrat',sans-serif;font-weight:700;font-size:12px;color:#fff;flex-shrink:0;">${initials}</div>`;
+    return `<div class="kc">
+      <div style="display:flex;gap:10px;align-items:center;">
+        ${avEl}
+        <div>
+          <div class="kc-name">${pname}</div>
+          <div class="kc-meta">${dname}</div>
+        </div>
+      </div>
+      <div style="margin-top:8px;font-family:'Montserrat',sans-serif;font-size:13px;font-weight:700;color:var(--dark);">${fee}</div>
+      <div class="kc-actions">
+        ${isPaid
+          ? `<span style="font-size:11px;color:var(--green);font-weight:700;">✓ Paid</span>`
+          : `<button class="kc-btn-move green" onclick="fbMarkPaid('${appt.id}')">Mark Paid ✓</button>`}
+      </div>
+    </div>`;
+  }
+
+  async function fbCallIn(queueEntryId) {
+    try {
+      await db.from('queue_entries').update({ status: 'in_session' }).eq('id', queueEntryId);
+      showToast('Patient called in');
+      loadFlowBoard();
+    } catch(e) { showToast('Error: ' + e.message); }
+  }
+
+  async function fbMarkBilling(apptId, queueEntryId) {
+    try {
+      await Promise.all([
+        apptId     ? db.from('appointments').update({ status: 'Completed' }).eq('id', apptId) : Promise.resolve(),
+        queueEntryId ? db.from('queue_entries').update({ status: 'completed' }).eq('id', queueEntryId) : Promise.resolve(),
+      ]);
+      showToast('Moved to Billing');
+      loadFlowBoard();
+    } catch(e) { showToast('Error: ' + e.message); }
+  }
+
+  async function fbMarkPaid(apptId) {
+    try {
+      const { error } = await db.from('appointments').update({ payment_status: 'paid', paid_at: new Date().toISOString() }).eq('id', apptId);
+      if (error) throw error;
+      showToast('Payment recorded ✓');
+      loadFlowBoard();
+      loadBillingView();
+    } catch(e) { showToast('Error: ' + e.message); }
+  }
+
+  function loadBillingBadge(unpaidCount) {
+    const badge = document.getElementById('unpaidBadge');
+    if (!badge) return;
+    badge.textContent = unpaidCount;
+    badge.style.display = unpaidCount > 0 ? '' : 'none';
+  }
+
+  // ── BILLING MODULE ────────────────────────────────────────────────────────
+  let _allBillingRecords = [];
+  let _billFilter = 'all';
+  let _billSearch = '';
+
+  async function loadBillingView() {
+    try {
+      const { data } = await db.from('appointments')
+        .select('*, patients(*), doctors(*)')
+        .order('date', { ascending: false })
+        .order('time', { ascending: false })
+        .limit(200);
+      _allBillingRecords = (data || []).filter(a => a.status !== 'Cancelled' && a.status !== 'Pending');
+      renderBillingView();
+    } catch(e) { console.error('Billing load error:', e); }
+  }
+
+  function setBillFilter(chip, filter) {
+    _billFilter = filter;
+    document.querySelectorAll('.bill-chip').forEach(c => c.classList.toggle('active', c.dataset.filter === filter));
+    renderBillingView();
+  }
+
+  function searchBilling(q) {
+    _billSearch = q.toLowerCase().trim();
+    renderBillingView();
+  }
+
+  function renderBillingView() {
+    const today = new Date().toISOString().slice(0, 10);
+    let records = _allBillingRecords;
+    if (_billFilter !== 'all') records = records.filter(a => (a.payment_status || 'unpaid') === _billFilter);
+    if (_billSearch)           records = records.filter(a => {
+      const p = a.patients;
+      return p ? (p.first_name + ' ' + p.last_name).toLowerCase().includes(_billSearch) : false;
+    });
+
+    // Summary stats
+    const todayRecs  = _allBillingRecords.filter(a => a.date === today);
+    const revenue    = todayRecs.filter(a => a.payment_status === 'paid').reduce((sum, a) => sum + Number(a.total_paid || a.consultation_fee || 500), 0);
+    const unpaidCnt  = _allBillingRecords.filter(a => !a.payment_status || a.payment_status === 'unpaid').length;
+    const paidCnt    = _allBillingRecords.filter(a => a.payment_status === 'paid').length;
+    const fees       = _allBillingRecords.map(a => Number(a.consultation_fee||500)).filter(Boolean);
+    const avg        = fees.length ? Math.round(fees.reduce((s,f)=>s+f,0)/fees.length) : 0;
+
+    const el = (id, val) => { const e = document.getElementById(id); if (e) e.textContent = val; };
+    el('bill-revenue',     '₱' + revenue.toLocaleString());
+    el('bill-revenue-sub', todayRecs.filter(a => a.payment_status === 'paid').length + ' paid today');
+    el('bill-unpaid',      unpaidCnt);
+    el('bill-unpaid-sub',  '₱' + (unpaidCnt * 500).toLocaleString() + ' est. pending');
+    el('bill-paid',        paidCnt);
+    el('bill-avg',         avg ? '₱' + avg.toLocaleString() : '₱—');
+    loadBillingBadge(unpaidCnt);
+
+    const tbody = document.getElementById('billingBody');
+    if (!tbody) return;
+    if (!records.length) {
+      tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--gray);padding:28px;">No records found.</td></tr>';
+      return;
+    }
+    const payBadge = ps => {
+      const map = { paid:'pay-badge-paid', partial:'pay-badge-partial', waived:'pay-badge-waived', insurance:'pay-badge-insurance' };
+      const label = { paid:'Paid', partial:'Partial', waived:'Waived', insurance:'Insurance', unpaid:'Unpaid' };
+      const cls = map[ps] || 'pay-badge-unpaid';
+      return `<span class="${cls}">${label[ps] || 'Unpaid'}</span>`;
+    };
+    const fmtCur = n => n ? '₱' + Number(n).toLocaleString() : '₱500';
+    const fmtDt  = ds => { if(!ds)return'—'; const[y,m,d]=ds.split('-'); const mo=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']; return mo[parseInt(m)-1]+' '+parseInt(d)+', '+y; };
+    tbody.innerHTML = records.map(a => {
+      const p = a.patients;
+      const d = a.doctors;
+      const pname = p ? p.first_name + ' ' + p.last_name : '—';
+      const dname = d ? 'Dr. ' + d.first_name + ' ' + d.last_name : '—';
+      const ps    = a.payment_status || 'unpaid';
+      const isPaid = ps === 'paid' || ps === 'waived';
+      return `<tr data-ps="${ps}">
+        <td><div class="td-name">${pname}</div><div class="td-sub">#${a.id.slice(0,8).toUpperCase()}</div></td>
+        <td>${dname}</td>
+        <td style="white-space:nowrap;">${fmtDt(a.date)}</td>
+        <td style="font-size:12px;color:var(--gray);">${a.purpose||'Consultation'}</td>
+        <td style="font-family:'Montserrat',sans-serif;font-weight:700;">${fmtCur(a.consultation_fee)}</td>
+        <td style="font-family:'Montserrat',sans-serif;font-weight:700;color:var(--green);">${a.total_paid ? '₱'+Number(a.total_paid).toLocaleString() : isPaid ? fmtCur(a.consultation_fee) : '₱0'}</td>
+        <td>${payBadge(ps)}</td>
+        <td>
+          <div style="display:flex;gap:5px;flex-wrap:nowrap;align-items:center;">
+            <button class="btn btn-ghost btn-sm" style="white-space:nowrap;padding:5px 10px;font-size:10px;" onclick="printReceipt('${a.id}','${pname.replace(/'/g,"\\'")}','${dname.replace(/'/g,"\\'")}','${fmtDt(a.date)}','${a.purpose||'Consultation'}','${fmtCur(a.consultation_fee)}')">Receipt</button>
+            ${!isPaid ? `<button class="btn btn-green btn-sm" style="white-space:nowrap;" onclick="quickMarkPaid('${a.id}')">Mark Paid</button>` : ''}
+            ${ps==='unpaid' ? `<button class="btn btn-ghost btn-sm" style="white-space:nowrap;" onclick="quickMarkWaived('${a.id}')">Waive</button>` : ''}
+          </div>
+        </td>
+      </tr>`;
+    }).join('');
+  }
+
+  function printReceipt(id, patient, doctor, date, service, fee) {
+    const w = window.open('', '_blank');
+    if (!w) return;
+    w.document.write(`<!DOCTYPE html><html><head><title>Receipt</title><style>
+      body{font-family:sans-serif;padding:32px;max-width:400px;margin:0 auto;color:#111}
+      h2{font-size:18px;margin:0 0 4px}h3{font-size:14px;color:#555;margin:0 0 24px}
+      hr{border:none;border-top:1px solid #ddd;margin:16px 0}
+      .row{display:flex;justify-content:space-between;padding:6px 0;font-size:14px}
+      .label{color:#777}.val{font-weight:700}
+      .total{font-size:16px;font-weight:800;color:#007A42}
+      .footer{margin-top:24px;font-size:12px;color:#999;text-align:center}
+    </style></head><body>
+    <h2>De Los Reyes Doctors Clinic</h2>
+    <h3>Official Receipt</h3>
+    <hr>
+    <div class="row"><span class="label">Receipt No.</span><span class="val">#${id.slice(0,8).toUpperCase()}</span></div>
+    <div class="row"><span class="label">Date</span><span class="val">${date}</span></div>
+    <div class="row"><span class="label">Patient</span><span class="val">${patient}</span></div>
+    <div class="row"><span class="label">Physician</span><span class="val">${doctor}</span></div>
+    <div class="row"><span class="label">Service</span><span class="val">${service}</span></div>
+    <hr>
+    <div class="row"><span class="label">Consultation Fee</span><span class="val total">${fee}</span></div>
+    <div class="footer">Thank you for trusting De Los Reyes Doctors Clinic.<br>"Professional Care You Can Trust"</div>
+    </body></html>`);
+    w.document.close();
+    w.print();
+  }
+
+  async function quickMarkPaid(apptId) {
+    try {
+      const { error } = await db.from('appointments').update({
+        payment_status: 'paid',
+        total_paid:     500,
+        paid_at:        new Date().toISOString(),
+      }).eq('id', apptId);
+      if (error) throw error;
+      showToast('Payment recorded ✓');
+      await loadBillingView();
+      if (document.getElementById('view-flowboard').classList.contains('active')) loadFlowBoard();
+    } catch(e) { showToast('Error: ' + e.message); }
+  }
+
+  async function quickMarkWaived(apptId) {
+    try {
+      const { error } = await db.from('appointments').update({ payment_status: 'waived', paid_at: new Date().toISOString() }).eq('id', apptId);
+      if (error) throw error;
+      showToast('Fee waived');
+      await loadBillingView();
+    } catch(e) { showToast('Error: ' + e.message); }
   }
 
   // ── QUEUE MONITOR ────────────────────────────────────────────────────────
@@ -1908,7 +3224,7 @@
   _sbScript.onload = () => {
     // Enable the login button now that db is ready
     const loginBtn = document.getElementById('adminLoginBtn');
-    if (loginBtn) { loginBtn.disabled = false; loginBtn.textContent = 'Sign In to Admin Panel'; }
+    if (loginBtn) { loginBtn.disabled = false; loginBtn.textContent = 'Sign In'; }
 
     db.auth.onAuthStateChange(async (event, session) => {
       if (event === 'INITIAL_SESSION' && session?.user) {

@@ -1,0 +1,65 @@
+Act as an expert Frontend Architect, Principal UI/UX Developer, and Security Engineer. Perform a comprehensive, production-grade refactor across the entire application codebase (`index.html`, `patient-portal.html`, `doctor-portal.html`, and `admin-portal.html`) to eliminate layout bugs, fix broken rendering logic, resolve critical authentication traps, and ensure WCAG AA compliance before live deployment.
+
+Please execute the following file-by-file instructions precisely:
+
+================================================================================
+SECTION 1: PUBLIC LANDING PAGE REFACTOR (`index.html`)
+================================================================================
+1.1 Hero Asset Masking: Locate the primary clinic logo graphic on the right side of the hero section. Remove the unmasked white square background. Apply a clean container clip-path or background transparency mask so it blends natively into the deep dark-green gradient backdrop. Ensure the outer text "DE LOS REYES DOCTORS" is not clipped by the circular boundary layers.
+1.2 Repair Counter Metrics: Locate the statistics row beneath the hero descriptions. Change the broken or placeholder "0% SATISFACTION RATE" string to a static, high-performing metric like "99% SATISFACTION RATE".
+1.3 Target Directory Empty State: Locate the "Meet Our Specialists" column block. Remove the raw fallback text string ("No doctors available at this time."). In its place, hardcode three beautifully styled placeholder specialist cards (e.g., "Dr. Alejandro Santos - Pediatrics") with fallback profile vectors so the section never renders as an empty layout void.
+1.4 Footer Form Clean-Up: Inside the contact/message form, extract hardcoded text values ("Juan dela Cruz", "juan@example.com") out of the HTML `value="..."` attributes and assign them properly to native `placeholder="..."` properties so users do not have to delete text manually.
+1.5 Global Nav Center Axis: Apply `display: flex; align-items: center;` to the main navigation header wrapper so links, branding assets, and buttons share a uniform vertical center line. Increase the border stroke brightness and text luminance on the secondary ghost button "EXPLORE SERVICES" to clear WCAG AA dark-mode contrast targets.
+
+================================================================================
+SECTION 2: PATIENT PORTAL MODULES (`patient-portal.html`)
+================================================================================
+2.1 Fix Global Sidebar Profile Widget: Locate the lower-left patient profile info row displaying "sibam Sapple". Re-architect its CSS using `display: flex; align-items: center; gap: 12px; padding: 12px;` to completely stop the green circle avatar initials ("SS") from shifting over and clipping the patient name typography.
+2.2 Clean Navigation Alignment: Balance the top-right header elements by adding uniform horizontal margins/gaps between the notification bell icon, the "[← MAIN SITE]" navigation link button, and the right edge of the viewport wrapper.
+2.3 Authenticate & Gateway Adjustments:
+    - Blend the logo badge on the login screen into the canvas by stripping away its raw white bounding square.
+    - Boost text luminance on the placeholder text strings ("juan@example.com", "Your password") inside the input fields to pass contrast checks.
+    - Add a fluid CSS `:focus-visible` state that wraps active inputs in a soft emerald glow.
+    - Program a click listener onto the inline eye icon graphic inside the password field to seamlessly toggle input elements between `type="password"` and `type="text"`.
+    - Build a client-side verification script: if inputs are empty or malformed upon clicking "SIGN IN", trigger a temporary horizontal shake animation on the card box wrapper and toggle input borders to an explicit warning red.
+2.4 Dashboard & Appointments Views (`#book`, `#appointments`, `#records`, `#profile`):
+    - Table Row Layout Overlaps: In the "Upcoming Appointments" table, center the text initials inside the small 24x24 avatar circle, and add an explicit `gap: 12px;` so it never collides with "Dr. Diksha Sapple". Give the "Purpose" column clean text truncation rules (`text-overflow: ellipsis; white-space: nowrap; overflow: hidden;`).
+    - Standardize Timestamps: Convert all mixed 24-hour military strings (e.g., "17:55", "14:10") across appointment arrays into clean, uniform 12-hour AM/PM formats (e.g., "5:55 PM", "2:10 PM"), and sort all lists in strict descending chronological order.
+    - Soften Destructive Buttons: Change all prominent, high-saturation red "CANCEL" borders or link text lines to an organic muted gray that elevates to a sharp alert red context ONLY upon active hover or pointer focus.
+    - Form Step Improvements: On the `#book` appointment wizard, increase the contrast on inactive sequential step tracking headers (Steps 2, 3, and 4) so they remain legible as upcoming milestones. Integrate a small character tracker (`0 / 500`) beneath the symptoms textarea field, and keep the primary action button disabled until a service tile is selected and the textarea has content.
+    - EHR Record Detail Enhancements: On the `#records` view, eliminate the raw single-character database leak variable ("s") across the Diagnosis, Notes, Prescription, Treatment Plan, and Follow-up slots. Transform these flat boxes into premium, read-only text wells with a soft background tint (`rgba(255,255,255,0.02)`), rounded borders, and generous padding. Add a stylized "DOWNLOAD PDF / PRINT" button line next to each record header row.
+    - Profile Form Columns: Inside the `#profile` settings page, align the "DATE OF BIRTH" and "GENDER" split inputs to share exact, equal 50/50 flex column layout fractions. Add hover overlay opacity states to the profile picture box showing a camera icon or an update tooltip.
+
+================================================================================
+SECTION 3: DOCTOR PORTAL MODULES (`doctor-portal.html`)
+================================================================================
+3.1 Fix Profile Alignment Regressions: Ensure that the bottom-left doctor profile details widget shares the exact same flex alignment rules fixed in the patient portal, keeping initials circles cleanly separated from the doctor name text strings.
+3.2 Form Placeholders & Focus Elements: Ensure all inline input elements, modal inputs, and markdown diagnostic note panels have high-contrast text fields, visible label padding bounds, and clear `:focus-visible` outline rings that align with a premium dark mode layout look.
+
+================================================================================
+SECTION 4: ADMIN PORTAL & ROUTING LIFECYCLE (`admin-portal.html`)
+================================================================================
+4.1 Resolve Authentication Interlocking Routing Trap (Critical Live Bug):
+    - Locate the application initialization lifecycle script. If an unauthenticated or tokenless session loads the page with an explicit sub-hash path in the URL bar (e.g., `#billing`, `#clinicfloor`, `#appointments`), catch the execution thread, immediately clear or mask the main dashboard nodes, and safely enforce strict visibility layers to contain the user within the login card interface.
+    - Set the full-screen admin authorization modal overlay z-index properties to fully block underlying layout elements from bleeding through.
+4.2 Sign-In Form Polish:
+    - Add a clear `margin-bottom: 8px;` separating the "EMAIL ADDRESS" and "PASSWORD" uppercase form text labels from the actual input text box borders.
+    
+    - Re-style the primary submission button currently reading "[ SIGNING IN…]": remove the raw bracket formatting characters, and replace them with an absolute CSS infinite rotating loader icon nested next to a clean, disabled font string reading "Signing in, please wait...".
+    - Wrap the login submission event thread in a 5000ms watchdog timeout handler. If the authentication promise fails to resolve within 5 seconds, drop the loading sequence, reset the button state to an active "SIGN IN", and display an error alert banner reading: "Authentication taking longer than expected. Please check your network connection and try again."
+4.3 Dashboard Overview & Clinic Floor (`#clinicfloor`):
+    - Table Timestamp Parsing: Locate the "Recent Appointments" and "Today's Schedule" elements. Fix the timestamp logic to remove duplicated suffixes (e.g., rewrite "9:30 AMAM" to a clean "9:30 AM") and inject missing space gaps (e.g., rewrite "5:56PM" to "5:56 PM").
+    - Fix Timeline Date Log Inconsistencies: Resolve the underlying script logic error where the global header text reports "Tuesday, May 27" while the schedule card row says "TODAY'S SCHEDULE Friday, May 29". Sync these values perfectly.
+    - Clear Column Action Overlaps: Re-architect the interior grid/flex tracks of the timeline card rows so that action buttons (like the amber "CHECK IN ⚠" or green checkmarks) occupy their own structured, absolute text column and NEVER layout-crash, wrap, or clip into adjacent patient names ("sibam Sapple") or doctor names.
+    - Boost Stat Metric Contrast: Elevate the font color luminance on all numeric indicator charts and structural text lines (like chart scale bounds "0", "17" and subheader status count badges) to comfortably satisfy WCAG AA parameters. Replace the plain flat text string "None right now" inside empty queue columns with a polished, centered, muted empty-state medical icon container.
+4.4 Appointments, Doctors, & Registry Views (`#appointments`, `#doctors`, `#patients`, `#billing`):
+    - Eliminate Duplicate Primary Buttons: On the `#appointments` view, eliminate the duplicate "+ NEW APPOINTMENT" button tracking on the right edge of the table controls row. Keep exclusively the main top-header primary button block.
+    - Filter Pill Activity Indications: Build a dynamic active indicator layout tracker class (e.g., `.active-filter-pill`) for your status filtering control rows ("ALL", "TODAY", "PAID", etc.) that instantly hooks a prominent background fill highlight or line indicator onto the selected tab state.
+    - Card Cleanups & Action Hierarchies: On the `#doctors` directory grid, remove the sharp green rule line slicing under card initials. Re-style card controls row layout: make "EDIT" and "AVAILABILITY" prominent secondary tools, and isolate the destructive "DELETE" action to a subtle text layout that only shifts to an intense crimson value upon direct mouse hover.
+    - Fix Registry Text Wrapping: Expand column layout tracks inside the patient directory rows so metadata text properties like "DOB: 2008-05-18 · Male" breathe easily across a single horizontal line block instead of splitting jaggedly.
+    - Financial Column Ledger Buttons: Locate the `#billing` data grid view. Apply `white-space: nowrap;` to the Date cells to lock strings like "May 29, 2026" onto a uniform baseline. Build functional secondary button triggers reading "RECEIPT" inside the empty "ACTIONS" table column cells using a clean, compact bordered layout style.
+- Fix CSS Canvas Initialization on Hash Collisions: Inspect the global body wrapper stylesheet logic. If a route collision occurs or if a full-screen authentication modal is rendered while a sub-hash (like `#billing`) is present in the URL, ensure that the background container explicitly defaults to your standard theme backdrop color variable rather than falling back to an unstyled, pure pitch-black (#000000) browser default canvas. The DOM must safely render the underlying dark mode grid architecture smoothly even if an execution thread holds on a processing loading loop state.
+================================================================================
+SECTION 5: CODE COMPILATION INTEGRITY
+================================================================================
+Ensure all modifications maintain perfect responsive layout scales down to 320px width constraints. Do not introduce vertical scrollbars or break text elements outside of their layout cards on narrow screens. Use premium dark-mode colors that match the existing aesthetic throughout. Validate syntax before finalizing edits.

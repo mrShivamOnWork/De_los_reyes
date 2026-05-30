@@ -48,7 +48,7 @@
       background-size: 48px 48px;
     }
     .auth-brand-inner { position: relative; z-index: 1; }
-    .auth-brand img { width: 120px; height: 120px; object-fit: contain; margin-bottom: 24px; border-radius: 12px; }
+    .auth-brand img { width: 120px; height: 120px; object-fit: contain; margin-bottom: 24px; border-radius: 12px; mix-blend-mode: multiply; }
     .auth-brand h1 {
       font-family: 'Montserrat', sans-serif;
       font-weight: 800; font-size: 22px; color: #fff;
@@ -180,8 +180,8 @@
       border-top: 1px solid rgba(255,255,255,0.06);
     }
     .sidebar-user {
-      display: flex; align-items: center; gap: 10px;
-      padding: 10px 12px; border-radius: 8px;
+      display: flex; align-items: center; gap: 12px;
+      padding: 12px; border-radius: 8px;
       margin-bottom: 6px;
     }
     .sidebar-avatar {
@@ -207,7 +207,7 @@
       font-weight: 800; font-size: 18px; color: var(--dark);
     }
     .main-header-sub { font-size: 13px; color: var(--gray); margin-top: 2px; }
-    .header-actions { display: flex; gap: 10px; align-items: center; }
+    .header-actions { display: flex; gap: 12px; align-items: center; }
     .notif-btn {
       width: 38px; height: 38px; border-radius: 8px;
       border: 1.5px solid rgba(0,0,0,0.1);
@@ -326,11 +326,13 @@
     .book-step-item.done .book-step-num { background: var(--green); color: #fff; }
     .book-step-label {
       font-family: 'Montserrat', sans-serif;
-      font-size: 12px; font-weight: 600; color: var(--gray);
+      font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.5);
     }
     .book-step-item.active .book-step-label { color: var(--green-dark); }
     .book-panel { display: none; }
     .book-panel.active { display: block; }
+    .char-counter { font-size: 11px; color: rgba(255,255,255,0.3); text-align: right; margin-top: 4px; font-family: 'Montserrat', sans-serif; font-weight: 600; }
+    .char-counter.warn { color: #F87171; }
     .doctor-select-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px; }
     @keyframes docCardIn {
       from { opacity: 0; transform: translateY(12px); }
@@ -471,9 +473,21 @@
     }
     .record-field-val {
       font-size: 13px; color: var(--dark); line-height: 1.65;
-      background: var(--light); border-radius: 6px;
-      padding: 8px 12px;
+      background: var(--light); border-radius: 8px;
+      padding: 10px 14px;
+      border: 1px solid rgba(255,255,255,0.06);
     }
+    .record-print-btn {
+      margin-left: auto; flex-shrink: 0;
+      display: inline-flex; align-items: center; gap: 5px;
+      font-family: 'Montserrat', sans-serif; font-size: 10px; font-weight: 700;
+      letter-spacing: 0.07em; text-transform: uppercase;
+      padding: 5px 12px; border-radius: 6px;
+      background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.5);
+      border: 1px solid rgba(255,255,255,0.1); cursor: pointer;
+      transition: background 0.2s, color 0.2s, border-color 0.2s;
+    }
+    .record-print-btn:hover { background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.85); border-color: rgba(255,255,255,0.2); }
     .record-vitals-grid {
       display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px;
     }
@@ -713,6 +727,19 @@
     .modal-btns { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
     .modal-cancel-reason { width: 100%; margin-bottom: 16px; }
 
+    /* ── CANCEL BUTTON (muted, turns red on hover) ── */
+    .btn-cancel-soft {
+      background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.45);
+      border: 1.5px solid rgba(255,255,255,0.12);
+      padding: 6px 12px; border-radius: 6px;
+      font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: 11px;
+      letter-spacing: 0.07em; text-transform: uppercase; cursor: pointer;
+      transition: color 0.2s, border-color 0.2s, background 0.2s;
+      white-space: nowrap;
+    }
+    .btn-cancel-soft:hover { background: rgba(211,26,34,0.12); color: #F87171; border-color: rgba(211,26,34,0.4); }
+    .btn-cancel-soft:focus-visible { outline: none; box-shadow: 0 0 0 2px rgba(211,26,34,0.3); }
+
     /* ── FORM VALIDATION ── */
     .finput.is-error { border-color: var(--crimson) !important; box-shadow: 0 0 0 3px rgba(211,26,34,0.1) !important; }
     .finput.is-valid { border-color: var(--green) !important; }
@@ -757,6 +784,147 @@
     .skeleton { background: linear-gradient(90deg,#eee 25%,#f5f5f5 50%,#eee 75%); background-size: 200% 100%; animation: shimmer 1.2s infinite; border-radius: 6px; }
     @keyframes shimmer { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
     @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+    /* ══════════════════════════════════════════════════════════════
+       GLOBAL DARK THEME — PATIENT PORTAL
+    ══════════════════════════════════════════════════════════════ */
+    :root { --green-tint: rgba(0,168,89,0.1); }
+    body { background: #0D1117; color: rgba(255,255,255,0.82); }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
+
+    /* Auth */
+    .auth-main { background: #0D1117; }
+    .auth-card { background: #1A2332; box-shadow: 0 8px 40px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.08); }
+    .auth-title { color: rgba(255,255,255,0.9); }
+    .auth-sub { color: rgba(255,255,255,0.4); }
+
+    /* Forms */
+    .flabel { color: rgba(255,255,255,0.6); }
+    .finput { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.1); color: rgba(255,255,255,0.85); }
+    .finput::placeholder { color: rgba(255,255,255,0.42); }
+    .finput:focus { border-color: #00A859; background: rgba(255,255,255,0.08); }
+    .finput:focus-visible { outline: none; border-color: #00A859; background: rgba(255,255,255,0.08); box-shadow: 0 0 0 3px rgba(0,168,89,0.28), 0 0 12px rgba(0,168,89,0.15); }
+    @keyframes shake { 0%,100%{transform:translateX(0)} 15%{transform:translateX(-8px)} 30%{transform:translateX(8px)} 45%{transform:translateX(-6px)} 60%{transform:translateX(6px)} 75%{transform:translateX(-3px)} 90%{transform:translateX(3px)} }
+    .auth-card.shake { animation: shake 0.55s cubic-bezier(0.36,0.07,0.19,0.97) both; }
+    select.finput option { background: #1A2332; color: rgba(255,255,255,0.85); }
+    .pass-toggle { color: rgba(255,255,255,0.3); }
+    .pass-toggle:hover { color: rgba(255,255,255,0.7); }
+
+    /* Buttons */
+    .btn-ghost { background: transparent; border-color: rgba(255,255,255,0.15); color: rgba(255,255,255,0.5); }
+    .btn-ghost:hover { border-color: rgba(255,255,255,0.3); color: rgba(255,255,255,0.85); }
+
+    /* Main header */
+    .main-header { background: #161D27; border-bottom: 1px solid rgba(255,255,255,0.06); }
+    .main-header-title { color: rgba(255,255,255,0.9); }
+    .main-header-sub { color: rgba(255,255,255,0.35); }
+    .notif-btn { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.1); }
+    .notif-btn svg { stroke: rgba(255,255,255,0.45); }
+
+    /* Stat cards */
+    .stat-card { background: #161D27; border-color: rgba(255,255,255,0.06); box-shadow: none; }
+    .stat-val { color: rgba(255,255,255,0.9); }
+    .stat-lbl { color: rgba(255,255,255,0.38); }
+    .stat-icon { background: rgba(255,255,255,0.05) !important; }
+    .stat-icon svg { stroke: rgba(255,255,255,0.45); }
+
+    /* Section title */
+    .section-title-sm { color: rgba(255,255,255,0.85); }
+
+    /* Cards & tables */
+    .card { background: #161D27; border-color: rgba(255,255,255,0.06); box-shadow: none; }
+    .table th { color: rgba(255,255,255,0.32); border-color: rgba(255,255,255,0.06); }
+    .table td { color: rgba(255,255,255,0.78); border-color: rgba(255,255,255,0.05); }
+    .table tr:hover td { background: rgba(255,255,255,0.03); }
+
+    /* Badges */
+    .badge-green  { background: rgba(0,168,89,0.15); color: #34D399; }
+    .badge-crimson{ background: rgba(211,26,34,0.15); color: #F87171; }
+    .badge-gray   { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.45); }
+    .badge-yellow { background: rgba(245,158,11,0.15); color: #F59E0B; }
+    .badge-blue   { background: rgba(96,165,250,0.15); color: #60A5FA; }
+
+    /* Booking steps */
+    .book-steps { background: #161D27; border-color: rgba(255,255,255,0.06); }
+    .book-step-item { border-color: rgba(255,255,255,0.06); }
+    .book-step-item.active { background: rgba(0,168,89,0.08); }
+    .book-step-num { background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.4); }
+    .book-step-label { color: rgba(255,255,255,0.38); }
+    .book-step-item.active .book-step-label { color: #00A859; }
+
+    /* Doctor select cards */
+    .doc-select-card { background: #161D27; border-color: rgba(255,255,255,0.08); }
+    .doc-select-card:hover { border-color: rgba(0,168,89,0.4); }
+    .doc-select-card.selected { border-color: #00A859; }
+    .doc-select-body { background: #161D27; }
+    .doc-select-card.selected .doc-select-body { background: rgba(0,168,89,0.08); }
+    .doc-select-name { color: rgba(255,255,255,0.9); }
+    .doc-select-avail { color: rgba(255,255,255,0.35); }
+
+    /* Date buttons */
+    .date-btn { background: #161D27; border-color: rgba(255,255,255,0.08); }
+    .date-btn:hover { border-color: #00A859; }
+    .date-btn.selected { background: rgba(0,168,89,0.1); border-color: #00A859; }
+    .date-day { color: rgba(255,255,255,0.35); }
+    .date-num { color: rgba(255,255,255,0.85); }
+    .date-btn.selected .date-num { color: #34D399; }
+
+    /* Time buttons */
+    .time-btn { background: #161D27; border-color: rgba(255,255,255,0.08); color: rgba(255,255,255,0.78); }
+    .time-btn:hover { border-color: #00A859; }
+    .time-btn.selected { background: rgba(0,168,89,0.1); border-color: #00A859; color: #34D399; }
+    .time-btn.booked { background: rgba(255,255,255,0.04); color: rgba(255,255,255,0.2); }
+
+    /* Booking confirmation summary */
+    .confirm-summary { background: rgba(0,168,89,0.08); border-color: rgba(0,168,89,0.2); }
+    .confirm-row { border-color: rgba(0,168,89,0.1); }
+    .confirm-key { color: rgba(255,255,255,0.38); }
+    .confirm-val { color: rgba(255,255,255,0.88); }
+
+    /* Appointment filter buttons */
+    .filter-btn { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.1); color: rgba(255,255,255,0.4); }
+    .filter-btn.active { background: #00A859; color: #fff; border-color: #00A859; }
+    .filter-btn:hover:not(.active) { border-color: #00A859; color: #00A859; }
+
+    /* Appointment cards */
+    .appt-card { background: #161D27; border-color: rgba(255,255,255,0.06); box-shadow: none; }
+    .appt-card:hover { border-color: rgba(255,255,255,0.12); box-shadow: 0 4px 16px rgba(0,0,0,0.3); }
+    .appt-doctor { color: rgba(255,255,255,0.9); }
+    .appt-detail { color: rgba(255,255,255,0.35); }
+
+    /* Health records */
+    .record-card { background: #161D27; border-color: rgba(255,255,255,0.06); box-shadow: none; }
+    .record-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.3); border-color: rgba(255,255,255,0.12); transform: none; }
+    .record-header { background: #161D27; }
+    .record-header:hover { background: rgba(255,255,255,0.02); }
+    .record-doctor { color: rgba(255,255,255,0.9); }
+    .record-reason { color: rgba(255,255,255,0.38); }
+    .record-chevron { color: rgba(255,255,255,0.3); }
+    .record-body { border-color: rgba(255,255,255,0.06); }
+    .record-field-val { background: rgba(255,255,255,0.02); color: rgba(255,255,255,0.78); border-color: rgba(255,255,255,0.06); }
+    .record-vital-chip { background: rgba(0,168,89,0.1); border-color: rgba(0,168,89,0.2); color: #34D399; }
+
+    /* Empty states */
+    .empty-state { color: rgba(255,255,255,0.35); }
+    .empty-icon { background: rgba(255,255,255,0.05); }
+    .empty-icon svg { stroke: rgba(255,255,255,0.3); }
+    .empty-title { color: rgba(255,255,255,0.6); }
+    .empty-desc { color: rgba(255,255,255,0.32); }
+
+    /* Booking done */
+    .booking-done-icon { background: rgba(0,168,89,0.1); }
+    .booking-done-title { color: rgba(255,255,255,0.9); }
+    .booking-done-sub { color: rgba(255,255,255,0.4); }
+    .booking-done-id { color: rgba(255,255,255,0.3); }
+    .booking-done-details { background: rgba(255,255,255,0.04); border-radius: 12px; }
+    .bdd-row { border-color: rgba(255,255,255,0.06); }
+    .bdd-key { color: rgba(255,255,255,0.38); }
+    .bdd-val { color: rgba(255,255,255,0.88); }
+
+    /* Skeleton loading */
+    .skeleton { background: linear-gradient(90deg,rgba(255,255,255,0.05) 25%,rgba(255,255,255,0.08) 50%,rgba(255,255,255,0.05) 75%); background-size: 200% 100%; }
   </style>
 </head>
 <body>
@@ -1176,10 +1344,11 @@
 
             <div class="fgroup" style="margin-top:16px;">
               <label class="flabel" for="book-reason">Reason for Visit / Symptoms</label>
-              <textarea class="finput" id="book-reason" placeholder="Briefly describe your symptoms or reason for your appointment…"></textarea>
+              <textarea class="finput" id="book-reason" placeholder="Briefly describe your symptoms or reason for your appointment…" maxlength="500" oninput="updateBookReasonCounter(this)"></textarea>
+              <div class="char-counter" id="bookReasonCounter">0 / 500</div>
             </div>
             <div style="text-align:right;">
-              <button class="btn btn-green" onclick="bookNext(1)">Next: Choose Date →</button>
+              <button class="btn btn-green" id="bookStep1Btn" onclick="bookNext(1)" disabled style="opacity:0.4;cursor:not-allowed;">Next: Choose Date →</button>
             </div>
           </div>
         </div>
@@ -1518,7 +1687,13 @@
     if (_patLoggingIn) return;
     const email = document.getElementById('login-email').value.trim();
     const pass  = document.getElementById('login-pass').value;
-    if (!email || !pass) { showToast('Please fill in all fields'); return; }
+    if (!email || !pass) {
+      const card = document.querySelector('#loginScreen .auth-card');
+      if (card) { card.classList.remove('shake'); void card.offsetWidth; card.classList.add('shake'); setTimeout(() => card.classList.remove('shake'), 600); }
+      if (!email) { const el = document.getElementById('login-email'); el.style.borderColor = 'var(--crimson)'; setTimeout(() => el.style.borderColor = '', 1500); }
+      if (!pass) { const el = document.getElementById('login-pass'); el.style.borderColor = 'var(--crimson)'; setTimeout(() => el.style.borderColor = '', 1500); }
+      showToast('Please fill in all fields'); return;
+    }
     const btn = document.getElementById('patientLoginBtn');
     _patLoggingIn = true;
     btn.disabled = true;
@@ -1668,11 +1843,11 @@
       const dspec = doc?.specialty || '';
       const photo = doc?.photo_url || 'https://placehold.co/28x28';
       return `<tr>
-        <td><div style="font-weight:700;">${fmtDate(a.date)}</div><div style="font-size:11px;color:var(--gray);">${a.time}</div></td>
-        <td><div style="display:flex;align-items:center;gap:8px;"><img src="${photo}" style="width:28px;height:28px;border-radius:50%;object-fit:cover;"><div><div style="font-weight:600;">${dname}</div><div style="font-size:11px;color:var(--gray);">${dspec}</div></div></div></td>
-        <td>${a.purpose||'—'}</td>
+        <td><div style="font-weight:700;">${fmtDate(a.date)}</div><div style="font-size:11px;color:var(--gray);">${fmt12h(a.time)}</div></td>
+        <td><div style="display:flex;align-items:center;gap:12px;"><img src="${photo}" style="width:28px;height:28px;border-radius:50%;object-fit:cover;flex-shrink:0;display:flex;align-items:center;justify-content:center;"><div><div style="font-weight:600;">${dname}</div><div style="font-size:11px;color:var(--gray);">${dspec}</div></div></div></td>
+        <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${a.purpose||'—'}</td>
         <td><span class="badge ${statusBadgeClass(a.status)}">${a.status}</span></td>
-        <td><button class="btn btn-ghost btn-sm" onclick="openRescheduleModal('${a.id}','${dname}','${dspec}')">Reschedule</button> <button class="btn btn-sm" style="color:var(--crimson);border:1.5px solid rgba(211,26,34,0.25);background:transparent;padding:6px 12px;border-radius:6px;font-family:'Montserrat',sans-serif;font-weight:700;font-size:11px;cursor:pointer;" onclick="openCancelModal('${a.id}')">Cancel</button></td>
+        <td><button class="btn btn-ghost btn-sm" onclick="openRescheduleModal('${a.id}','${dname}','${dspec}')">Reschedule</button> <button class="btn-cancel-soft" onclick="openCancelModal('${a.id}')">Cancel</button></td>
       </tr>`;
     }).join('');
   }
@@ -1729,13 +1904,13 @@
         <img class="appt-doc-av" src="${photo}" alt="${dname}">
         <div class="appt-info">
           <div class="appt-doctor">${dname}</div>
-          <div class="appt-detail">${a.time} · ${dspec} · ${a.purpose||''}</div>
+          <div class="appt-detail">${fmt12h(a.time)} · ${dspec} · ${a.purpose||''}</div>
         </div>
         <span class="badge ${isOverdue ? 'badge-yellow' : statusBadgeClass(a.status)}">${displayStatus}</span>
         ${(a.status === 'Confirmed' || a.status === 'Pending') ? `
           <div style="display:flex;gap:6px;margin-left:8px;">
             <button class="btn btn-ghost btn-sm" onclick="openRescheduleModal('${a.id}','${dname}','${dspec}')">Reschedule</button>
-            <button class="btn btn-sm" style="background:rgba(211,26,34,0.08);color:var(--crimson);border:none;" onclick="openCancelModal('${a.id}')">Cancel</button>
+            <button class="btn-cancel-soft" onclick="openCancelModal('${a.id}')">Cancel</button>
           </div>` : ''}
         ${a.status === 'Cancelled' ? `<button class="btn btn-green btn-sm" style="margin-left:8px;" onclick="rebookDoctor('${dname}','${dspec}')">Rebook</button>` : ''}
       </div>`;
@@ -1758,9 +1933,11 @@
         ? `<img class="record-doc-av" src="${photo}" alt="${dname}">`
         : `<div class="record-doc-av" style="background:var(--green);display:flex;align-items:center;justify-content:center;font-family:'Montserrat',sans-serif;font-weight:700;font-size:13px;color:#fff;">${(doc?.first_name?.[0]||'D')+(doc?.last_name?.[0]||'')}</div>`;
 
-      const field = (label, val) => val
-        ? `<div class="record-field"><div class="record-field-label">${label}</div><div class="record-field-val">${val}</div></div>`
-        : '';
+      const field = (label, val) => {
+        const clean = (val || '').trim();
+        if (!clean || clean.length <= 1) return '';
+        return `<div class="record-field"><div class="record-field-label">${label}</div><div class="record-field-val">${clean}</div></div>`;
+      };
 
       const vitals = r.vitals ? (() => {
         const v = typeof r.vitals === 'string' ? JSON.parse(r.vitals) : r.vitals;
@@ -1783,7 +1960,11 @@
             <div class="record-doctor">${dname}</div>
             <div class="record-reason">${dspec}${r.diagnosis ? ' · ' + r.diagnosis : ''}</div>
           </div>
-          <span class="badge badge-green" style="flex-shrink:0;margin-left:auto;">Completed</span>
+          <span class="badge badge-green" style="flex-shrink:0;">Completed</span>
+          <button class="record-print-btn" onclick="event.stopPropagation();printRecord(${i})" title="Download or print this record">
+            <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" viewBox="0 0 24 24"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+            PDF / Print
+          </button>
           <div class="record-chevron">
             <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
           </div>
@@ -1815,6 +1996,14 @@
   function fmtDate(d) {
     if (!d) return '—';
     return new Date(d + 'T00:00:00').toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+  }
+  function fmt12h(t) {
+    if (!t) return '—';
+    const m = t.match(/^(\d{1,2}):(\d{2})(?:\s*(AM|PM))?$/i);
+    if (!m) return t;
+    let h = parseInt(m[1], 10), min = m[2], ampm = m[3];
+    if (!ampm) { ampm = h < 12 ? 'AM' : 'PM'; if (h === 0) h = 12; else if (h > 12) h -= 12; }
+    return `${h}:${min} ${ampm.toUpperCase()}`;
   }
 
   function loadPatientProfileForm(patient) {
@@ -2092,6 +2281,25 @@
     }
   }
 
+  // ── BOOKING STEP 1 ENABLE/DISABLE ──
+  function updateBookStep1Btn() {
+    const btn = document.getElementById('bookStep1Btn');
+    if (!btn) return;
+    const hasService = !!booking.service || (bookingMode === 'doctor' && !!booking.doctor);
+    const hasDoctor  = !!booking.doctor;
+    const hasReason  = (document.getElementById('book-reason')?.value || '').trim().length > 0;
+    const ready = (bookingMode === 'service' ? (hasService && hasDoctor) : hasDoctor) && hasReason;
+    btn.disabled = !ready;
+    btn.style.opacity = ready ? '1' : '0.4';
+    btn.style.cursor  = ready ? 'pointer' : 'not-allowed';
+  }
+  function updateBookReasonCounter(ta) {
+    const len = ta.value.length;
+    const counter = document.getElementById('bookReasonCounter');
+    if (counter) { counter.textContent = len + ' / 500'; counter.classList.toggle('warn', len > 450); }
+    updateBookStep1Btn();
+  }
+
   // ── BOOKING MODE ──
   function setBookingMode(mode) {
     bookingMode = mode;
@@ -2117,6 +2325,7 @@
     const noMsg = document.getElementById('noDocMsg');
     grid.innerHTML = '';
     booking.doctor = null; booking.doctorId = null; booking.specialty = null;
+    updateBookStep1Btn();
     if (matching.length === 0) {
       grid.style.display = 'none'; lbl.style.display = 'none'; noMsg.style.display = '';
     } else {
@@ -2139,6 +2348,7 @@
     el.classList.add('selected');
     booking.doctorId = id; booking.doctor = name; booking.specialty = spec;
     document.getElementById('dateDocName').textContent = name;
+    updateBookStep1Btn();
     // populate service dropdown for doctor mode
     if (bookingMode === 'doctor') {
       const doc = dbDoctors.find(d => d.id === id);
@@ -2331,6 +2541,8 @@
     });
     document.querySelectorAll('.doc-select-card, .date-btn, .time-btn, .svc-select-card').forEach(el => el.classList.remove('selected'));
     document.getElementById('book-reason').value = '';
+    const counter = document.getElementById('bookReasonCounter'); if (counter) counter.textContent = '0 / 500';
+    updateBookStep1Btn();
     document.getElementById('filteredDocGrid').innerHTML = '';
     document.getElementById('filteredDocGrid').style.display = 'none';
     document.getElementById('filteredDocLabel').style.display = 'none';
@@ -2417,6 +2629,21 @@
     list.prepend(item);
     unreadCount++;
     updateBadge();
+  }
+
+  // ── PRINT RECORD ──
+  function printRecord(idx) {
+    const cards = document.querySelectorAll('#recordsList .record-card');
+    const card = cards[idx];
+    if (!card) return;
+    const w = window.open('', '_blank');
+    if (!w) return;
+    w.document.write('<html><head><title>Health Record</title><style>body{font-family:sans-serif;padding:24px;color:#111}h2{margin-bottom:4px}h4{color:#007A42;letter-spacing:.08em;text-transform:uppercase;font-size:11px;margin:14px 0 4px}p{background:#f4f6f7;padding:8px 12px;border-radius:6px;font-size:13px;line-height:1.6}hr{border:none;border-top:1px solid #eee;margin:12px 0}</style></head><body>');
+    w.document.write('<h2>Health Record — De Los Reyes Doctors Clinic</h2><hr>');
+    w.document.write(card.innerHTML);
+    w.document.write('</body></html>');
+    w.document.close();
+    w.print();
   }
 
   // ── RECORDS SEARCH ──

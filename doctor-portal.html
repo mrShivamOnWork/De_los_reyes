@@ -41,7 +41,7 @@
       background-size: 48px 48px;
     }
     .auth-brand-inner { position: relative; z-index: 1; }
-    .auth-brand img { width: 110px; height: 110px; object-fit: contain; margin-bottom: 22px; border-radius: 12px; }
+    .auth-brand img { width: 110px; height: 110px; object-fit: contain; margin-bottom: 22px; border-radius: 12px; mix-blend-mode: multiply; }
     .auth-brand h1 { font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 20px; color: #fff; margin-bottom: 10px; }
     .auth-brand p { font-size: 14px; color: rgba(255,255,255,0.4); line-height: 1.7; margin-bottom: 28px; }
     .auth-role-badge {
@@ -136,7 +136,7 @@
     }
     .sidebar-bottom { padding: 10px 10px 18px; border-top: 1px solid rgba(255,255,255,0.06); }
     .sidebar-doc-card {
-      display: flex; align-items: center; gap: 10px;
+      display: flex; align-items: center; gap: 12px;
       padding: 12px; background: rgba(255,255,255,0.04);
       border-radius: 8px; margin-bottom: 8px;
     }
@@ -146,8 +146,8 @@
       flex-shrink: 0;
       border: 2px solid rgba(255,255,255,0.15);
     }
-    .doc-sidebar-name { font-family: 'Montserrat', sans-serif; font-size: 12px; font-weight: 700; color: #fff; }
-    .doc-sidebar-spec { font-size: 11px; color: rgba(255,255,255,0.35); }
+    .doc-sidebar-name { font-family: 'Montserrat', sans-serif; font-size: 12px; font-weight: 700; color: #fff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .doc-sidebar-spec { font-size: 11px; color: rgba(255,255,255,0.35); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
     /* ── MAIN ── */
     .main-content { flex: 1; overflow-y: auto; }
@@ -511,6 +511,153 @@
     .summary-patient-status { font-family: 'Montserrat', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.08em; }
     .spd-done { color: var(--green); }
     .spd-skip { color: rgba(255,255,255,0.3); }
+
+    /* ── SCHEDULE REFACTOR ── */
+    .sched-wrap { background:#161D27; border-radius:14px; border:1px solid rgba(255,255,255,0.06); overflow:hidden; }
+    .sched-top { display:flex; align-items:center; gap:14px; padding:16px 20px; border-bottom:1px solid rgba(255,255,255,0.06); }
+    .sched-nav-btn { width:32px; height:32px; border-radius:8px; border:1px solid rgba(255,255,255,0.12); background:rgba(255,255,255,0.06); color:rgba(255,255,255,0.65); cursor:pointer; font-size:14px; display:flex; align-items:center; justify-content:center; transition:background 0.15s,color 0.15s,border-color 0.15s; flex-shrink:0; }
+    .sched-nav-btn:hover { background:rgba(255,255,255,0.12); color:#fff; border-color:rgba(255,255,255,0.25); }
+    .sched-nav-btn:active { transform:scale(0.95); }
+    .sched-week-info { flex:1; }
+    .sched-week-label { font-family:'Montserrat',sans-serif; font-weight:800; font-size:15px; color:rgba(255,255,255,0.9); }
+    .sched-doc-tag { display:flex; align-items:center; gap:7px; margin-top:5px; }
+    .sched-doc-name { font-family:'Montserrat',sans-serif; font-size:12px; font-weight:700; color:var(--crimson); }
+    /* Grid */
+    .schedule-grid { display:grid; grid-template-columns:repeat(6,1fr); gap:0; }
+    .sched-col { display:flex; flex-direction:column; border-right:1px solid rgba(255,255,255,0.05); min-width:0; }
+    .sched-col:last-child { border-right:none; }
+    .sched-col-hdr { padding:12px 10px 10px; text-align:center; background:#0D1117; border-bottom:2px solid transparent; }
+    .sched-col-hdr .day-abbr { font-family:'Montserrat',sans-serif; font-size:10px; font-weight:700; letter-spacing:0.15em; text-transform:uppercase; color:rgba(255,255,255,0.3); }
+    .sched-col-hdr .day-num { font-family:'Montserrat',sans-serif; font-size:24px; font-weight:900; color:rgba(255,255,255,0.55); margin-top:2px; line-height:1; }
+    .sched-col-hdr.today { background:rgba(0,168,89,0.08); border-bottom-color:rgba(0,168,89,0.55); }
+    .sched-col-hdr.today .day-abbr { color:rgba(0,168,89,0.75); }
+    .sched-col-hdr.today .day-num { color:#00A859; }
+    .sched-col-hdr.off .day-abbr,.sched-col-hdr.off .day-num { color:rgba(255,255,255,0.18); }
+    .sched-col-body { flex:1; padding:8px; min-height:180px; position:relative; }
+    .sched-col.off-col .sched-col-body { background:repeating-linear-gradient(45deg,transparent,transparent 7px,rgba(255,255,255,0.015) 7px,rgba(255,255,255,0.015) 14px); }
+    /* Appointment cards */
+    .sched-card { background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.07); border-radius:8px; padding:7px 8px; margin-bottom:5px; cursor:pointer; transition:background 0.12s,transform 0.12s,border-color 0.12s; border-left:3px solid rgba(255,255,255,0.1); }
+    .sched-card:hover { background:rgba(255,255,255,0.09); transform:translateY(-1px); box-shadow:0 4px 12px rgba(0,0,0,0.25); }
+    .sched-card:last-child { margin-bottom:0; }
+    .sched-card.s-confirmed { border-left-color:#60A5FA; }
+    .sched-card.s-pending   { border-left-color:#A78BFA; }
+    .sched-card.s-checkedin { border-left-color:#F59E0B; }
+    .sched-card.s-session   { border-left-color:#D31A22; background:rgba(211,26,34,0.07); }
+    .sched-card.s-completed { border-left-color:#34D399; opacity:0.55; }
+    .sched-card.s-overdue   { border-left-color:#B45309; opacity:0.72; }
+    .sched-card-top { display:flex; align-items:center; justify-content:space-between; gap:4px; margin-bottom:4px; }
+    .sched-card-time { font-family:'Montserrat',sans-serif; font-size:10px; font-weight:800; color:rgba(255,255,255,0.4); letter-spacing:0.04em; white-space:nowrap; }
+    .sched-card-badge { font-family:'Montserrat',sans-serif; font-size:8px; font-weight:800; padding:2px 5px; border-radius:100px; letter-spacing:0.06em; text-transform:uppercase; white-space:nowrap; flex-shrink:0; }
+    .sb-confirmed { background:rgba(96,165,250,0.15); color:#60A5FA; }
+    .sb-pending   { background:rgba(167,139,250,0.15); color:#A78BFA; }
+    .sb-checkedin { background:rgba(245,158,11,0.15); color:#F59E0B; }
+    .sb-session   { background:rgba(211,26,34,0.15); color:#F87171; }
+    .sb-completed { background:rgba(52,211,153,0.12); color:#34D399; }
+    .sched-card-name { font-family:'Montserrat',sans-serif; font-size:11px; font-weight:700; color:rgba(255,255,255,0.85); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    /* Empty / Off */
+    .sched-empty { padding:24px 8px; text-align:center; font-size:10px; font-family:'Montserrat',sans-serif; font-weight:600; color:rgba(255,255,255,0.16); white-space:nowrap; letter-spacing:0.05em; }
+    .sched-off-label { padding:24px 8px; text-align:center; font-size:9px; font-family:'Montserrat',sans-serif; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:rgba(255,255,255,0.12); white-space:nowrap; }
+    /* Current time line */
+    .sched-timenow { position:absolute; left:0; right:0; height:2px; background:rgba(211,26,34,0.7); z-index:5; pointer-events:none; box-shadow:0 0 6px rgba(211,26,34,0.5); }
+    .sched-timenow::before { content:''; position:absolute; left:-1px; top:50%; transform:translateY(-50%); width:7px; height:7px; background:#D31A22; border-radius:50%; box-shadow:0 0 8px rgba(211,26,34,0.8); }
+    @media(max-width:1000px){ .schedule-grid{grid-template-columns:repeat(3,1fr);} }
+    @media(max-width:600px){ .schedule-grid{grid-template-columns:repeat(2,1fr);} }
+
+    /* ══════════════════════════════════════════════════════════════
+       GLOBAL DARK THEME — DOCTOR PORTAL
+    ══════════════════════════════════════════════════════════════ */
+    :root { --green-tint: rgba(0,168,89,0.1); }
+    body { background: #0D1117; color: rgba(255,255,255,0.82); }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
+
+    /* Auth */
+    .auth-main { background: #0D1117; }
+    .auth-card { background: #1A2332; box-shadow: 0 8px 40px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.08); }
+    .auth-title { color: rgba(255,255,255,0.9); }
+    .auth-sub { color: rgba(255,255,255,0.4); }
+
+    /* Forms */
+    .flabel { color: rgba(255,255,255,0.6); }
+    .finput { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.1); color: rgba(255,255,255,0.85); }
+    .finput::placeholder { color: rgba(255,255,255,0.42); }
+    .finput:focus { border-color: #D31A22; background: rgba(255,255,255,0.08); }
+    .finput:focus-visible { outline: none; border-color: #D31A22; background: rgba(255,255,255,0.08); box-shadow: 0 0 0 3px rgba(211,26,34,0.22), 0 0 10px rgba(211,26,34,0.12); }
+    textarea.finput:focus-visible { box-shadow: 0 0 0 3px rgba(211,26,34,0.22); }
+    select.finput option { background: #1A2332; color: rgba(255,255,255,0.85); }
+    textarea.finput { color: rgba(255,255,255,0.85); }
+
+    /* Buttons */
+    .btn-ghost { background: transparent; border-color: rgba(255,255,255,0.15); color: rgba(255,255,255,0.5); }
+    .btn-ghost:hover { border-color: rgba(255,255,255,0.3); color: rgba(255,255,255,0.85); }
+    .btn-dark { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.1); color: rgba(255,255,255,0.8); }
+
+    /* Main header */
+    .main-header { background: #161D27; border-bottom: 1px solid rgba(255,255,255,0.06); }
+    .main-header-title { color: rgba(255,255,255,0.9); }
+    .main-header-sub { color: rgba(255,255,255,0.35); }
+
+    /* Stat cards */
+    .stat-card { background: #161D27; border-color: rgba(255,255,255,0.06); box-shadow: none; }
+    .stat-val { color: rgba(255,255,255,0.9); }
+    .stat-lbl { color: rgba(255,255,255,0.38); }
+    .stat-delta { color: #34D399; }
+
+    /* Queue panel body */
+    .queue-panel { background: #161D27; border-color: rgba(255,255,255,0.06); }
+    .queue-panel-header { background: #0D1117; }
+    .queue-item { border-color: rgba(255,255,255,0.05); }
+    .queue-item:hover { background: rgba(255,255,255,0.03); }
+    .queue-item.active { background: rgba(0,168,89,0.08); border-left-color: #00A859; }
+    .q-num { background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.55); }
+    .queue-item.active .q-num { background: #00A859; color: #fff; }
+    .q-name { color: rgba(255,255,255,0.88); }
+    .q-time { color: rgba(255,255,255,0.35); }
+    .queue-call-btn { background: transparent; border-color: rgba(255,255,255,0.12); color: rgba(255,255,255,0.4); }
+    .queue-call-btn:hover { border-color: rgba(255,255,255,0.3); color: rgba(255,255,255,0.8); }
+
+    /* Cards (EHR form sections) */
+    .card { background: #161D27; border-color: rgba(255,255,255,0.06); box-shadow: none; }
+    .card-title { color: rgba(255,255,255,0.85); }
+
+    /* Reason box (Chief Complaint) */
+    .reason-box { background: rgba(245,158,11,0.06); border-color: rgba(245,158,11,0.2); }
+    .reason-text { color: rgba(255,255,255,0.78); }
+
+    /* Schedule day columns */
+    .day-col { background: #161D27; border-color: rgba(255,255,255,0.06); }
+    .day-slot { border-color: rgba(255,255,255,0.04); color: rgba(255,255,255,0.35); }
+    .day-slot.booked { background: rgba(211,26,34,0.1); color: #F87171; }
+    .day-slot.available { color: #34D399; }
+    .day-slot.available:hover { background: rgba(0,168,89,0.07); }
+
+    /* Patient history */
+    .hist-item { background: #161D27; border-color: rgba(255,255,255,0.06); box-shadow: none; }
+    .hist-item:hover { border-color: rgba(211,26,34,0.25); box-shadow: 0 4px 14px rgba(0,0,0,0.3); }
+    .hist-name { color: rgba(255,255,255,0.9); }
+    .hist-meta { color: rgba(255,255,255,0.38); }
+
+    /* Badges */
+    .badge-green  { background: rgba(0,168,89,0.15); color: #34D399; }
+    .badge-crimson{ background: rgba(211,26,34,0.15); color: #F87171; }
+    .badge-gray   { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.45); }
+    .badge-blue   { background: rgba(96,165,250,0.15); color: #60A5FA; }
+    .badge-yellow { background: rgba(245,158,11,0.15); color: #F59E0B; }
+
+    /* Break modal */
+    .modal-card { background: #1A2332; box-shadow: 0 24px 64px rgba(0,0,0,0.5); }
+    .modal-title { color: rgba(255,255,255,0.9); }
+    .modal-sub { color: rgba(255,255,255,0.4); }
+    .break-opt { border-color: rgba(255,255,255,0.1); }
+    .break-opt:hover { border-color: rgba(245,158,11,0.4); }
+    .break-opt.selected { border-color: #F59E0B; background: rgba(245,158,11,0.08); }
+    .break-opt-time { color: rgba(255,255,255,0.9); }
+    .break-opt-lbl { color: rgba(255,255,255,0.35); }
+
+    /* Previous visits section */
+    .prev-visit-item { background: rgba(255,255,255,0.04); }
+    .prev-visit-body { color: rgba(255,255,255,0.72); }
   </style>
 </head>
 <body>
@@ -654,7 +801,7 @@
     <div class="sidebar-bottom">
       <div class="sidebar-doc-card">
         <img class="doc-av" id="docAvatar" src="doctors/images.jpg" alt="Doctor">
-        <div>
+        <div style="min-width:0;">
           <div class="doc-sidebar-name" id="docSidebarName">Dr. M. Santos</div>
           <div class="doc-sidebar-spec" id="docSidebarSpec">Internal Medicine</div>
         </div>
@@ -863,13 +1010,21 @@
 
       <!-- ── SCHEDULE VIEW ── -->
       <div class="view" id="view-schedule">
-        <div class="card" style="margin-bottom:20px;">
-          <div class="card-title" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-            <span id="scheduleWeekLabel">Current Week</span> —
-            <span style="display:flex;align-items:center;gap:8px;color:var(--crimson);">
-              <img id="scheduleDocPhoto" src="doctors/images.jpg" style="width:26px;height:26px;border-radius:50%;object-fit:cover;object-position:top;border:1.5px solid var(--crimson);" alt="Doctor">
-              <span id="scheduleDocName">Dr. Maria C. Santos</span>
-            </span>
+        <div class="sched-wrap">
+          <div class="sched-top">
+            <button class="sched-nav-btn" onclick="changeWeek(-1)" title="Previous week">
+              <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+            </button>
+            <div class="sched-week-info">
+              <div class="sched-week-label" id="scheduleWeekLabel">Week of May 25, 2026</div>
+              <div class="sched-doc-tag">
+                <img id="scheduleDocPhoto" src="doctors/images.jpg" style="width:18px;height:18px;border-radius:50%;object-fit:cover;object-position:top;border:1.5px solid var(--crimson);flex-shrink:0;" alt="">
+                <span class="sched-doc-name" id="scheduleDocName">Dr. Maria C. Santos</span>
+              </div>
+            </div>
+            <button class="sched-nav-btn" onclick="changeWeek(1)" title="Next week">
+              <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+            </button>
           </div>
           <div class="schedule-grid" id="scheduleGrid">
             <!-- populated by buildSchedule() -->
@@ -947,6 +1102,7 @@
   let currentDocSpec   = '';
   let currentDocId     = null;
   let currentDocRecord = null;
+  let weekOffset       = 0;
   let _liveQueue       = [];
   let _activeEntry     = null;
 
@@ -1426,7 +1582,7 @@
     const days  = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
     const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
     document.getElementById('summaryDate').textContent = `${days[now.getDay()]}, ${months[now.getMonth()]} ${now.getDate()}, ${now.getFullYear()}`;
-    document.getElementById('sumSeen').textContent = seenCount;
+    document.getElementById('sumSeen').textContent = document.getElementById('seenCount')?.textContent || '0';
     const skips = document.querySelectorAll('.queue-item:not(.done)').length;
     document.getElementById('sumSkip').textContent = skips;
     document.getElementById('doctorApp').classList.remove('active');
@@ -1452,7 +1608,8 @@
     const [t, s] = viewTitles[id] || [id, ''];
     document.getElementById('viewTitle').textContent = t;
     if (location.hash !== '#' + id) history.pushState(null,'','#'+id);
-    if (id === 'history') loadPatientHistory();
+    if (id === 'history')  loadPatientHistory();
+    if (id === 'schedule') buildSchedule();
   }
   window.addEventListener('hashchange', () => {
     const id = location.hash.slice(1);
@@ -1563,34 +1720,42 @@
   }
 
   // ── DYNAMIC SCHEDULE ──
+  function changeWeek(delta) {
+    weekOffset += delta;
+    buildSchedule();
+  }
+
   async function buildSchedule() {
     const grid = document.getElementById('scheduleGrid');
     if (!grid) return;
     grid.innerHTML = '';
+
     const dayNames = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
     const months   = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-    const now = new Date();
-    const dayOfWeek = now.getDay();
-    const monday = new Date(now); monday.setDate(now.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1));
-    document.getElementById('scheduleWeekLabel').textContent = `Week of ${months[monday.getMonth()]} ${monday.getDate()}, ${monday.getFullYear()}`;
+    const now      = new Date();
 
-    // Parse work_days string into a set of day abbreviations (Mon, Tue, etc.)
+    // Monday of the offset week
+    const dow     = now.getDay();
+    const monday  = new Date(now);
+    monday.setDate(now.getDate() - dow + (dow === 0 ? -6 : 1) + weekOffset * 7);
+    monday.setHours(0, 0, 0, 0);
+
+    document.getElementById('scheduleWeekLabel').textContent =
+      `Week of ${months[monday.getMonth()]} ${monday.getDate()}, ${monday.getFullYear()}`;
+
+    // Parse doctor work days
     const workDaysRaw = currentDocRecord?.work_days || '';
-    const workDaySet = new Set();
-    ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].forEach(d => {
-      if (workDaysRaw.includes(d)) workDaySet.add(d);
-    });
-    // If work_days contains a range like "Mon – Fri", expand it
-    const rangeMatch = workDaysRaw.match(/(\w+)\s*[–-]\s*(\w+)/);
+    const workDaySet  = new Set();
+    ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].forEach(d => { if (workDaysRaw.includes(d)) workDaySet.add(d); });
+    const rangeMatch  = workDaysRaw.match(/(\w+)\s*[–-]\s*(\w+)/);
     if (rangeMatch) {
       const order = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
-      const start = order.indexOf(rangeMatch[1]);
-      const end   = order.indexOf(rangeMatch[2]);
-      if (start !== -1 && end !== -1) for (let i = start; i <= end; i++) workDaySet.add(order[i]);
+      const s = order.indexOf(rangeMatch[1]), e = order.indexOf(rangeMatch[2]);
+      if (s !== -1 && e !== -1) for (let i = s; i <= e; i++) workDaySet.add(order[i]);
     }
     const hasWorkDays = workDaySet.size > 0;
 
-    // Fetch this week's real appointments
+    // Fetch week appointments
     const weekDates = Array.from({length: 6}, (_, i) => {
       const d = new Date(monday); d.setDate(monday.getDate() + i);
       return d.toISOString().slice(0, 10);
@@ -1610,6 +1775,25 @@
       } catch(_) {}
     }
 
+    // 12-hour time formatter
+    const fmt12 = t => {
+      if (!t) return '—';
+      const [h, m] = t.split(':').map(Number);
+      const hr = h % 12 || 12;
+      return `${hr}:${String(m).padStart(2,'0')} ${h < 12 ? 'AM' : 'PM'}`;
+    };
+
+    // Status config — card class + badge class + label
+    const statusCfg = {
+      'Confirmed':  { card:'s-confirmed', badge:'sb-confirmed', lbl:'Confirmed' },
+      'Pending':    { card:'s-pending',   badge:'sb-pending',   lbl:'Pending'   },
+      'Checked In': { card:'s-checkedin', badge:'sb-checkedin', lbl:'Checked In'},
+      'In Session': { card:'s-session',   badge:'sb-session',   lbl:'In Session'},
+      'Completed':  { card:'s-completed', badge:'sb-completed', lbl:'Done'      },
+    };
+
+    const nowMins = now.getHours() * 60 + now.getMinutes();
+
     for (let d = 0; d < 6; d++) {
       const date    = new Date(monday); date.setDate(monday.getDate() + d);
       const isToday = date.toDateString() === now.toDateString();
@@ -1617,41 +1801,66 @@
       const dateStr = date.toISOString().slice(0, 10);
       const isOff   = hasWorkDays && !workDaySet.has(dayAbbr);
 
+      // Column wrapper
       const col = document.createElement('div');
-      col.className = 'day-col' + (isOff ? ' off-day' : '');
-      const header = document.createElement('div');
-      header.className = 'day-header' + (isToday ? ' today' : '') + (isOff ? ' off' : '');
-      header.textContent = dayAbbr + ' ' + date.getDate();
-      col.appendChild(header);
+      col.className = 'sched-col' + (isOff ? ' off-col' : '');
+
+      // Header — day abbr on top, large date number below
+      const hdr = document.createElement('div');
+      hdr.className = 'sched-col-hdr' + (isToday ? ' today' : '') + (isOff ? ' off' : '');
+      hdr.innerHTML = `<div class="day-abbr">${dayAbbr}</div><div class="day-num">${date.getDate()}</div>`;
+      col.appendChild(hdr);
+
+      // Body
+      const body = document.createElement('div');
+      body.className = 'sched-col-body';
 
       if (isOff) {
-        const sl = document.createElement('div');
-        sl.className = 'day-slot'; sl.style.fontStyle = 'italic'; sl.style.color = 'var(--gray)'; sl.style.opacity = '0.5';
-        sl.textContent = 'Day Off'; col.appendChild(sl); grid.appendChild(col); continue;
+        body.innerHTML = '<div class="sched-off-label">Day Off</div>';
+      } else {
+        // Sort by time ascending
+        const dayAppts = (apptsByDate[dateStr] || [])
+          .sort((a, b) => (a.time || '00:00') < (b.time || '00:00') ? -1 : 1);
+
+        if (!dayAppts.length) {
+          body.innerHTML = '<div class="sched-empty">No appointments</div>';
+        } else {
+          dayAppts.forEach(a => {
+            const pName  = a.patients ? a.patients.first_name + ' ' + a.patients.last_name : '—';
+            const cfg    = statusCfg[a.status] || statusCfg['Confirmed'];
+            const tMins  = a.time ? (([h,m]) => h*60+m)(a.time.split(':').map(Number)) : null;
+            const isOver = isToday && tMins && tMins < nowMins
+                           && a.status !== 'Completed' && a.status !== 'In Session';
+
+            const card = document.createElement('div');
+            card.className = `sched-card ${cfg.card}${isOver ? ' s-overdue' : ''}`;
+            card.title = `${pName} · ${a.status || 'Scheduled'}`;
+            card.innerHTML = `
+              <div class="sched-card-top">
+                <span class="sched-card-time">${fmt12(a.time)}</span>
+                <span class="sched-card-badge ${cfg.badge}">${cfg.lbl}</span>
+              </div>
+              <div class="sched-card-name">${pName}${isOver ? ' ⚠' : ''}</div>`;
+            body.appendChild(card);
+          });
+        }
+
+        // Current-time indicator — only on today's column
+        if (isToday) {
+          // Position relative to 7 AM–9 PM window (840 mins range)
+          const dayStart = 7 * 60, dayEnd = 21 * 60;
+          const pct = Math.min(100, Math.max(0,
+            (nowMins - dayStart) / (dayEnd - dayStart) * 100));
+          if (pct > 0 && pct < 100) {
+            const line = document.createElement('div');
+            line.className = 'sched-timenow';
+            line.style.top = pct + '%';
+            body.appendChild(line);
+          }
+        }
       }
 
-      const dayAppts = (apptsByDate[dateStr] || []).sort((a,b) => a.time < b.time ? -1 : 1);
-      if (!dayAppts.length) {
-        const sl = document.createElement('div');
-        sl.className = 'day-slot available';
-        sl.textContent = 'No appointments'; col.appendChild(sl);
-      } else {
-        const nowMins = now.getHours() * 60 + now.getMinutes();
-        dayAppts.forEach(a => {
-          const sl = document.createElement('div');
-          const pName = a.patients ? a.patients.first_name + ' ' + a.patients.last_name : '—';
-          const isNow      = a.status === 'In Session' || a.status === 'Checked In';
-          const isOverdue  = isToday && !isNow && a.status !== 'Completed' && a.status !== 'No-Show' && a.time && (() => {
-            const [h, m] = a.time.split(':').map(Number);
-            return (h * 60 + m) < nowMins;
-          })();
-          sl.className = 'day-slot booked';
-          sl.textContent = (a.time || '') + ' – ' + pName;
-          if (isNow)     sl.style.borderLeft = '3px solid var(--crimson)';
-          if (isOverdue) { sl.style.borderLeft = '3px solid #B45309'; sl.style.opacity = '0.7'; sl.title = 'Overdue'; sl.textContent += ' ⚠'; }
-          col.appendChild(sl);
-        });
-      }
+      col.appendChild(body);
       grid.appendChild(col);
     }
   }

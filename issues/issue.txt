@@ -1,1 +1,1 @@
-ON THE APOINTMENT MANAGEMENT IN THE ADMIN LOOK ITS SO CONFUSING TO SEE ALOT OF APOINTMENTS BY THE SAME PERSON ITS SO CONFUSINGWE NEED REDUCE THE CONFUSION WHAT CAN WE DO?
+1- in doctors portal my schedule the appointments are highlighted with red color which for god sake is looking so bad use ur frontend skill and improve it make it look good and if its the same person make it like the card in which 
