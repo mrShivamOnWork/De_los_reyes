@@ -182,7 +182,7 @@
     .sidebar-user {
       display: flex; align-items: center; gap: 12px;
       padding: 12px; border-radius: 8px;
-      margin-bottom: 6px;
+      margin-bottom: 6px; width: 100%;
     }
     .sidebar-avatar {
       width: 34px; height: 34px; border-radius: 50%;
@@ -472,10 +472,10 @@
       color: var(--green); margin-bottom: 5px;
     }
     .record-field-val {
-      font-size: 13px; color: var(--dark); line-height: 1.65;
-      background: var(--light); border-radius: 8px;
-      padding: 10px 14px;
-      border: 1px solid rgba(255,255,255,0.06);
+      font-size: 14px; color: var(--dark); line-height: 1.6;
+      background: rgba(255,255,255,0.02); border-radius: 8px;
+      padding: 12px 14px;
+      border: 1px solid rgba(255,255,255,0.08);
     }
     .record-print-btn {
       margin-left: auto; flex-shrink: 0;
@@ -903,7 +903,7 @@
     .record-reason { color: rgba(255,255,255,0.38); }
     .record-chevron { color: rgba(255,255,255,0.3); }
     .record-body { border-color: rgba(255,255,255,0.06); }
-    .record-field-val { background: rgba(255,255,255,0.02); color: rgba(255,255,255,0.78); border-color: rgba(255,255,255,0.06); }
+    .record-field-val { background: rgba(255,255,255,0.02); color: rgba(255,255,255,0.78); border-color: rgba(255,255,255,0.08); }
     .record-vital-chip { background: rgba(0,168,89,0.1); border-color: rgba(0,168,89,0.2); color: #34D399; }
 
     /* Empty states */
@@ -1146,9 +1146,9 @@
     <div class="sidebar-bottom">
       <div class="sidebar-user">
         <div class="sidebar-avatar" id="sidebarAvatar">JP</div>
-        <div>
-          <div class="sidebar-user-name" id="sidebarName">Juan Patient</div>
-          <div class="sidebar-user-role">Patient Account</div>
+        <div style="min-width:0;overflow:hidden;">
+          <div class="sidebar-user-name" id="sidebarName" style="overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">Juan Patient</div>
+          <div class="sidebar-user-role" style="overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">Patient Account</div>
         </div>
       </div>
       <a class="sidebar-nav a" style="display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:8px;font-family:'Montserrat',sans-serif;font-size:13px;font-weight:600;color:rgba(255,100,100,0.7);cursor:pointer;text-decoration:none;" onclick="doLogout()">
@@ -1934,9 +1934,8 @@
         : `<div class="record-doc-av" style="background:var(--green);display:flex;align-items:center;justify-content:center;font-family:'Montserrat',sans-serif;font-weight:700;font-size:13px;color:#fff;">${(doc?.first_name?.[0]||'D')+(doc?.last_name?.[0]||'')}</div>`;
 
       const field = (label, val) => {
-        const clean = (val || '').trim();
-        if (!clean || clean.length <= 1) return '';
-        return `<div class="record-field"><div class="record-field-label">${label}</div><div class="record-field-val">${clean}</div></div>`;
+        const display = (val == null || String(val).trim() === '') ? '—' : String(val).trim();
+        return `<div class="record-field"><div class="record-field-label">${label}</div><div class="record-field-val">${display}</div></div>`;
       };
 
       const vitals = r.vitals ? (() => {
