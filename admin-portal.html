@@ -697,9 +697,30 @@
 
     /* Clinic Floor — refit to dark page (no need for edge-to-edge bleed) */
     #view-clinicfloor.active { display:flex; flex-direction:column; margin:-28px -32px; height:calc(100vh - 65px); overflow:hidden; background:#0D1117; }
+
+    /* ── LOADING SCREEN ── */
+    #loadingScreen {
+      position: fixed; inset: 0; background: #1B232C;
+      display: flex; align-items: center; justify-content: center;
+      z-index: 99999; flex-direction: column; gap: 16px;
+    }
+    #loadingScreen.hidden { display: none; }
+    .loading-spinner {
+      width: 32px; height: 32px;
+      border: 3px solid rgba(0,168,89,0.2);
+      border-top-color: #00A859;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
   </style>
 </head>
 <body>
+
+<!-- ── LOADING SCREEN ── -->
+<div id="loadingScreen">
+  <div class="loading-spinner"></div>
+  <div style="font-family:'Montserrat',sans-serif;font-size:12px;font-weight:600;color:rgba(255,255,255,0.4);letter-spacing:0.1em;">LOADING...</div>
+</div>
 
 <!-- ── LOGIN ── -->
 <div class="auth-screen" id="loginScreen">
@@ -1532,13 +1553,13 @@
     }
   }
 
-  // Enforce auth wall on every page load — clear hash, hide app, show login
+  // On every page load: hide both app and login — loading screen covers while auth checks
   (function guardRoute() {
     const loginEl = document.getElementById('loginScreen');
     const appEl   = document.getElementById('adminApp');
     history.replaceState(null, '', window.location.pathname);
-    if (appEl)   appEl.style.display   = 'none';
-    if (loginEl) loginEl.style.display = 'flex';
+    if (appEl)   { appEl.style.display = 'none'; appEl.classList.remove('active'); }
+    if (loginEl) { loginEl.style.display = 'none'; loginEl.classList.add('hidden'); }
   })();
 
   function initAdminSession(profile) {
@@ -1557,7 +1578,10 @@
     if (cfDateEl) cfDateEl.textContent = liveDateShort;
     const checkinDateEl = document.getElementById('checkinDateLabel');
     if (checkinDateEl) checkinDateEl.textContent = liveDate;
+    document.getElementById('loadingScreen').classList.add('hidden');
     document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('loginScreen').classList.add('hidden');
+    document.getElementById('adminApp').style.display = 'flex';
     document.getElementById('adminApp').classList.add('active');
     showToast('Welcome, ' + name + '! Clinic dashboard loaded.');
     buildDynamicStats();
@@ -1627,20 +1651,17 @@
     renderGroupedPatients(filtered);
   }
 
-  function _fmtTime(t) {
-    if (!t) return '—';
-    const str   = String(t).trim();
-    const isPM  = /PM$/i.test(str);
-    const isAM  = /AM$/i.test(str);
-    const time  = str.replace(/\s*[AP]M\s*$/i, '').trim();
-    const parts = time.split(':');
-    if (parts.length < 2) return str;
-    let hr      = parseInt(parts[0], 10);
-    const min   = parts[1].substring(0, 2).padStart(2, '0');
-    if (isNaN(hr)) return str;
-    if (isPM && hr !== 12) hr += 12;
-    if (isAM && hr === 12) hr  = 0;
-    return (hr % 12 || 12) + ':' + min + (hr < 12 ? ' AM' : ' PM');
+  function _fmtTime(raw) {
+    if (!raw) return '—';
+    // Remove any existing AM/PM suffix first (clean slate)
+    let clean = String(raw).replace(/\s*(AM|PM)$/i, '').trim();
+    // Parse hours and minutes
+    let [h, m] = clean.split(':').map(Number);
+    if (isNaN(h) || isNaN(m)) return raw;
+    // Convert to 12-hour format
+    const suffix = h >= 12 ? 'PM' : 'AM';
+    h = h % 12 || 12;
+    return `${h}:${String(m).padStart(2, '0')} ${suffix}`;
   }
   function _fmtDate(ds) {
     if (!ds) return '—';
@@ -1684,7 +1705,7 @@
       const p = a.patients;
       const d = a.doctors;
       const dname   = d ? 'Dr. ' + d.first_name + ' ' + d.last_name : '—';
-      const apptMin = a.time ? (() => { const [h,m] = a.time.split(':').map(Number); return h*60+m; })() : 9999;
+      const apptMin = a.time ? (() => { const timeClean = String(a.time).replace(/\s*(AM|PM)$/i,'').trim(); const [h,m] = timeClean.split(':').map(Number); return h*60+m; })() : 9999;
       const isNow   = a.status === 'In Session' || a.status === 'Checked In';
       const isDone  = a.status === 'Completed'  || a.status === 'No-Show' || a.status === 'Cancelled';
       const isLate  = !isNow && !isDone && apptMin < nowMins;
@@ -1802,8 +1823,11 @@
     localStorage.removeItem('drd-role');
     localStorage.removeItem('drd-uid');
     await db.auth.signOut();
+    document.getElementById('adminApp').style.display = 'none';
     document.getElementById('adminApp').classList.remove('active');
     document.getElementById('loginScreen').style.display = 'flex';
+    document.getElementById('loginScreen').classList.remove('hidden');
+    history.replaceState(null, '', window.location.pathname);
   }
 
   // ── NAVIGATION ──────────────────────────────────────────────────────────
@@ -2432,7 +2456,7 @@
         rowClass   = 'cf-row-done';
       } else {
         // Not yet checked in — check if overdue
-        const apptMins = a.time ? (() => { const[h,m]=a.time.split(':').map(Number); return h*60+m; })() : 9999;
+        const apptMins = a.time ? (() => { const timeClean = String(a.time).replace(/\s*(AM|PM)$/i,'').trim(); const [h,m] = timeClean.split(':').map(Number); return h*60+m; })() : 9999;
         const isLate   = apptMins < nowMins;
         statusHtml = `<button class="btn btn-green btn-sm${isLate ? '" style="background:#B45309;' : '"'} onclick="cfCheckIn('${a.id}')">Check In${isLate ? ' ⚠' : ''}</button>`;
       }
@@ -3225,18 +3249,21 @@
   }
 
   // ── SUPABASE INIT + SESSION RESTORE ────────────────────────────────────
+  function _showLoginFromLoad() {
+    document.getElementById('loadingScreen').classList.add('hidden');
+    const loginBtn = document.getElementById('adminLoginBtn');
+    if (loginBtn) { loginBtn.disabled = false; loginBtn.textContent = 'Sign In'; }
+    document.getElementById('loginScreen').style.display = 'flex';
+    document.getElementById('loginScreen').classList.remove('hidden');
+  }
+
   const _sbScript = document.createElement('script');
   _sbScript.src = '/supabase-client.js';
   _sbScript.onload = () => {
-    // Enable the login button now that db is ready
-    const loginBtn = document.getElementById('adminLoginBtn');
-    if (loginBtn) { loginBtn.disabled = false; loginBtn.textContent = 'Sign In'; }
-
-    db.auth.onAuthStateChange(async (event, session) => {
-      if (event === 'INITIAL_SESSION' && session?.user) {
-        if (document.getElementById('adminApp').classList.contains('active')) return;
+    // Check session once on load — determines whether to show dashboard or login
+    db.auth.getSession().then(async ({ data: { session } }) => {
+      if (session?.user) {
         try {
-          // Check cache first so refresh works even if DB is slow
           const cachedUid  = localStorage.getItem('drd-uid');
           const cachedRole = localStorage.getItem('drd-role');
           let profile = null;
@@ -3248,10 +3275,24 @@
           if (role === 'admin') {
             if (!profile) profile = { first_name: '', last_name: '' };
             initAdminSession(profile);
-            const hash = location.hash.slice(1);
-            if (hash && viewTitles[hash]) showView(hash);
+          } else {
+            await db.auth.signOut();
+            _showLoginFromLoad();
           }
-        } catch(_) {}
+        } catch(_) { _showLoginFromLoad(); }
+      } else {
+        _showLoginFromLoad();
+      }
+    }).catch(() => { _showLoginFromLoad(); });
+
+    // Listen for sign-out events (handles logout from other tabs too)
+    db.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_OUT') {
+        document.getElementById('adminApp').style.display = 'none';
+        document.getElementById('adminApp').classList.remove('active');
+        document.getElementById('loginScreen').style.display = 'flex';
+        document.getElementById('loginScreen').classList.remove('hidden');
+        history.replaceState(null, '', window.location.pathname);
       }
     });
   };
