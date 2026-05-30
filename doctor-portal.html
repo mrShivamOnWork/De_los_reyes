@@ -1432,6 +1432,9 @@
   }
 
   async function doLogout() {
+    _docLoggingIn = false;
+    const lb = document.getElementById('docLoginBtn');
+    if (lb) { lb.disabled = false; lb.textContent = 'Sign In to Doctor Portal'; }
     await db.auth.signOut();
     sessionStorage.removeItem('doc-session-active');
     localStorage.removeItem('drd-role');

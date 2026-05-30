@@ -1822,6 +1822,9 @@
   async function doLogout() {
     localStorage.removeItem('drd-role');
     localStorage.removeItem('drd-uid');
+    _adminLoggingIn = false;
+    const lb = document.getElementById('adminLoginBtn');
+    if (lb) { lb.disabled = false; lb.textContent = 'Sign In'; }
     await db.auth.signOut();
     document.getElementById('adminApp').style.display = 'none';
     document.getElementById('adminApp').classList.remove('active');
@@ -3288,6 +3291,9 @@
     // Listen for sign-out events (handles logout from other tabs too)
     db.auth.onAuthStateChange((event, session) => {
       if (event === 'SIGNED_OUT') {
+        _adminLoggingIn = false;
+        const lb = document.getElementById('adminLoginBtn');
+        if (lb) { lb.disabled = false; lb.textContent = 'Sign In'; }
         document.getElementById('adminApp').style.display = 'none';
         document.getElementById('adminApp').classList.remove('active');
         document.getElementById('loginScreen').style.display = 'flex';

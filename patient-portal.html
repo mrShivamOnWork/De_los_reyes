@@ -2080,6 +2080,9 @@
     currentPatient = null;
     dbDoctors      = [];
     unreadCount    = 0;
+    _patLoggingIn = false;
+    const lb = document.getElementById('patientLoginBtn');
+    if (lb) { lb.disabled = false; lb.textContent = 'Sign In'; }
     try { await db.auth.signOut(); } catch(e) {}
     document.getElementById('patientApp').classList.remove('active');
     document.getElementById('registerScreen').style.display = 'none';
