@@ -1,0 +1,1 @@
+- [De Los Reyes Landing Page](project_delosreyes_landing.md) — Architecture, known tech debt, and ship-readiness context for index.html at first production launch

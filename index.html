@@ -30,6 +30,7 @@
       --r: 16px;
       --r-lg: 24px;
       --spring: cubic-bezier(0.22,1,0.36,1);
+      --bg-portal: #11161B;
     }
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -133,6 +134,16 @@
     .btn-outline-white:hover { border-color: #fff; color: #fff; background: rgba(255,255,255,0.07); }
     .btn-white { background: #fff; color: var(--crimson); box-shadow: 0 4px 20px rgba(0,0,0,0.2); }
     .btn-white:hover { box-shadow: 0 8px 32px rgba(0,0,0,0.3); }
+    .btn-crimson-outline {
+      background: transparent;
+      color: var(--crimson);
+      border-color: var(--crimson);
+    }
+    .btn-crimson-outline:hover {
+      background: rgba(211,26,34,0.08);
+      border-color: var(--crimson);
+      color: var(--crimson);
+    }
     .btn-lg { padding: 14px 32px; font-size: 15px; border-radius: 12px; }
 
     .hamburger {
@@ -557,25 +568,6 @@
     .testi-name { font-weight: 700; font-size: 13px; color: var(--text); }
     .testi-since { font-size: 11px; color: var(--text-s); }
 
-    /* ── CTA ── */
-    .cta-sec {
-      background: linear-gradient(135deg, #8A0D12 0%, var(--crimson) 50%, #A8141B 100%);
-      padding: 88px 6%; text-align: center; position: relative; overflow: hidden;
-    }
-    .cta-sec::before {
-      content: ''; position: absolute; inset: 0;
-      background: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.06'/%3E%3C/svg%3E");
-      background-size: 180px 180px; pointer-events: none;
-    }
-    .cta-orb-1 { position: absolute; width: 400px; height: 400px; top: -160px; right: -100px; border-radius: 50%; background: radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 65%); pointer-events: none; }
-    .cta-orb-2 { position: absolute; width: 280px; height: 280px; bottom: -110px; left: -60px; border-radius: 50%; background: radial-gradient(circle, rgba(255,255,255,0.06) 0%, transparent 65%); pointer-events: none; }
-    .cta-inner { position: relative; z-index: 1; }
-    .cta-eyebrow { font-size: 11px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(255,255,255,0.45); margin-bottom: 16px; display: block; }
-    .cta-h2 { font-family: 'Playfair Display', serif; font-weight: 700; font-size: clamp(28px, 3.8vw, 52px); color: #fff; line-height: 1.1; letter-spacing: -0.02em; margin-bottom: 14px; }
-    .cta-h2 em { font-style: italic; color: rgba(255,255,255,0.72); }
-    .cta-sub { font-size: 16px; color: rgba(255,255,255,0.62); line-height: 1.6; max-width: 500px; margin: 0 auto 36px; }
-    .cta-btns { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
-
     /* ── CONTACT ── */
     .contact-sec { background: var(--bg); }
     .contact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: start; }
@@ -683,6 +675,134 @@
       .hstat-val { font-size: 22px; }
     }
     @keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+
+    /* ── FAQ ── */
+    .faq-sec { background: var(--bg-2); }
+    .faq-list { display: flex; flex-direction: column; gap: 0; border: 1px solid var(--border); border-radius: var(--r-lg); overflow: hidden; }
+    .faq-item { border-bottom: 1px solid var(--border); }
+    .faq-item:last-child { border-bottom: none; }
+    .faq-trigger {
+      width: 100%; display: flex; align-items: center; justify-content: space-between;
+      gap: 16px; padding: 22px 28px; background: none; border: none; cursor: pointer;
+      text-align: left; color: var(--text); font-family: 'Figtree', sans-serif;
+      font-size: 15px; font-weight: 700; line-height: 1.4; letter-spacing: -0.01em;
+      transition: background 0.2s, color 0.2s;
+      min-height: 64px;
+    }
+    .faq-trigger:hover { background: rgba(255,255,255,0.04); }
+    .faq-trigger[aria-expanded="true"] { color: var(--green); background: rgba(0,168,89,0.05); }
+    .faq-chevron {
+      flex-shrink: 0; width: 20px; height: 20px; border-radius: 6px;
+      background: rgba(255,255,255,0.06); display: flex; align-items: center; justify-content: center;
+      transition: transform 0.3s var(--spring), background 0.2s;
+    }
+    .faq-chevron svg { width: 12px; height: 12px; stroke: var(--text-m); fill: none; stroke-width: 2.5; stroke-linecap: round; }
+    .faq-trigger[aria-expanded="true"] .faq-chevron { transform: rotate(180deg); background: rgba(0,168,89,0.14); }
+    .faq-trigger[aria-expanded="true"] .faq-chevron svg { stroke: var(--green); }
+    .faq-body {
+      max-height: 0; overflow: hidden;
+      transition: max-height 0.3s ease-out, padding 0.3s ease-out;
+    }
+    .faq-body.open { max-height: 800px; }
+    .faq-answer {
+      padding: 18px 28px 22px; font-size: 14px; color: var(--text-m);
+      line-height: 1.75; border-top: 1px solid var(--border);
+    }
+    @media (max-width: 768px) {
+      .faq-trigger { padding: 18px 20px; font-size: 14px; }
+      .faq-answer { padding: 16px 20px 18px; }
+    }
+
+    /* ── LOCATION + HOURS ── */
+    .location-sec { background: var(--bg); }
+    .location-grid {
+      display: grid; grid-template-columns: 3fr 2fr;
+      gap: 48px; align-items: start;
+    }
+    .map-wrap {
+      border-radius: var(--r-lg); overflow: hidden;
+      border: 1px solid var(--border-b);
+      box-shadow: 0 24px 60px rgba(0,0,0,0.4);
+      flex-shrink: 0;
+    }
+    .map-wrap iframe {
+      display: block; width: 100%; height: 420px;
+      border: none; filter: grayscale(40%) invert(0.92) hue-rotate(170deg) brightness(0.85);
+    }
+    .location-info { display: flex; flex-direction: column; gap: 28px; }
+    .loc-block { display: flex; gap: 16px; align-items: flex-start; }
+    .loc-ico {
+      width: 44px; height: 44px; border-radius: 12px; flex-shrink: 0;
+      background: rgba(0,168,89,0.1); border: 1px solid rgba(0,168,89,0.15);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .loc-ico svg { width: 18px; height: 18px; stroke: var(--green); fill: none; stroke-width: 1.8; stroke-linecap: round; }
+    .loc-lbl { font-size: 10px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: var(--text-s); margin-bottom: 4px; }
+    .loc-val { font-size: 14px; color: var(--text); font-weight: 500; line-height: 1.55; }
+    .loc-val a { color: var(--text); text-decoration: none; transition: color 0.2s; }
+    .loc-val a:hover { color: var(--green); }
+    .hours-table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+    .hours-table tr { border-bottom: 1px solid var(--border); }
+    .hours-table tr:last-child { border-bottom: none; }
+    .hours-table td { padding: 9px 0; font-size: 13px; color: var(--text-m); }
+    .hours-table td:first-child { color: var(--text); font-weight: 600; padding-right: 20px; }
+    .hours-table tr.today td { color: var(--green); }
+    .btn-directions {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 11px 22px; border-radius: 10px;
+      background: rgba(0,168,89,0.1); border: 1px solid rgba(0,168,89,0.22);
+      color: var(--green); font-family: 'Figtree', sans-serif;
+      font-weight: 700; font-size: 13px; text-decoration: none;
+      transition: background 0.2s, border-color 0.2s, transform 0.15s var(--spring);
+      min-height: 44px;
+    }
+    .btn-directions:hover { background: rgba(0,168,89,0.18); border-color: rgba(0,168,89,0.4); transform: translateY(-1px); }
+    .btn-directions svg { width: 15px; height: 15px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; }
+    @media (max-width: 768px) {
+      .location-grid { grid-template-columns: 1fr; gap: 32px; }
+      .map-wrap iframe { height: 300px; }
+    }
+
+    /* ── PATIENT PORTAL CTA ── */
+    .portal-sec {
+      background: var(--bg-portal);
+      position: relative; overflow: hidden;
+    }
+    .portal-sec::before {
+      content: ''; position: absolute; top: -200px; right: -200px;
+      width: 600px; height: 600px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(0,168,89,0.07) 0%, transparent 65%);
+      pointer-events: none;
+    }
+    .portal-inner { position: relative; z-index: 1; text-align: center; }
+    .portal-h2 {
+      font-family: 'Playfair Display', serif; font-weight: 700;
+      font-size: clamp(28px, 3.5vw, 48px); color: #fff;
+      line-height: 1.08; letter-spacing: -0.02em; margin-bottom: 14px;
+    }
+    .portal-h2 em { font-style: italic; color: var(--green); }
+    .portal-sub { font-size: 16px; color: var(--text-m); line-height: 1.7; max-width: 480px; margin: 0 auto 52px; }
+    .portal-cards { display: grid; grid-template-columns: repeat(3,1fr); gap: 20px; margin-bottom: 48px; }
+    .portal-card {
+      background: rgba(255,255,255,0.04); border: 1px solid var(--border-b);
+      border-radius: var(--r); padding: 28px 24px; text-align: left;
+      transition: background 0.2s, border-color 0.2s, transform 0.2s var(--spring);
+    }
+    .portal-card:hover { background: rgba(255,255,255,0.07); border-color: rgba(0,168,89,0.22); transform: translateY(-3px); }
+    .portal-card-ico {
+      width: 48px; height: 48px; border-radius: 12px;
+      background: rgba(0,168,89,0.12); border: 1px solid rgba(0,168,89,0.2);
+      display: flex; align-items: center; justify-content: center; margin-bottom: 16px;
+    }
+    .portal-card-ico svg { width: 22px; height: 22px; stroke: var(--green); fill: none; stroke-width: 1.8; stroke-linecap: round; }
+    .portal-card-title { font-weight: 800; font-size: 15px; color: #fff; margin-bottom: 8px; letter-spacing: -0.01em; }
+    .portal-card-desc { font-size: 13px; color: var(--text-m); line-height: 1.6; }
+    .portal-btns { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+    @media (max-width: 768px) {
+      .portal-cards { grid-template-columns: 1fr; }
+      .portal-btns { flex-direction: column; align-items: center; }
+      .portal-btns .btn { width: 100%; max-width: 340px; justify-content: center; }
+    }
   </style>
 </head>
 <body>
@@ -703,6 +823,8 @@
       <li><a href="#services">Services</a></li>
       <li><a href="#doctors">Doctors</a></li>
       <li><a href="#how-it-works">How It Works</a></li>
+      <li><a href="#faq">FAQ</a></li>
+      <li><a href="#location">Location</a></li>
       <li><a href="#contact">Contact</a></li>
     </ul>
     <div class="nav-actions">
@@ -722,6 +844,8 @@
   <a href="#services" onclick="closeNav()">Services</a>
   <a href="#doctors" onclick="closeNav()">Our Doctors</a>
   <a href="#how-it-works" onclick="closeNav()">How It Works</a>
+  <a href="#faq" onclick="closeNav()">FAQ</a>
+  <a href="#location" onclick="closeNav()">Location</a>
   <a href="#contact" onclick="closeNav()">Contact</a>
   <a href="patient-portal.html" onclick="closeNav()">Patient Login</a>
   <a href="patient-portal.html" class="acc" onclick="closeNav()">Book Appointment →</a>
@@ -1005,20 +1129,217 @@
   </div>
 </section>
 
-<!-- ── CTA ── -->
-<div class="cta-sec" role="complementary" aria-label="Call to action">
-  <div class="cta-orb-1" aria-hidden="true"></div>
-  <div class="cta-orb-2" aria-hidden="true"></div>
-  <div class="cta-inner container">
-    <span class="cta-eyebrow">Start Today</span>
-    <h2 class="cta-h2">"Professional Care<br><em>You Can Trust"</em></h2>
-    <p class="cta-sub">Join thousands of families who have chosen De Los Reyes Doctors as their trusted healthcare partner.</p>
-    <div class="cta-btns">
-      <a href="patient-portal.html" class="btn btn-white btn-lg">Book an Appointment</a>
-      <a href="#contact" class="btn btn-outline-white btn-lg">Contact Us</a>
+<!-- ── FAQ ── -->
+<section class="faq-sec" id="faq">
+  <div class="container">
+    <div class="section-head fade-up" style="text-align:center;">
+      <div class="eyebrow" style="justify-content:center;">Got Questions?</div>
+      <h2 class="section-h2" style="text-align:center;">Frequently Asked <em>Questions</em></h2>
+      <p class="section-lead" style="margin:0 auto;text-align:center;">Everything you need to know before your visit.</p>
+    </div>
+    <div class="faq-list">
+
+      <div class="faq-item">
+        <h3 style="margin:0;"><button class="faq-trigger" aria-expanded="false" aria-controls="faq-a1" id="faq-q1">
+          How do I book an appointment?
+          <span class="faq-chevron" aria-hidden="true"><svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></span>
+        </button></h3>
+        <div class="faq-body" id="faq-a1" role="region" aria-labelledby="faq-q1">
+          <div class="faq-answer">You can book online through our Patient Portal at any time, or call us during clinic hours and our staff will assist you. Online booking is available 24/7 and confirms your slot instantly.</div>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <h3 style="margin:0;"><button class="faq-trigger" aria-expanded="false" aria-controls="faq-a2" id="faq-q2">
+          Can I book for a family member or child?
+          <span class="faq-chevron" aria-hidden="true"><svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></span>
+        </button></h3>
+        <div class="faq-body" id="faq-a2" role="region" aria-labelledby="faq-q2">
+          <div class="faq-answer">Yes. When logged into the Patient Portal, you can add dependents to your account and book on their behalf. Walk-ins for minors accompanied by a guardian are also accepted during clinic hours.</div>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <h3 style="margin:0;"><button class="faq-trigger" aria-expanded="false" aria-controls="faq-a3" id="faq-q3">
+          How early should I arrive for my appointment?
+          <span class="faq-chevron" aria-hidden="true"><svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></span>
+        </button></h3>
+        <div class="faq-body" id="faq-a3" role="region" aria-labelledby="faq-q3">
+          <div class="faq-answer">Please arrive 10 to 15 minutes before your scheduled time to check in and complete any required forms before your consultation.</div>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <h3 style="margin:0;"><button class="faq-trigger" aria-expanded="false" aria-controls="faq-a4" id="faq-q4">
+          Can I cancel or reschedule my appointment?
+          <span class="faq-chevron" aria-hidden="true"><svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></span>
+        </button></h3>
+        <div class="faq-body" id="faq-a4" role="region" aria-labelledby="faq-q4">
+          <div class="faq-answer">Yes. You can cancel or reschedule through the Patient Portal up to 2 hours before your appointment. For same-day changes, please call us directly so we can offer the slot to another patient.</div>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <h3 style="margin:0;"><button class="faq-trigger" aria-expanded="false" aria-controls="faq-a5" id="faq-q5">
+          Do I need a referral to see a specialist?
+          <span class="faq-chevron" aria-hidden="true"><svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></span>
+        </button></h3>
+        <div class="faq-body" id="faq-a5" role="region" aria-labelledby="faq-q5">
+          <div class="faq-answer">A referral is not required for most specialist consultations at our clinic. However, some HMO plans require one for reimbursement — please check with your insurer before your visit.</div>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <h3 style="margin:0;"><button class="faq-trigger" aria-expanded="false" aria-controls="faq-a6" id="faq-q6">
+          What should I bring to my first appointment?
+          <span class="faq-chevron" aria-hidden="true"><svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></span>
+        </button></h3>
+        <div class="faq-body" id="faq-a6" role="region" aria-labelledby="faq-q6">
+          <div class="faq-answer">Bring a valid government-issued ID, your PhilHealth or HMO card if applicable, and any recent lab results or medical records relevant to your concern. Returning patients' records are already in our system.</div>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <h3 style="margin:0;"><button class="faq-trigger" aria-expanded="false" aria-controls="faq-a7" id="faq-q7">
+          Do you accept HMO or PhilHealth?
+          <span class="faq-chevron" aria-hidden="true"><svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></span>
+        </button></h3>
+        <div class="faq-body" id="faq-a7" role="region" aria-labelledby="faq-q7">
+          <div class="faq-answer">Yes, we accept PhilHealth and select HMOs. Please contact us to confirm your plan is accredited before booking. Cash payment is also accepted.</div>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <h3 style="margin:0;"><button class="faq-trigger" aria-expanded="false" aria-controls="faq-a8" id="faq-q8">
+          Is a general consultation required before seeing a specialist?
+          <span class="faq-chevron" aria-hidden="true"><svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></span>
+        </button></h3>
+        <div class="faq-body" id="faq-a8" role="region" aria-labelledby="faq-q8">
+          <div class="faq-answer">Not necessarily. If you know which specialist you need, you can book directly. If you are unsure, a General Consultation is a good starting point and our doctor will refer you to the right specialist.</div>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <h3 style="margin:0;"><button class="faq-trigger" aria-expanded="false" aria-controls="faq-a9" id="faq-q9">
+          Where is the clinic located and where can I park?
+          <span class="faq-chevron" aria-hidden="true"><svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></span>
+        </button></h3>
+        <div class="faq-body" id="faq-a9" role="region" aria-labelledby="faq-q9">
+          <div class="faq-answer">The clinic is located at 123 Rizal Avenue, Sta. Mesa, Manila. See the Location section on this page for an interactive map and directions. Street parking is available nearby.</div>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <h3 style="margin:0;"><button class="faq-trigger" aria-expanded="false" aria-controls="faq-a10" id="faq-q10">
+          What are your clinic hours?
+          <span class="faq-chevron" aria-hidden="true"><svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></span>
+        </button></h3>
+        <div class="faq-body" id="faq-a10" role="region" aria-labelledby="faq-q10">
+          <div class="faq-answer">Our clinic is open Monday to Friday from 8:00 AM to 6:00 PM, and Saturday from 8:00 AM to 12:00 PM. We are closed on Sundays and public holidays. See the Location + Hours section below for the full schedule.</div>
+        </div>
+      </div>
+
     </div>
   </div>
-</div>
+</section>
+
+<!-- ── LOCATION + HOURS ── -->
+<section class="location-sec" id="location">
+  <div class="container">
+    <div class="section-head fade-up" style="text-align:center;">
+      <div class="eyebrow" style="justify-content:center;">Find Us</div>
+      <h2 class="section-h2" style="text-align:center;">Visit Us In <em>Person</em></h2>
+      <p class="section-lead" style="margin:0 auto;text-align:center;">We're here when you need us. Plan your visit with our map and hours below.</p>
+    </div>
+    <div class="location-grid">
+      <div class="map-wrap fade-up">
+        <iframe
+          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3861.5!2d121.0!3d14.6!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3397b7d6e77e6d4d%3A0x0!2sSta.+Mesa%2C+Manila%2C+Philippines!5e0!3m2!1sen!2sph!4v1"
+          sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox"
+          allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"
+          title="De Los Reyes Doctors Clinic location map">
+        </iframe>
+      </div>
+      <div class="location-info fade-up">
+        <div class="loc-block">
+          <div class="loc-ico"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></div>
+          <div>
+            <div class="loc-lbl">Address</div>
+            <div class="loc-val">
+              <a href="https://maps.google.com/?q=Sta.+Mesa+Manila+Philippines" target="_blank" rel="noopener noreferrer">
+                123 Rizal Avenue, Sta. Mesa<br>Manila 1016, Philippines
+              </a>
+            </div>
+          </div>
+        </div>
+        <div class="loc-block">
+          <div class="loc-ico"><svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 1.18h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L7.91 9a16 16 0 0 0 6 6l1.18-1.18a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg></div>
+          <div>
+            <div class="loc-lbl">Phone</div>
+            <div class="loc-val"><a href="tel:+63281234567">(02) 8123-4567</a><br><a href="tel:+639171234567">0917-123-4567</a></div>
+          </div>
+        </div>
+        <div class="loc-block">
+          <div class="loc-ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+          <div>
+            <div class="loc-lbl">Clinic Hours</div>
+            <table class="hours-table" aria-label="Clinic operating hours">
+              <tr><td>Monday – Friday</td><td>8:00 AM – 6:00 PM</td></tr>
+              <tr><td>Saturday</td><td>8:00 AM – 12:00 PM</td></tr>
+              <tr><td>Sunday</td><td>Closed</td></tr>
+              <tr><td>Public Holidays</td><td>Closed</td></tr>
+            </table>
+          </div>
+        </div>
+        <a href="https://maps.google.com/?q=Sta.+Mesa+Manila+Philippines" target="_blank" rel="noopener noreferrer" class="btn-directions">
+          <svg viewBox="0 0 24 24"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
+          Get Directions
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── PATIENT PORTAL CTA ── -->
+<section class="portal-sec" id="portal">
+  <div class="container">
+    <div class="portal-inner fade-up">
+      <div class="eyebrow" style="justify-content:center;margin-bottom:16px;">Patient Portal</div>
+      <h2 class="portal-h2">Your Health,<br><em>At Your Fingertips</em></h2>
+      <p class="portal-sub">Create a free account to manage your care from anywhere — no waiting on hold, no paperwork to repeat.</p>
+      <div class="portal-cards">
+        <div class="portal-card fade-up">
+          <div class="portal-card-ico">
+            <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          </div>
+          <div class="portal-card-title">Book Appointments Online</div>
+          <div class="portal-card-desc">Choose your doctor, pick a time, and confirm in under 2 minutes — any time, any day.</div>
+        </div>
+        <div class="portal-card fade-up">
+          <div class="portal-card-ico">
+            <svg viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+          </div>
+          <div class="portal-card-title">Track Your Queue Live</div>
+          <div class="portal-card-desc">See your real-time position in the queue so you know exactly when to arrive. No more waiting blindly.</div>
+        </div>
+        <div class="portal-card fade-up">
+          <div class="portal-card-ico">
+            <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="11" x2="12" y2="17"/><line x1="9" y1="14" x2="15" y2="14"/></svg>
+          </div>
+          <div class="portal-card-title">Access Your Medical Records</div>
+          <div class="portal-card-desc">View consultation history, lab results, and prescriptions anytime — all in one secure place.</div>
+        </div>
+      </div>
+      <div class="portal-btns">
+        <a href="patient-portal.html" class="btn btn-green btn-lg">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
+          Create Free Account
+        </a>
+        <a href="patient-portal.html" class="btn btn-crimson-outline btn-lg">Log In</a>
+      </div>
+    </div>
+  </div>
+</section>
 
 <!-- ── CONTACT ── -->
 <section class="contact-sec" id="contact">
@@ -1031,7 +1352,7 @@
       <div>
         <div class="cinfo-item fade-up">
           <div class="cinfo-ico"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></div>
-          <div><div class="cinfo-lbl">Address</div><div class="cinfo-val">123 Reyes Street, Barangay San Jose<br>Quezon City, Metro Manila</div></div>
+          <div><div class="cinfo-lbl">Address</div><div class="cinfo-val">123 Rizal Avenue, Sta. Mesa<br>Manila 1016, Philippines</div></div>
         </div>
         <div class="cinfo-item fade-up">
           <div class="cinfo-ico"><svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 1.18h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L7.91 9a16 16 0 0 0 6 6l1.18-1.18a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg></div>
@@ -1039,7 +1360,7 @@
         </div>
         <div class="cinfo-item fade-up">
           <div class="cinfo-ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
-          <div><div class="cinfo-lbl">Clinic Hours</div><div class="cinfo-val">Mon – Sat: 8:00 AM – 6:00 PM<br>Sunday: 9:00 AM – 1:00 PM</div></div>
+          <div><div class="cinfo-lbl">Clinic Hours</div><div class="cinfo-val">Mon – Fri: 8:00 AM – 6:00 PM<br>Saturday: 8:00 AM – 12:00 PM<br>Sunday &amp; Holidays: Closed</div></div>
         </div>
         <div class="cinfo-item fade-up">
           <div class="cinfo-ico"><svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div>
@@ -1117,7 +1438,7 @@
       </div>
     </div>
     <div class="footer-bottom">
-      <p class="footer-copy">© 2024 De Los Reyes Doctors Clinic. All rights reserved.</p>
+      <p class="footer-copy" id="footerCopy">© 2026 De Los Reyes Doctors Clinic. All rights reserved.</p>
       <span class="footer-slogan">"Professional Care You Can Trust"</span>
     </div>
   </div>
@@ -1182,10 +1503,38 @@
   /* ── CONTACT ── */
   function submitContact() {
     const name = document.getElementById('c-name').value.trim();
+    const email = document.getElementById('c-email').value.trim();
     if (!name) { alert('Please enter your name.'); return; }
-    alert(`Thank you, ${name}! We'll get back to you within 24 hours.`);
+    if (!email || !email.includes('@')) { alert('Please enter a valid email address.'); return; }
+    alert('Thank you, ' + name + '! We\'ll get back to you within 24 hours.');
     ['c-name','c-email','c-subj','c-msg'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
   }
+
+  /* ── FAQ ACCORDION ── */
+  (function() {
+    const items = document.querySelectorAll('.faq-trigger');
+    function closeAll() {
+      items.forEach(t => {
+        t.setAttribute('aria-expanded', 'false');
+        const body = document.getElementById(t.getAttribute('aria-controls'));
+        if (body) body.classList.remove('open');
+      });
+    }
+    items.forEach(trigger => {
+      trigger.addEventListener('click', () => {
+        const expanded = trigger.getAttribute('aria-expanded') === 'true';
+        closeAll();
+        if (!expanded) {
+          trigger.setAttribute('aria-expanded', 'true');
+          const body = document.getElementById(trigger.getAttribute('aria-controls'));
+          if (body) body.classList.add('open');
+        }
+      });
+      trigger.addEventListener('keydown', e => {
+        if (e.key === 'Escape') closeAll();
+      });
+    });
+  })();
 
   /* ── ECG HEARTBEAT CANVAS ── */
   (function() {
@@ -1253,15 +1602,25 @@
   if (!grid) return;
 
   const FALLBACK = [
-    { initials:'AS', bg:'var(--green)', spec:'Pediatrics', name:'Dr. Alejandro Santos', bio:'Board-certified pediatrician with 12 years of experience in child health, growth development, and newborn care.', sched:'Mon–Fri · 9:00 AM – 5:00 PM', svc:'Pediatric%20Care' },
-    { initials:'MS', bg:'#2563EB', spec:'Internal Medicine', name:'Dr. Maria C. Santos', bio:'Specialist in internal medicine and chronic disease management, focused on preventive care and patient education.', sched:'Mon–Sat · 8:00 AM – 4:00 PM', svc:'General%20Consultation' },
+    { initials:'AS', bg:'var(--green)', spec:'Pediatrics', name:'Dr. Alejandro Santos', bio:'Board-certified pediatrician with 12 years of experience in child health, growth development, and newborn care.', sched:'Mon–Fri · 9:00 AM – 5:00 PM', svc:'Pediatric Care' },
+    { initials:'MS', bg:'#2563EB', spec:'Internal Medicine', name:'Dr. Maria C. Santos', bio:'Specialist in internal medicine and chronic disease management, focused on preventive care and patient education.', sched:'Mon–Sat · 8:00 AM – 4:00 PM', svc:'General Consultation' },
     { initials:'AR', bg:'#7C3AED', spec:'OB-Gynecology', name:'Dr. Ana P. Reyes', bio:'OB-GYN specialist with extensive experience in maternal health, prenatal care, and comprehensive women\'s wellness.', sched:'Tue, Thu, Sat · 10:00 AM – 6:00 PM', svc:'OB-Gynecology' },
   ];
 
+  function esc(str) {
+    if (!str) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#x27;');
+  }
+
   function card(p) {
     const photoEl = p.photo
-      ? `<img src="${p.photo}" alt="${p.name}" loading="lazy">`
-      : `<div class="doc-initials">${p.initials}</div>`;
+      ? `<img src="${esc(p.photo)}" alt="${esc(p.name)}" loading="lazy">`
+      : `<div class="doc-initials">${esc(p.initials)}</div>`;
     return `<div class="doc-card fade-up">
       <div class="doc-photo">
         ${photoEl}
@@ -1269,14 +1628,14 @@
         <div class="doc-status avail"><span class="doc-sdot"></span>Available</div>
       </div>
       <div class="doc-body">
-        <div class="doc-spec">${p.spec}</div>
-        <div class="doc-name">${p.name}</div>
-        <div class="doc-bio">${p.bio}</div>
+        <div class="doc-spec">${esc(p.spec)}</div>
+        <div class="doc-name">${esc(p.name)}</div>
+        <div class="doc-bio">${esc(p.bio)}</div>
         <div class="doc-sched">
           <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-          ${p.sched}
+          ${esc(p.sched)}
         </div>
-        <a href="patient-portal.html?service=${p.svc}" class="doc-book">Book Appointment</a>
+        <a href="patient-portal.html?service=${encodeURIComponent(p.svc || '')}" class="doc-book">Book Appointment</a>
       </div>
     </div>`;
   }
@@ -1297,7 +1656,7 @@
       name: 'Dr. ' + d.first_name + ' ' + d.last_name,
       bio: d.bio || 'Board-certified physician at De Los Reyes Doctors Clinic.',
       sched: [d.work_days, d.work_hours].filter(Boolean).join(' · ') || 'Contact clinic for schedule',
-      svc: encodeURIComponent(d.specialty || 'General Consultation'),
+      svc: d.specialty || 'General Consultation',
     })));
   } catch(_) { render(FALLBACK); }
 })();

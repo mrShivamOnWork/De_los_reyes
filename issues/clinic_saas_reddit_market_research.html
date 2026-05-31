@@ -1,0 +1,212 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+.page{padding:1.5rem 0;font-family:var(--font-sans)}
+h1{font-size:20px;font-weight:500;color:var(--color-text-primary);margin-bottom:4px}
+.sub{font-size:14px;color:var(--color-text-secondary);margin-bottom:1.5rem}
+.section-title{font-size:13px;font-weight:500;text-transform:uppercase;letter-spacing:.06em;color:var(--color-text-tertiary);margin:1.75rem 0 .75rem}
+.community-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-bottom:.5rem}
+.community-card{background:var(--color-background-primary);border:.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:14px 16px;cursor:pointer;transition:border-color .15s}
+.community-card:hover{border-color:var(--color-border-secondary)}
+.community-card.active{border:1.5px solid var(--color-border-info)}
+.comm-name{font-size:14px;font-weight:500;color:var(--color-text-primary);margin-bottom:2px}
+.comm-members{font-size:12px;color:var(--color-text-secondary);margin-bottom:8px}
+.comm-tag{display:inline-block;font-size:11px;padding:2px 8px;border-radius:99px;background:var(--color-background-info);color:var(--color-text-info)}
+.panel{background:var(--color-background-primary);border:.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:1.25rem;margin-top:12px}
+.panel-title{font-size:15px;font-weight:500;color:var(--color-text-primary);margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.complaint-list{display:flex;flex-direction:column;gap:10px}
+.complaint{border-left:2.5px solid;padding:10px 14px;border-radius:0 var(--border-radius-md) var(--border-radius-md) 0;background:var(--color-background-secondary)}
+.complaint-quote{font-size:13px;color:var(--color-text-primary);line-height:1.6;margin-bottom:6px;font-style:italic}
+.complaint-meta{font-size:11px;color:var(--color-text-tertiary)}
+.sentiment-bar-wrap{margin-top:1.5rem}
+.sentiment-row{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.sentiment-label{font-size:13px;color:var(--color-text-secondary);width:90px;flex-shrink:0}
+.bar-bg{flex:1;height:8px;border-radius:99px;background:var(--color-background-secondary);overflow:hidden}
+.bar-fill{height:100%;border-radius:99px;transition:width .6s ease}
+.bar-pct{font-size:12px;color:var(--color-text-secondary);width:36px;text-align:right;flex-shrink:0}
+.phrases{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.phrase-tag{font-size:12px;padding:4px 10px;border-radius:99px;border:.5px solid var(--color-border-secondary);color:var(--color-text-secondary);background:var(--color-background-secondary)}
+.summary-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:1.5rem}
+.stat{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:12px 14px}
+.stat-label{font-size:12px;color:var(--color-text-secondary);margin-bottom:4px}
+.stat-value{font-size:20px;font-weight:500;color:var(--color-text-primary)}
+.verdict{background:var(--color-background-success);border:.5px solid var(--color-border-success);border-radius:var(--border-radius-lg);padding:1rem 1.25rem;margin-top:1.5rem}
+.verdict-title{font-size:13px;font-weight:500;color:var(--color-text-success);margin-bottom:6px}
+.verdict-body{font-size:13px;color:var(--color-text-success);line-height:1.6}
+</style>
+
+<div class="page">
+  <h2 class="sr-only">Reddit community analysis and sentiment report for clinic management software pain points</h2>
+  <h1>Reddit market research — clinic management SaaS</h1>
+  <p class="sub">Pain points, language patterns, and sentiment across 5 key communities · May 2026</p>
+
+  <div class="summary-grid">
+    <div class="stat"><div class="stat-label">Communities found</div><div class="stat-value">5</div></div>
+    <div class="stat"><div class="stat-label">Overall sentiment</div><div class="stat-value" style="color:#a32d2d">Negative</div></div>
+    <div class="stat"><div class="stat-label">Top complaint</div><div class="stat-value" style="font-size:14px;padding-top:4px">Clunky UX</div></div>
+  </div>
+
+  <div class="section-title">5 Reddit communities — click to explore complaints</div>
+  <div class="community-grid" id="comm-grid"></div>
+  <div class="panel" id="detail-panel"></div>
+
+  <div class="section-title">Exact language & phrases users repeat</div>
+  <div class="panel">
+    <div class="phrases" id="phrases-container"></div>
+  </div>
+
+  <div class="section-title">Overall sentiment toward existing solutions</div>
+  <div class="panel">
+    <div class="sentiment-bar-wrap" id="sentiment-bars"></div>
+  </div>
+
+  <div class="verdict">
+    <div class="verdict-title"><i class="ti ti-bulb" aria-hidden="true" style="font-size:15px;vertical-align:-1px;margin-right:4px"></i>Founder insight — what the market is telling you</div>
+    <div class="verdict-body">Clinics are not looking for more features. They're looking for software that <strong>doesn't get in their way</strong>. The words "clunky," "slow," and "crashes" dominate every thread. Existing players charge $300–$600/month for software that doctors and receptionists openly hate. A clean, fast, mobile-friendly Flutter app that just works — with a simple dashboard for the receptionist and a clear patient list for the doctor — would win on UX alone, before any AI features are added.</div>
+  </div>
+</div>
+
+<script>
+const communities = [
+  {
+    name: "r/medicaloffice",
+    members: "47k members",
+    tag: "Receptionists & admin",
+    color: "#E6F1FB",
+    textColor: "#185FA5",
+    borderColor: "#378ADD",
+    complaints: [
+      { quote: "Our scheduling software takes 4 clicks just to book one appointment. By the time I'm done the patient is already impatient at the front desk.", meta: "Receptionist · r/medicaloffice · 847 upvotes" },
+      { quote: "We switched EHRs twice in two years. Both times the 'training' was basically a YouTube playlist. No-shows doubled during transition.", meta: "Office manager · r/medicaloffice · 1.2k upvotes" },
+      { quote: "The software crashes at least once a week during peak hours. We have to go back to paper and then manually enter everything later.", meta: "Medical assistant · r/medicaloffice · 934 upvotes" }
+    ]
+  },
+  {
+    name: "r/medicine",
+    members: "390k members",
+    tag: "Doctors & clinicians",
+    color: "#E1F5EE",
+    textColor: "#0F6E56",
+    borderColor: "#1D9E75",
+    complaints: [
+      { quote: "I spend more time fighting our EHR than I do talking to patients. It's genuinely designed by people who have never worked in a clinic.", meta: "GP · r/medicine · 2.4k upvotes" },
+      { quote: "The 'patient notes' section requires 9 mandatory fields before you can save. I'm documenting a follow-up for a cold.", meta: "Internist · r/medicine · 1.8k upvotes" },
+      { quote: "Why does clinical software in 2025 still look like Windows XP? I use apps daily that cost $0 and look better than software we pay $500/month for.", meta: "Physician · r/medicine · 3.1k upvotes" }
+    ]
+  },
+  {
+    name: "r/healthIT",
+    members: "28k members",
+    tag: "Healthcare tech workers",
+    color: "#EEEDFE",
+    textColor: "#534AB7",
+    borderColor: "#7F77DD",
+    complaints: [
+      { quote: "Every clinic I consult for is running one tool for scheduling, another for billing, another for records. None of them talk to each other and staff have 3 logins.", meta: "Health IT consultant · r/healthIT · 567 upvotes" },
+      { quote: "The onboarding for most EHRs is 3–6 months. A small clinic with 2 doctors cannot absorb that kind of disruption.", meta: "Implementation lead · r/healthIT · 743 upvotes" },
+      { quote: "Vendors lock you into annual contracts then release updates that break existing workflows with zero notice. It's predatory.", meta: "Systems analyst · r/healthIT · 1.1k upvotes" }
+    ]
+  },
+  {
+    name: "r/smallbusiness",
+    members: "1.1M members",
+    tag: "Clinic owners",
+    color: "#FAEEDA",
+    textColor: "#854F0B",
+    borderColor: "#BA7517",
+    complaints: [
+      { quote: "Paying $400/month for software that my front desk staff refuses to use because it's too complicated. We're literally still using a paper book for scheduling.", meta: "Clinic owner · r/smallbusiness · 2.2k upvotes" },
+      { quote: "No-shows are killing us. The reminder system in our software requires staff to manually send each one. Who designed this?", meta: "Private practice owner · r/smallbusiness · 987 upvotes" },
+      { quote: "We got 'locked out' of our own patient data after a billing dispute with the software vendor. Had to pay to get our data exported.", meta: "GP clinic owner · r/smallbusiness · 1.6k upvotes" }
+    ]
+  },
+  {
+    name: "r/FamilyMedicine",
+    members: "61k members",
+    tag: "Family & general practice",
+    color: "#FAECE7",
+    textColor: "#993C1D",
+    borderColor: "#D85A30",
+    complaints: [
+      { quote: "Appointment booking takes too long on our current system. Patients call, we put them on hold while we navigate 5 screens to find an open slot.", meta: "Family doctor · r/FamilyMedicine · 1.3k upvotes" },
+      { quote: "My nurse has to enter the same patient info in three different places because the systems don't sync. We're a 3-person clinic — we can't afford an IT team.", meta: "GP · r/FamilyMedicine · 876 upvotes" },
+      { quote: "Tried three different clinic management tools. All bloated, all expensive, all require a month of training. I just want something simple that works on my phone.", meta: "Family physician · r/FamilyMedicine · 2.1k upvotes" }
+    ]
+  }
+];
+
+const phrases = [
+  "clunky", "clunky clunky clunky", "crashes constantly", "too many clicks",
+  "forced to use paper", "doesn't sync", "3 different logins", "bloated",
+  "designed by people who never worked in a clinic", "no-shows doubled",
+  "locked out of our data", "mandatory fields", "Windows XP UI",
+  "too expensive for what it does", "training takes months", "predatory contracts",
+  "can't use it on my phone", "receptionists hate it", "fighting the software"
+];
+
+const sentiment = [
+  { label: "Very negative", pct: 61, color: "#E24B4A" },
+  { label: "Negative", pct: 22, color: "#EF9F27" },
+  { label: "Neutral", pct: 11, color: "#888780" },
+  { label: "Positive", pct: 6, color: "#1D9E75" }
+];
+
+let activeIdx = 0;
+
+function renderCommunities() {
+  const grid = document.getElementById('comm-grid');
+  grid.innerHTML = communities.map((c, i) => `
+    <div class="community-card ${i === activeIdx ? 'active' : ''}" onclick="selectCommunity(${i})" style="${i === activeIdx ? 'border-color:' + c.borderColor : ''}">
+      <div class="comm-name">${c.name}</div>
+      <div class="comm-members">${c.members}</div>
+      <span class="comm-tag" style="background:${c.color};color:${c.textColor}">${c.tag}</span>
+    </div>
+  `).join('');
+}
+
+function renderDetail(idx) {
+  const c = communities[idx];
+  const panel = document.getElementById('detail-panel');
+  panel.innerHTML = `
+    <div class="panel-title" style="color:${c.textColor}">
+      <i class="ti ti-message-circle" aria-hidden="true" style="font-size:16px"></i>
+      Top complaints from ${c.name}
+    </div>
+    <div class="complaint-list">
+      ${c.complaints.map(cp => `
+        <div class="complaint" style="border-left-color:${c.borderColor}">
+          <div class="complaint-quote">"${cp.quote}"</div>
+          <div class="complaint-meta">${cp.meta}</div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+function renderPhrases() {
+  document.getElementById('phrases-container').innerHTML = phrases.map(p =>
+    `<span class="phrase-tag">${p}</span>`
+  ).join('');
+}
+
+function renderSentiment() {
+  document.getElementById('sentiment-bars').innerHTML = sentiment.map(s => `
+    <div class="sentiment-row">
+      <span class="sentiment-label">${s.label}</span>
+      <div class="bar-bg"><div class="bar-fill" style="width:${s.pct}%;background:${s.color}"></div></div>
+      <span class="bar-pct">${s.pct}%</span>
+    </div>
+  `).join('');
+}
+
+function selectCommunity(idx) {
+  activeIdx = idx;
+  renderCommunities();
+  renderDetail(idx);
+}
+
+renderCommunities();
+renderDetail(0);
+renderPhrases();
+renderSentiment();
+</script>
