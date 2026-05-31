@@ -89,8 +89,9 @@ async function sbGetMyAppointments(patientProfileId) {
 }
 
 async function sbBookAppointment({ patientProfileId, doctorId, date, time, purpose, paymentMethod }) {
-  const { data: patient } = await db
+  const { data: patient, error: patErr } = await db
     .from('patients').select('id').eq('profile_id', patientProfileId).single();
+  if (patErr || !patient) throw new Error('Patient record not found. Please contact the clinic.');
   const { data, error } = await db.from('appointments').insert({
     clinic_id:      'a1b2c3d4-0000-0000-0000-000000000001',
     patient_id:     patient.id,
@@ -212,6 +213,11 @@ async function sbGetBookedTimes(doctorId, dateStr) {
 async function sbCheckProfileRole(userId) {
   const { data } = await db.from('profiles').select('role').eq('id', userId).maybeSingle();
   return data?.role || null;
+}
+
+async function sbUpdatePassword(newPassword) {
+  const { error } = await db.auth.updateUser({ password: newPassword });
+  if (error) throw error;
 }
 
 async function sbUploadPhoto(bucket, filePath, file) {
