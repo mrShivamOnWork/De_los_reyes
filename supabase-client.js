@@ -329,6 +329,51 @@ async function sbGetTodayAppointments() {
   return data;
 }
 
+// ── BILLING ────────────────────────────────────────────────
+
+async function sbGetBillingRecords(dateFilter) {
+  let query = db
+    .from('appointments')
+    .select('*, patients(first_name, last_name), doctors(first_name, last_name)')
+    .not('status', 'in', '("Confirmed","Pending","Cancelled")')
+    .order('date', { ascending: false });
+  if (dateFilter) query = query.eq('date', dateFilter);
+  const { data, error } = await query;
+  if (error) throw error;
+  return data || [];
+}
+
+async function sbUpdateBillingPayment(appointmentId, paymentStatus) {
+  const updates = { payment_status: paymentStatus };
+  if (paymentStatus === 'paid') {
+    updates.paid_at = new Date().toISOString();
+  } else {
+    updates.paid_at = null;
+  }
+  const { error } = await db.from('appointments').update(updates).eq('id', appointmentId);
+  if (error) throw error;
+}
+
+async function sbCreateBillingEntry({ patientId, purpose, consultationFee, paymentStatus, paymentNotes }) {
+  const CLINIC_ID = 'a1b2c3d4-0000-0000-0000-000000000001';
+  const todayStr = new Date().toISOString().slice(0, 10);
+  const { data, error } = await db.from('appointments').insert({
+    clinic_id:        CLINIC_ID,
+    patient_id:       patientId,
+    date:             todayStr,
+    time:             '00:00',
+    purpose:          purpose || 'Manual Billing Entry',
+    status:           'Completed',
+    appointment_type: 'billing',
+    consultation_fee: consultationFee,
+    payment_status:   paymentStatus || 'unpaid',
+    payment_notes:    paymentNotes || null,
+    paid_at:          paymentStatus === 'paid' ? new Date().toISOString() : null,
+  }).select().single();
+  if (error) throw error;
+  return data;
+}
+
 async function sbCallNext(doctorId) {
   const today = new Date().toISOString().slice(0, 10);
   const { data: inSession } = await db.from('queue_entries')

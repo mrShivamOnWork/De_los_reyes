@@ -215,6 +215,9 @@ td{padding:10px 14px;font-size:13px;color:var(--white);vertical-align:middle}
 .empty-state svg{opacity:.2}
 .empty-state h4{font-family:'Montserrat',sans-serif;font-weight:700;font-size:15px;color:var(--white)}
 .empty-state p{font-size:13px;color:var(--muted)}
+/* ── DELETE BTN ── */
+.btn-delete{background:none;border:none;color:var(--muted);cursor:pointer;font-family:'Montserrat',sans-serif;font-weight:700;font-size:11px;padding:0 10px;height:28px;border-radius:8px;transition:color .15s,background .15s;letter-spacing:.02em}
+.btn-delete:hover{color:var(--crimson);background:rgba(211,26,34,0.06)}
 </style>
 </head>
 <body>
@@ -340,7 +343,18 @@ td{padding:10px 14px;font-size:13px;color:var(--white);vertical-align:middle}
       <div class="section-panel" id="sec-billing">
         <div class="content-hdr"><h1>Billing</h1><button class="btn btn-green" onclick="openAddBilling()"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>ADD ENTRY</button></div>
         <div class="content-body">
-          <div class="filter-bar"><label style="margin:0;white-space:nowrap;text-transform:none;letter-spacing:0;font-size:12px">Date:</label><input type="date" id="bill-filter-date" onchange="filterBilling()" style="width:160px"></div>
+          <div class="filter-bar">
+            <label style="margin:0;white-space:nowrap;text-transform:none;letter-spacing:0;font-size:12px">Date:</label>
+            <input type="date" id="bill-filter-date" onchange="filterBilling()" style="width:160px">
+            <select id="bill-filter-status" onchange="filterBilling()" style="width:auto;min-width:140px">
+              <option value="">All Statuses</option>
+              <option value="paid">Paid</option>
+              <option value="unpaid">Unpaid</option>
+              <option value="partial">Partial</option>
+              <option value="waived">Waived</option>
+            </select>
+            <button class="btn btn-outline btn-ghost" onclick="clearBillFilters()" style="font-size:12px;color:var(--muted)">Clear</button>
+          </div>
           <div class="tbl-wrap"><table><thead><tr><th>Date</th><th>Patient</th><th>Service</th><th>Fee</th><th>Status</th><th>Notes</th></tr></thead><tbody id="bill-tbody"></tbody><tfoot><tr class="bill-tfoot"><td colspan="3">Daily Total</td><td id="bill-total" class="bill-tfoot" style="color:var(--green)">₱0.00</td><td colspan="2"></td></tr></tfoot></table></div>
         </div>
       </div>
@@ -432,7 +446,7 @@ function toast(msg,type='suc'){
 }
 function today(){return new Date().toISOString().slice(0,10);}
 function fmtDate(d){if(!d)return'—';return new Date(d+'T12:00:00').toLocaleDateString('en-PH',{month:'short',day:'numeric',year:'numeric'});}
-function fmtTime(t){if(!t)return'—';const[h,m]=t.split(':').map(Number);return`${h%12||12}:${String(m).padStart(2,'0')} ${h>=12?'PM':'AM'}`;}
+function fmtTime(t){if(!t)return'—';const parts=String(t).split(':');const h=parseInt(parts[0],10);const m=parseInt(parts[1],10)||0;if(isNaN(h))return esc(t);return`${h%12||12}:${String(m).padStart(2,'0')} ${h>=12?'PM':'AM'}`;}
 function fmtCurrency(n){return'₱'+(Number(n)||0).toLocaleString('en-PH',{minimumFractionDigits:2,maximumFractionDigits:2});}
 function setBtnLoading(id,loading,label=''){
   const b=document.getElementById(id);if(!b)return;
@@ -453,6 +467,14 @@ function apptBadge(s){
   const r=m[s];return r?`<span class="${r[1]}">${r[0]}</span>`:`<span class="badge b-pending">${esc(s)}</span>`;
 }
 
+// ════════ FILTER HELPERS ════════
+function updateFilterActiveStates(){
+  ['bill-filter-date','bill-filter-status','appt-filter-date','appt-filter-doctor','appt-filter-status'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el)el.style.borderColor=el.value?'var(--green)':'';
+  });
+}
+
 // ════════ STATE ════════
 let currentUser=null,allDoctors=[],allPatients=[],allAppts=[],billingEntries=[];
 let dashInterval=null,secLoaded={};
@@ -460,6 +482,7 @@ let wiPatientId=null,wiPatientName='',editingDoctorId=null;
 
 // ════════ PAGE LOAD ════════
 window.addEventListener('DOMContentLoaded',async()=>{
+  if(location.hash)history.replaceState(null,'',location.pathname);
   try{
     const u=await sbGetUser();
     if(!u){showAuth();return;}
@@ -554,10 +577,10 @@ async function loadStats(){
       try{const q=await sbGetQueue(d.id);waitCount+=(q||[]).filter(e=>e.status==='waiting').length;}catch(e){}
     }
     document.getElementById('stat-queue').textContent=waitCount;
-    // Revenue: billing entries paid today
+    // Revenue: appointments paid today
     try{
-      const {data:billRows}=await db.from('billing_entries').select('fee').eq('status','paid').eq('date',today());
-      const rev=(billRows||[]).reduce((s,r)=>s+Number(r.fee||0),0);
+      const {data:billRows}=await db.from('appointments').select('consultation_fee').eq('payment_status','paid').eq('date',today());
+      const rev=(billRows||[]).reduce((s,r)=>s+Number(r.consultation_fee||0),0);
       document.getElementById('stat-revenue').textContent=fmtCurrency(rev);
     }catch(e){document.getElementById('stat-revenue').textContent='—';}
   }catch(e){
@@ -648,6 +671,7 @@ async function loadAppointments(){
     docSel.innerHTML='<option value="">All Doctors</option>'+doctors.map(d=>`<option value="${esc(d.id||'')}">Dr. ${esc(d.first_name||'')} ${esc(d.last_name||'')}</option>`).join('');
     // Default to today
     document.getElementById('appt-filter-date').value=today();
+    updateFilterActiveStates();
     filterAppts();
   }catch(e){document.getElementById('appt-tbody').innerHTML='<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:32px">Could not load appointments</td></tr>';}
 }
@@ -660,6 +684,7 @@ function filterAppts(){
   if(date)filtered=filtered.filter(a=>a.date===date);
   if(docId)filtered=filtered.filter(a=>a.doctor_id===docId);
   if(status)filtered=filtered.filter(a=>a.status===status);
+  updateFilterActiveStates();
   renderApptTable(filtered);
 }
 
@@ -667,6 +692,7 @@ function clearApptFilters(){
   document.getElementById('appt-filter-date').value='';
   document.getElementById('appt-filter-doctor').value='';
   document.getElementById('appt-filter-status').value='';
+  updateFilterActiveStates();
   filterAppts();
 }
 
@@ -705,48 +731,58 @@ async function cancelAppt(id){
 // ════════ BILLING ════════
 async function loadBilling(){
   try{
-    const{data}=await db.from('billing_entries').select('*,patients(first_name,last_name)').order('date',{ascending:false});
-    billingEntries=data||[];
+    billingEntries=await sbGetBillingRecords()||[];
     document.getElementById('bill-filter-date').value=today();
+    updateFilterActiveStates();
     filterBilling();
   }catch(e){document.getElementById('bill-tbody').innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:32px">Could not load billing</td></tr>';}
 }
 
 function filterBilling(){
   const date=document.getElementById('bill-filter-date').value;
-  const filtered=date?billingEntries.filter(b=>b.date===date):billingEntries;
+  const status=document.getElementById('bill-filter-status').value;
+  let filtered=date?billingEntries.filter(b=>b.date===date):billingEntries;
+  if(status)filtered=filtered.filter(b=>b.payment_status===status);
+  updateFilterActiveStates();
   renderBillingTable(filtered);
+}
+
+function clearBillFilters(){
+  document.getElementById('bill-filter-date').value='';
+  document.getElementById('bill-filter-status').value='';
+  updateFilterActiveStates();
+  renderBillingTable(billingEntries);
 }
 
 function renderBillingTable(rows){
   const tbody=document.getElementById('bill-tbody');
-  if(!rows.length){tbody.innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:32px">No entries for this date</td></tr>';computeDailyTotal(rows);return;}
+  if(!rows.length){tbody.innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:32px">No entries found</td></tr>';computeDailyTotal(rows);return;}
   tbody.innerHTML=rows.map(r=>{
     const pt=r.patients?esc(r.patients.first_name||'')+' '+esc(r.patients.last_name||''):'—';
-    const isPaid=r.status==='paid';
+    const isPaid=r.payment_status==='paid';
     return`<tr>
-      <td class="td-muted">${esc(fmtDate(r.date))}</td>
+      <td class="td-muted" style="white-space:nowrap">${esc(fmtDate(r.date))}</td>
       <td>${pt}</td>
-      <td>${esc(r.service||'—')}</td>
-      <td style="font-family:'Montserrat',sans-serif;font-weight:700">${fmtCurrency(r.fee)}</td>
+      <td>${esc(r.purpose||'—')}</td>
+      <td style="font-family:'Montserrat',sans-serif;font-weight:700;white-space:nowrap">${fmtCurrency(r.consultation_fee)}</td>
       <td><button class="bill-toggle ${isPaid?'paid':'unpaid'}" onclick="toggleBillStatus('${esc(r.id)}','${isPaid?'unpaid':'paid'}')" title="${isPaid?'Mark Unpaid':'Mark Paid'}"></button></td>
-      <td class="td-muted">${esc(r.notes||'')}</td>
+      <td class="td-muted">${esc(r.payment_notes||'')}</td>
     </tr>`;
   }).join('');
   computeDailyTotal(rows);
 }
 
 function computeDailyTotal(rows){
-  const total=rows.filter(r=>r.status==='paid').reduce((s,r)=>s+Number(r.fee||0),0);
+  const total=rows.filter(r=>r.payment_status==='paid').reduce((s,r)=>s+Number(r.consultation_fee||0),0);
   document.getElementById('bill-total').textContent=fmtCurrency(total);
 }
 
 async function toggleBillStatus(id,newStatus){
-  if(newStatus!=='paid'&&newStatus!=='unpaid')return;
+  if(!['paid','unpaid','partial','waived'].includes(newStatus))return;
   try{
-    await db.from('billing_entries').update({status:newStatus}).eq('id',id);
+    await sbUpdateBillingPayment(id,newStatus);
     const entry=billingEntries.find(b=>b.id===id);
-    if(entry){entry.status=newStatus;}else{secLoaded.billing=false;await loadBilling();return;}
+    if(entry){entry.payment_status=newStatus;}else{secLoaded.billing=false;await loadBilling();return;}
     filterBilling();
     toast(newStatus==='paid'?'Marked as paid':'Marked as unpaid','suc');
   }catch(e){toast('Update failed','err');}
@@ -776,9 +812,12 @@ async function saveBillingEntry(){
   if(!fee||isNaN(fee)||Number(fee)<0){errEl.textContent='Enter a valid fee.';errEl.classList.add('show');return;}
   setBtnLoading('bill-submit',true);
   try{
-    await db.from('billing_entries').insert({
-      patient_id:patId,service,fee:Number(fee),status,notes:notes||null,
-      date:today(),clinic_id:'a1b2c3d4-0000-0000-0000-000000000001'
+    await sbCreateBillingEntry({
+      patientId:patId,
+      purpose:service,
+      consultationFee:Number(fee),
+      paymentStatus:status,
+      paymentNotes:notes||null,
     });
     closeBillModal();
     toast('Billing entry saved','suc');
@@ -808,7 +847,7 @@ async function loadDoctors(){
           <button class="btn btn-outline" style="font-size:11px;height:28px;padding:0 10px" onclick="openDoctorEdit('${esc(d.id)}')">Edit</button>
           <button class="btn ${isActive?'btn-outline':'btn-green'}" style="font-size:11px;height:28px;padding:0 10px" onclick="toggleDoctorStatus('${esc(d.id)}','${isActive?'inactive':'active'}')">${isActive?'Deactivate':'Activate'}</button>
           <div id="del-${esc(d.id)}" style="display:flex;align-items:center;gap:4px">
-            <button class="btn btn-outline-crimson" style="font-size:11px;height:28px;padding:0 10px" onclick="askDeleteDoc('${esc(d.id)}')">Delete</button>
+            <button class="btn-delete" onclick="askDeleteDoc('${esc(d.id)}')">Delete</button>
           </div>
         </div>
       </div>`;
